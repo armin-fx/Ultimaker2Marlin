@@ -40,7 +40,7 @@ void eeprom_write_float(const float* addr, float f)
 
 uint16_t lineEntryPos  = 0;
 int8_t   lineEntryWait = 0;
-void line_entry_pos_update (uint16_t maxStep)
+void line_entry_pos_update (uint16_t maxStep, uint8_t lineEntryStep)
 {
 	if (lineEntryPos > maxStep) lineEntryPos = 0;
 	// 
@@ -48,7 +48,7 @@ void line_entry_pos_update (uint16_t maxStep)
 	if (lineEntryWait >= LINE_ENTRY_WAIT_END)
 	{
 		lineEntryWait = LINE_ENTRY_WAIT_END;
-		lineEntryPos += LINE_ENTRY_STEP;
+		lineEntryPos += lineEntryStep;
 		if (lineEntryPos > maxStep)
 		{
 			lineEntryPos  = maxStep;
@@ -57,12 +57,64 @@ void line_entry_pos_update (uint16_t maxStep)
 	}
 	else if (lineEntryWait == 0 && lineEntryPos > 0)
 	{
-		lineEntryPos -= LINE_ENTRY_STEP;
+		lineEntryPos -= lineEntryStep;
 		lineEntryWait--;
 	}
 }
 
-inline void line_entry_pos_reset () { lineEntryPos = lineEntryWait = 0; }
+//
+char    lineEntryBackupChar = '\0';
+uint8_t lineEntryBackupPos  = 0;
+char* line_entry_scroll_string_transform (char* str, uint8_t lineEntryStep)
+{
+	uint8_t str_len = (uint8_t) strlen(str);
+	lineEntryBackupChar = '\0';
+	lineEntryBackupPos  = 0;
+	
+	if (str_len > LINE_ENTRY_TEXT_LENGHT)
+	{
+		line_entry_pos_update(LINE_ENTRY_MAX_STEP(str_len - LINE_ENTRY_TEXT_LENGHT), lineEntryStep);
+		uint8_t str_begin       = LINE_ENTRY_TEXT_BEGIN();
+		lineEntryBackupPos      = str_begin + LINE_ENTRY_TEXT_LENGHT + LINE_ENTRY_TEXT_OFFSET();
+		lineEntryBackupChar     = str[lineEntryBackupPos];
+		str[lineEntryBackupPos] = '\0';
+		return str + str_begin;
+	}
+	return str;
+}
+void line_entry_scroll_string_restore (char* str)
+{
+	if (lineEntryBackupChar != '\0')
+		str[lineEntryBackupPos] = lineEntryBackupChar;
+}
+//
+void line_entry_fixed_string_transform (char* str)
+{
+	lineEntryBackupChar = '\0';
+	if ((uint8_t) strlen(str) > LINE_ENTRY_TEXT_LENGHT)
+	{
+		lineEntryBackupChar         = str[LINE_ENTRY_TEXT_LENGHT];
+		str[LINE_ENTRY_TEXT_LENGHT] = '\0';
+	}
+}
+void line_entry_fixed_string_restore (char* str)
+{
+	if (lineEntryBackupChar != '\0')
+		str[LINE_ENTRY_TEXT_LENGHT] = lineEntryBackupChar;
+}
+
+void lcd_lib_draw_string_scroll_center (uint8_t y, char* str, uint8_t step)
+{
+	char* str_begin = line_entry_scroll_string_transform(str, step);
+	lcd_lib_draw_string(LCD_GFX_WIDTH/2 - min(strlen(str), LINE_ENTRY_TEXT_LENGHT) * (LCD_CHAR_SPACING/2) + LINE_ENTRY_GFX_BEGIN(), y, str_begin);
+	line_entry_scroll_string_restore(str);
+}
+void lcd_lib_draw_string_scroll_left (uint8_t y, char* str, uint8_t step)
+{
+	char* str_begin = line_entry_scroll_string_transform(str, step);
+	lcd_lib_draw_string(LCD_CHAR_MARGIN_LEFT+LINE_ENTRY_GFX_BEGIN(), y, str_begin);
+	line_entry_scroll_string_restore(str);
+}
 
 void lcd_tripple_menu(const char* left, const char* right, const char* bottom)
 {
@@ -202,36 +254,16 @@ void lcd_progressbar(uint8_t progress)
 
 void lcd_draw_scroll_entry(uint8_t offsetY, char * buffer, uint8_t flags)
 {
-	uint8_t buffer_len = (uint8_t) strlen(buffer);
-	char    backup     = '\0';
-	uint8_t backup_pos = 0;
 	if (flags & MENU_SELECTED)
 	{
-		if (buffer_len > LINE_ENTRY_TEXT_LENGHT)
-		{
-			line_entry_pos_update(LINE_ENTRY_MAX_STEP(buffer_len - LINE_ENTRY_TEXT_LENGHT));
-			buffer    += LINE_ENTRY_TEXT_BEGIN();
-			backup_pos = LINE_ENTRY_TEXT_LENGHT+LINE_ENTRY_TEXT_OFFSET();
-			backup     = buffer[backup_pos];
-			buffer[backup_pos] = '\0';
-		}
-		//
+		char* buffer_begin = line_entry_scroll_string_transform(buffer);
 		lcd_lib_set(LCD_CHAR_MARGIN_LEFT-1, offsetY-1, LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT, offsetY+7);
-		lcd_lib_clear_string(LCD_CHAR_MARGIN_LEFT+LINE_ENTRY_GFX_BEGIN(), offsetY, buffer);
-		//
-		if (backup != '\0')
-			buffer[backup_pos] = backup;
+		lcd_lib_clear_string(LCD_CHAR_MARGIN_LEFT+LINE_ENTRY_GFX_BEGIN(), offsetY, buffer_begin);
+		line_entry_scroll_string_restore(buffer);
 	}else{
-		if (buffer_len > LINE_ENTRY_TEXT_LENGHT)
-		{
-			backup = buffer[LINE_ENTRY_TEXT_LENGHT];
-			buffer[LINE_ENTRY_TEXT_LENGHT] = '\0';
-		}
-		//
+		line_entry_fixed_string_transform(buffer);
 		lcd_lib_draw_string(LCD_CHAR_MARGIN_LEFT, offsetY, buffer);
-		//
-		if (backup != '\0')
-			buffer[LINE_ENTRY_TEXT_LENGHT] = backup;
+		line_entry_fixed_string_restore(buffer);
 	}
 }
 

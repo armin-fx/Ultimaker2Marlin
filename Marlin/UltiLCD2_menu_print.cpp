@@ -539,8 +539,9 @@ void lcd_menu_print_select()
                         analogWrite(LED_PIN, 255 * int(led_brightness_level) / 100);
                     if (!card.longFilename[0])
                         strncpy(card.longFilename, card.filename, LONG_FILENAME_LENGTH-1);
-                    card.longFilename[20] = '\0';
-                    if (strchr(card.longFilename, '.')) strchr(card.longFilename, '.')[0] = '\0';
+                    if (strrchr(card.longFilename, '.')) strrchr(card.longFilename, '.')[0] = '\0';
+                    //card.longFilename[20] = '\0';
+                    line_entry_pos_reset ();
 
                     char buffer[64];
                     card.fgets(buffer, sizeof(buffer));
@@ -729,9 +730,9 @@ void lcd_menu_print_heatup()
     else
         minProgress = progress;
 
-    lcd_lib_draw_string_centerP(10, PSTR("Heating up..."));
-    lcd_lib_draw_string_centerP(20, PSTR("Preparing to print:"));
-    lcd_lib_draw_string_center(30, card.longFilename);
+    lcd_lib_draw_string_centerP      (10, PSTR("Heating up..."));
+    lcd_lib_draw_string_centerP      (20, PSTR("Preparing to print:"));
+    lcd_lib_draw_string_scroll_center(30, card.longFilename);
 
     lcd_progressbar(progress);
 
@@ -763,8 +764,8 @@ static void lcd_menu_print_printing()
         switch(printing_state)
         {
         default:
-            lcd_lib_draw_string_centerP(20, PSTR("Printing:"));
-            lcd_lib_draw_string_center(30, card.longFilename);
+            lcd_lib_draw_string_centerP      (20, PSTR("Printing:"));
+            lcd_lib_draw_string_scroll_center(30, card.longFilename);
             break;
         case PRINT_STATE_HEATING:
             lcd_lib_draw_string_centerP(20, PSTR("Heating"));
@@ -911,7 +912,7 @@ void lcd_menu_print_ready()
     lcd_info_screen(NULL, postPrintReady, PSTR("BACK TO MENU"));
 
     lcd_lib_draw_hline(3, 124, 13);
-    // lcd_lib_draw_string_left(5, card.longFilename);
+    // lcd_lib_draw_string_scroll_left(5, card.longFilename);
 
     char buffer[32] = {0};
     unsigned long t=(stoptime-starttime)/1000;
@@ -969,8 +970,8 @@ void lcd_menu_print_ready()
         {
             LED_GLOW
         }
-        lcd_lib_draw_string_center(16, card.longFilename);
-        lcd_lib_draw_string_centerP(40, PSTR("Print finished"));
+        lcd_lib_draw_string_scroll_center(16, card.longFilename);
+        lcd_lib_draw_string_centerP      (40, PSTR("Print finished"));
     }
     lcd_lib_update_screen();
 }
