@@ -31,7 +31,7 @@ static void lcd_menu_print_material_warning();
 static void lcd_menu_print_tune_retraction();
 
 static bool primed = false;
-static bool pauseRequested = false;
+//static bool pauseRequested = false;
 
 void lcd_clear_cache()
 {
@@ -97,7 +97,7 @@ void abortPrint()
     stoptime=millis();
     lifetime_stats_print_end();
     card.pause = false;
-    pauseRequested = false;
+//    pauseRequested = false;
     printing_state  = PRINT_STATE_NORMAL;
     if (led_mode == LED_MODE_WHILE_PRINTING)
         analogWrite(LED_PIN, 0);
@@ -211,7 +211,7 @@ void doStartPrint()
     starttime = millis();
     stoptime = starttime;
     predictedTime = 0;
-    sleep_state = 0x0;
+    sleep_state = (sleep_state & SLEEP_SERIAL_SCREEN);
 }
 
 static void userStartPrint()
@@ -422,7 +422,11 @@ void lcd_sd_menu_details_callback(uint8_t nr)
                         }
                         else
                         {
+    #if EXTRUDERS > 1
+                            strcpy_P(c, PSTR("Mat. ")); c += 5;
+    #else
                             strcpy_P(c, PSTR("Material ")); c += 9;
+    #endif
                             float length = float(LCD_DETAIL_CACHE_MATERIAL(0)) / (M_PI * (material[0].diameter / 2.0) * (material[0].diameter / 2.0));
                             if (length < 10000)
                                 c = float_to_string2(length / 1000.0, c, PSTR("m"));
@@ -443,8 +447,13 @@ void lcd_sd_menu_details_callback(uint8_t nr)
                     }
                     else
                     {
-                        strcpy_P(c, PSTR("Nozzle: ")); c += 8;
+                        strcpy_P(c, PSTR("Nozzle ")); c += 7;
+    #if EXTRUDERS > 1
+                        c = float_to_string2(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(0), c, PSTR("/"));
+                        c = float_to_string2(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(1), c, NULL);
+    #else
                         c = float_to_string2(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(0), c);
+    #endif
                     }
                     lcd_lib_draw_string(3, BOTTOM_MENU_YPOS, buffer);
                 }else{
@@ -738,7 +747,7 @@ void lcd_change_to_menu_change_material_return()
 
 static void lcd_menu_print_printing()
 {
-    if (card.pause || isPauseRequested())
+    if (card.pause)
     {
         menu.add_menu(menu_t(lcd_select_first_submenu, lcd_menu_print_resume, NULL, MAIN_MENU_ITEM_POS(0)), true);
         if (!checkFilamentSensor())
@@ -754,7 +763,7 @@ static void lcd_menu_print_printing()
         switch(printing_state)
         {
         default:
-            lcd_lib_draw_string_centerP(20, pauseRequested ? PSTR("Pausing:") : PSTR("Printing:"));
+            lcd_lib_draw_string_centerP(20, PSTR("Printing:"));
             lcd_lib_draw_string_center(30, card.longFilename);
             break;
         case PRINT_STATE_HEATING:
@@ -814,16 +823,15 @@ static void lcd_menu_print_error_sd()
     lcd_info_screen(NULL, lcd_return_to_main_menu, PSTR("RETURN TO MAIN"));
 
     lcd_lib_draw_string_centerP(10, PSTR("Error while"));
-    lcd_lib_draw_string_centerP(20, PSTR("reading"));
-    lcd_lib_draw_string_centerP(30, PSTR("SD-card!"));
+    lcd_lib_draw_string_centerP(20, PSTR("reading SD-card!"));
+    lcd_lib_draw_string_centerP(30, PSTR("Go to:"));
+    lcd_lib_draw_string_centerP(40, PSTR("ultimaker.com/ER08"));
     /*
     char buffer[12];
     strcpy_P(buffer, PSTR("Code:"));
     int_to_string(card.errorCode(), buffer+5);
     lcd_lib_draw_string_center(40, buffer);
     */
-    lcd_lib_draw_string_centerP(40, PSTR("See:"));
-    lcd_lib_draw_string_centerP(50, PSTR("ultimaker.com/ER08"));
 
     lcd_lib_update_screen();
 }
@@ -874,10 +882,10 @@ static void lcd_menu_print_material_warning()
 
 void lcd_menu_print_abort()
 {
-    if (pauseRequested)
-    {
-        lcd_print_pause();
-    }
+//    if (pauseRequested)
+//    {
+//        lcd_print_pause();
+//    }
     LED_GLOW
     lcd_question_screen(lcd_menu_print_ready, userAbortPrint, PSTR("YES"), NULL, lcd_change_to_previous_menu, PSTR("NO"));
 
@@ -1009,7 +1017,7 @@ static void tune_item_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
         strcpy_P(buffer, PSTR("LED Brightness"));
     else if ((ui_mode & UI_MODE_EXPERT) && card.sdprinting && card.pause && (index++ == nr))
         strcpy_P(buffer, PSTR("Move material"));
-    else if (ui_mode & UI_MODE_EXPERT)
+    else if ((ui_mode & UI_MODE_EXPERT) && (index++ == nr))
         strcpy_P(buffer, PSTR("Sleep timer"));
     else
         strcpy_P(buffer, PSTR("???"));
@@ -1054,7 +1062,7 @@ static void tune_item_details_callback(uint8_t nr)
     }
     else
         return;
-    lcd_lib_draw_string(5, BOTTOM_MENU_YPOS, buffer);
+    lcd_lib_draw_string_left(BOTTOM_MENU_YPOS, buffer);
 }
 
 void lcd_menu_print_tune_heatup_nozzle0()
@@ -1072,7 +1080,11 @@ void lcd_menu_print_tune_heatup_nozzle0()
         menu.return_to_previous();
 
     lcd_lib_clear();
-    lcd_lib_draw_string_centerP(20, PSTR("Nozzle temperature:"));
+#if EXTRUDERS > 1
+    lcd_lib_draw_string_centerP(20, PSTR("Nozzle 1 temperature"));
+#else
+    lcd_lib_draw_string_centerP(20, PSTR("Nozzle temperature"));
+#endif
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, PSTR("Click to return"));
     char buffer[16] = {0};
     int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/"));
@@ -1097,7 +1109,7 @@ void lcd_menu_print_tune_heatup_nozzle1()
         lcd_change_to_previous_menu();
 
     lcd_lib_clear();
-    lcd_lib_draw_string_centerP(20, PSTR("Nozzle2 temperature:"));
+    lcd_lib_draw_string_centerP(20, PSTR("Nozzle 2 temperature"));
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, PSTR("Click to return"));
     char buffer[16] = {0};
     int_to_string(int(dsp_temperature[1]), buffer, PSTR("C/"));
@@ -1110,10 +1122,10 @@ void lcd_menu_print_tune_heatup_nozzle1()
 
 void lcd_menu_print_tune()
 {
-    if (pauseRequested)
-    {
-        lcd_print_pause();
-    }
+//    if (pauseRequested)
+//    {
+//        lcd_print_pause();
+//    }
     uint8_t len = 5 + BED_MENU_OFFSET + EXTRUDERS * 2;
     if (ui_mode & UI_MODE_EXPERT)
     {
@@ -1129,12 +1141,8 @@ void lcd_menu_print_tune()
     {
         uint8_t index(0);
         if (IS_SELECTED_SCROLL(index++))
-        {
             menu.return_to_previous();
-//        }else if (IS_SELECTED_SCROLL(index++))
-//        {
-//            menu.add_menu(menu_t(lcd_menu_print_abort));
-        }else if (IS_SELECTED_SCROLL(index++))
+        else if (IS_SELECTED_SCROLL(index++))
             LCD_EDIT_SETTING(feedmultiply, "Print speed", "%", 10, 1000);
         else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_print_tune_heatup_nozzle0, 0));
@@ -1148,11 +1156,14 @@ void lcd_menu_print_tune()
 #endif
         else if (IS_SELECTED_SCROLL(index++))
             LCD_EDIT_SETTING_BYTE_PERCENT(fanSpeed, "Fan speed", "%", 0, 100);
-        else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING(extrudemultiply[0], "Material flow", "%", 10, 1000);
 #if EXTRUDERS > 1
         else if (IS_SELECTED_SCROLL(index++))
+            LCD_EDIT_SETTING(extrudemultiply[0], "Material flow 1", "%", 10, 1000);
+        else if (IS_SELECTED_SCROLL(index++))
             LCD_EDIT_SETTING(extrudemultiply[1], "Material flow 2", "%", 10, 1000);
+#else
+        else if (IS_SELECTED_SCROLL(index++))
+            LCD_EDIT_SETTING(extrudemultiply[0], "Material flow", "%", 10, 1000);
 #endif
         else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_print_tune_retraction, 0));
@@ -1228,44 +1239,51 @@ static void lcd_menu_print_tune_retraction()
 
 void lcd_print_pause()
 {
-    if (card.sdprinting && !card.pause)
+    if (!card.pause)
     {
-        if (movesplanned() > 0 && commands_queued() < BUFSIZE)
+//        if (movesplanned() > 0 && commands_queued() < BUFSIZE)
+//        {
+        card.pause = true;
+//        pauseRequested = false;
+        recover_height = current_position[Z_AXIS];
+
+        // move z up according to the current height - but minimum to z=70mm (above the gantry height)
+        uint16_t zdiff = 0;
+        if (current_position[Z_AXIS] < 70)
+            zdiff = max(70 - floor(current_position[Z_AXIS]), 20);
+        else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 60)
         {
-            card.pause = true;
-            pauseRequested = false;
-            recover_height = current_position[Z_AXIS];
-
-            // move z up according to the current height - but minimum to z=70mm (above the gantry height)
-            uint16_t zdiff = 0;
-            if (current_position[Z_AXIS] < 70)
-                zdiff = max(70 - floor(current_position[Z_AXIS]), 20);
-            else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 60)
-            {
-                zdiff = 20;
-            }
-            else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 30)
-            {
-                zdiff = 2;
-            }
-
-            char buffer[32] = {0};
-            sprintf_P(buffer, PSTR("M601 X%i Y%i Z%i L%f"), int(min_pos[X_AXIS])+5, int(min_pos[Y_AXIS])+5, zdiff, end_of_print_retraction);
-            enquecommand(buffer);
-
-            primed = false;
+            zdiff = 20;
         }
-        else if (!pauseRequested)
+        else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 30)
         {
-            pauseRequested = true;
+            zdiff = 2;
         }
+
+        char buffer[32] = {0};
+        #if (EXTRUDERS > 1)
+            uint16_t x = max(5, int(min_pos[X_AXIS]) + 5 + extruder_offset[X_AXIS][active_extruder]);
+        #else
+            uint8_t x = max(int(min_pos[X_AXIS]), 0) + 5;
+        #endif
+        uint8_t y = max(int(min_pos[Y_AXIS]), 0) + 5;
+
+        sprintf_P(buffer, PSTR("M601 X%u Y%u Z%u L%u"), x, y, zdiff, uint8_t(end_of_print_retraction));
+        process_command(buffer);
+
+        primed = false;
+//        }
+//        else if (!pauseRequested)
+//        {
+//            pauseRequested = true;
+//        }
     }
 }
 
-bool isPauseRequested()
-{
-    return pauseRequested;
-}
+//bool isPauseRequested()
+//{
+//    return pauseRequested;
+//}
 
 void lcd_print_tune()
 {
@@ -1282,7 +1300,7 @@ void lcd_print_abort()
 static void lcd_menu_print_resume_ready()
 {
     menu.return_to_previous();
-    pauseRequested = false;
+//    pauseRequested = false;
     card.pause = false;
     if (LCD_DETAIL_CACHE_MATERIAL(active_extruder))
         primed = true;
@@ -1290,15 +1308,15 @@ static void lcd_menu_print_resume_ready()
 
 static void lcd_print_resume()
 {
-    if (card.sdprinting)
-    {
+//    if (card.sdprinting)
+//    {
         menu.replace_menu(menu_t(lcd_menu_print_resume_ready));
         check_preheat();
-    }
-    else
-    {
-        menu.return_to_previous();
-    }
+//    }
+//    else
+//    {
+//        menu.return_to_previous();
+//    }
 }
 
 static void lcd_print_change_material()
@@ -1324,7 +1342,7 @@ static const menu_t & get_pause_menuoption(uint8_t nr, menu_t &opt)
     {
         opt.setData(MENU_NORMAL, lcd_show_pause_menu);
     }
-    else if (nr == menu_index++)
+    else if (IS_SD_PRINTING && (nr == menu_index++))
     {
         opt.setData(MENU_NORMAL, lcd_print_abort);
     }
@@ -1360,7 +1378,7 @@ static void drawPauseSubmenu(uint8_t nr, uint8_t &flags)
             lcd_lib_draw_gfx(LCD_CHAR_MARGIN_LEFT+26, LCD_LINE_HEIGHT*3+2, pauseGfx);
         }
     }
-    else if (nr == index++)
+    else if (IS_SD_PRINTING && (nr == index++))
     {
         LCDMenu::drawMenuString_P(LCD_GFX_WIDTH/2 + LCD_CHAR_MARGIN_LEFT+3
                                 , LCD_LINE_HEIGHT
@@ -1422,9 +1440,10 @@ void lcd_menu_print_pause()
     lcd_lib_draw_vline(64, 5, 46);
     lcd_lib_draw_hline(3, 124, 50);
 
-    menu.process_submenu(get_pause_menuoption, 4);
+    uint8_t len = IS_SD_PRINTING ? 4 : 3;
+    menu.process_submenu(get_pause_menuoption, len);
 
-    for (uint8_t index=0; index<4; ++index)
+    for (uint8_t index=0; index<len; ++index)
     {
         menu.drawSubMenu(drawPauseSubmenu, index);
     }
@@ -1438,7 +1457,7 @@ static const menu_t & get_resume_menuoption(uint8_t nr, menu_t &opt)
     {
         opt.setData(MENU_NORMAL, lcd_print_resume);
     }
-    else if (nr == menu_index++)
+    else if (IS_SD_PRINTING && (nr == menu_index++))
     {
         opt.setData(MENU_NORMAL, lcd_print_change_material);
     }
@@ -1446,7 +1465,7 @@ static const menu_t & get_resume_menuoption(uint8_t nr, menu_t &opt)
     {
         opt.setData(MENU_NORMAL, lcd_print_tune);
     }
-    else if (nr == menu_index++)
+    else if (IS_SD_PRINTING && (nr == menu_index++))
     {
         opt.setData(MENU_NORMAL, lcd_print_abort);
     }
@@ -1458,7 +1477,7 @@ static void drawResumeSubmenu(uint8_t nr, uint8_t &flags)
     uint8_t index(0);
     if (nr == index++)
     {
-        if (card.pause && (movesplanned() == 0))
+        if (card.pause && (!IS_SD_PRINTING || (movesplanned() == 0)))
         {
             LCDMenu::drawMenuString_P(LCD_CHAR_MARGIN_LEFT+3
                                     , LCD_LINE_HEIGHT
@@ -1493,7 +1512,7 @@ static void drawResumeSubmenu(uint8_t nr, uint8_t &flags)
             }
         }
     }
-    else if (nr == index++)
+    else if (IS_SD_PRINTING && (nr == index++))
     {
         LCDMenu::drawMenuBox(LCD_GFX_WIDTH/2 + LCD_CHAR_MARGIN_LEFT+3
                            , LCD_LINE_HEIGHT
@@ -1531,7 +1550,7 @@ static void drawResumeSubmenu(uint8_t nr, uint8_t &flags)
             lcd_lib_draw_gfx(2*LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, menuGfx);
         }
     }
-    else if (nr == index++)
+    else if (IS_SD_PRINTING && (nr == index++))
     {
         LCDMenu::drawMenuBox(LCD_GFX_WIDTH/2 + LCD_CHAR_MARGIN_LEFT*2
                                 , BOTTOM_MENU_YPOS
@@ -1553,22 +1572,24 @@ static void drawResumeSubmenu(uint8_t nr, uint8_t &flags)
 
 void lcd_menu_print_resume()
 {
-    if (pauseRequested)
-    {
-        lcd_print_pause();
-    }
-    if (movesplanned())
-    {
-        last_user_interaction = millis();
-    }
+//    if (pauseRequested)
+//    {
+//        lcd_print_pause();
+//    }
+//    if (movesplanned())
+//    {
+//        last_user_interaction = millis();
+//    }
 
     lcd_lib_clear();
     lcd_lib_draw_vline(64, 5, 46);
     lcd_lib_draw_hline(3, 124, 50);
 
-    menu.process_submenu(get_resume_menuoption, 4);
+    uint8_t len = IS_SD_PRINTING ? 4 : 2;
 
-    for (uint8_t index=0; index<4; ++index)
+    menu.process_submenu(get_resume_menuoption, len);
+
+    for (uint8_t index=0; index<len; ++index)
     {
         menu.drawSubMenu(drawResumeSubmenu, index);
     }

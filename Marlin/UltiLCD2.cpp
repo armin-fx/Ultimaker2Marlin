@@ -22,7 +22,6 @@
 #define LCD_CHARS_PER_LINE 20
 
 unsigned long lastSerialCommandTime;
-// bool serialScreenShown;
 uint8_t led_brightness_level = 100;
 uint8_t led_mode = LED_MODE_ALWAYS_ON;
 float dsp_temperature[EXTRUDERS] = { 20.0 };
@@ -135,38 +134,41 @@ void lcd_update()
 		default:
 			strcat_P(buffer, PSTR("support"));
         }
-        lcd_lib_draw_stringP(1, 40, PSTR("Go to:"));
-        lcd_lib_draw_string(1, 50, buffer);
+        lcd_lib_draw_string_centerP(40, PSTR("Go to:"));
+        lcd_lib_draw_string_center(50, buffer);
         LED_GLOW_ERROR
         lcd_lib_update_screen();
     }
-    else if (m - lastSerialCommandTime < SERIAL_CONTROL_TIMEOUT)
+    else if ((is_command_queued() && serialCmd) || (millis() - lastSerialCommandTime < SERIAL_CONTROL_TIMEOUT))
     {
-        lcd_usbprinting();
-//        if (!serialScreenShown)
-//        {
-//            lcd_lib_clear();
-//            lcd_lib_draw_string_centerP(20, PSTR("Printing with USB..."));
-//            serialScreenShown = true;
-//        }
-//        if (printing_state == PRINT_STATE_HEATING || printing_state == PRINT_STATE_HEATING_BED || printing_state == PRINT_STATE_HOMING)
-//            lastSerialCommandTime = m;
-//        lcd_lib_update_screen();
+        if (!(sleep_state & SLEEP_SERIAL_SCREEN))
+        {
+            // show usb printing screen during incoming serial communication
+            menu.add_menu(menu_t(lcd_menu_printing_tg, MAIN_MENU_ITEM_POS(1)), false);
+            sleep_state |= SLEEP_SERIAL_SCREEN;
+        }
+        menu.processEvents();
     }
     else
     {
-        // serialScreenShown = false;
-        // refresh the displayed temperatures
-        for(uint8_t e=0;e<EXTRUDERS;e++)
+        if (sleep_state & SLEEP_SERIAL_SCREEN)
         {
-            dsp_temperature[e] = (ALPHA * current_temperature[e]) + (ONE_MINUS_ALPHA * dsp_temperature[e]);
+            // end of serial communication
+            sleep_state &= ~SLEEP_SERIAL_SCREEN;
+            menu.removeMenu(lcd_menu_printing_tg);
         }
-#if TEMP_SENSOR_BED != 0
-        dsp_temperature_bed = (ALPHA * current_temperature_bed) + (ONE_MINUS_ALPHA * dsp_temperature_bed);
-#endif
+        // serialScreenShown = false;
         menu.processEvents();
         if (postMenuCheck) postMenuCheck();
     }
+    // refresh the displayed temperatures
+    for(uint8_t e=0; e<EXTRUDERS; ++e)
+    {
+        dsp_temperature[e] = (ALPHA * current_temperature[e]) + (ONE_MINUS_ALPHA * dsp_temperature[e]);
+    }
+#if TEMP_SENSOR_BED != 0
+    dsp_temperature_bed = (ALPHA * current_temperature_bed) + (ONE_MINUS_ALPHA * dsp_temperature_bed);
+#endif
 }
 
 void lcd_menu_startup()

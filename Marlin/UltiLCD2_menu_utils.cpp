@@ -24,8 +24,8 @@ void LCDMenu::processEvents()
     // check printing state
     if ((printing_state != PRINT_STATE_HEATING) &&
         (printing_state != PRINT_STATE_START) &&
-        (!card.sdprinting || card.pause) &&
-         !commands_queued())
+        ((!card.sdprinting && !serialCmd && (millis() - lastSerialCommandTime > SERIAL_CONTROL_TIMEOUT)) || card.pause) &&
+         !is_command_queued())
     {
         // cool down nozzle after timeout
         check_heater_timeout();
@@ -137,6 +137,36 @@ void LCDMenu::return_to_main(bool beep)
         {
             menuStack[currentIndex].initMenuFunc();
         }
+    }
+    LED_NORMAL
+}
+
+void LCDMenu::removeMenu(menuFunc_t func)
+{
+    if (currentIndex>0)
+    {
+        reset_submenu();
+        while (currentIndex>0)
+        {
+            // post processing
+            if (menuStack[currentIndex].postMenuFunc)
+            {
+                menuStack[currentIndex].postMenuFunc();
+            }
+            // switch back to previous menu
+            --currentIndex;
+            // abort loop if the requested menu is removed
+            if (menuStack[currentIndex+1].processMenuFunc == func)
+            {
+                break;
+            }
+        }
+        lastEncoderPos = lcd_lib_encoder_pos = menuStack[currentIndex].encoderPos;
+        lcd_lib_button_pressed = false;
+//        if (menuStack[currentIndex].initMenuFunc)
+//        {
+//            menuStack[currentIndex].initMenuFunc();
+//        }
     }
     LED_NORMAL
 }
@@ -430,38 +460,50 @@ bool lcd_tune_byte(uint8_t &value, uint8_t _min, uint8_t _max)
     return false;
 }
 
-void lcd_tune_speed(float &value, float _min, float _max)
+bool lcd_tune_speed(float &value, float _min, float _max)
 {
     if (lcd_lib_encoder_pos != 0)
     {
         lcd_lib_tick();
         value = constrain(value + (lcd_lib_encoder_pos * 60), _min, _max);
         lcd_lib_encoder_pos = 0;
+        return true;
     }
+    return false;
 }
 
-void lcd_tune_value(int &value, int _min, int _max)
+bool lcd_tune_value(int &value, int _min, int _max)
 {
     if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
     {
         lcd_lib_tick();
         value = constrain(value + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM), _min, _max);
         lcd_lib_encoder_pos = 0;
+        return true;
     }
+    return false;
 }
 
-void lcd_tune_value(uint16_t &value, uint16_t _min, uint16_t _max)
+bool lcd_tune_value(uint16_t &value, uint16_t _min, uint16_t _max)
 {
     int iValue = value;
-    lcd_tune_value(iValue, _min, _max);
-    value = iValue;
+    if (lcd_tune_value(iValue, _min, _max))
+    {
+        value = iValue;
+        return true;
+    }
+    return false;
 }
 
-void lcd_tune_value(uint8_t &value, uint8_t _min, uint8_t _max)
+bool lcd_tune_value(uint8_t &value, uint8_t _min, uint8_t _max)
 {
     int iValue = value;
-    lcd_tune_value(iValue, _min, _max);
-    value = iValue;
+    if (lcd_tune_value(iValue, _min, _max))
+    {
+        value = iValue;
+        return true;
+    }
+    return false;
 }
 
 bool lcd_tune_value(float &value, float _min, float _max, float _step)
