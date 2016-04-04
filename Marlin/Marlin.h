@@ -190,6 +190,12 @@ bool is_command_queued();
 uint8_t commands_queued();
 void clamp_to_software_endstops(float target[3]);
 
+#ifdef PREVENT_FILAMENT_GRIND
+void filament_grab_init();
+void filament_grab_update(float filament_lenght);
+void filament_grab_set_retract_lenght();
+#endif
+
 #ifdef FAST_PWM_FAN
 void setPwmFrequency(uint8_t pin, int val);
 #endif
@@ -223,6 +229,18 @@ extern unsigned char fanSpeedSoftPwm;
 extern bool autoretract_enabled;
 extern bool retracted;
 extern float retract_length, retract_feedrate, retract_zlift;
+#ifdef PREVENT_FILAMENT_GRIND
+extern float retract_length_min;
+extern float retract_length_current[EXTRUDERS];
+extern float   filament_grab_value[EXTRUDERS];
+extern uint8_t filament_grab_max;
+inline bool is_prevent_filament_grind()  {return filament_grab_max != 0;}
+#define RETRACT_LENGTH_CURRENT retract_length_current[active_extruder]
+#define IS_PREVENT_FILAMENT_GRIND true
+#else
+#define RETRACT_LENGTH_CURRENT retract_length
+#define IS_PREVENT_FILAMENT_GRIND false
+#endif
 #if EXTRUDERS > 1
 extern float extruder_swap_retract_length;
 #endif
@@ -254,11 +272,13 @@ extern uint8_t active_extruder;
 extern uint8_t tmp_extruder;
 
 #if EXTRUDERS > 2
-  # error Unsupported number of extruders
+  #error Unsupported number of extruders
 #elif EXTRUDERS > 1
-  # define ARRAY_BY_EXTRUDERS(v1, v2, v3) { v1, v2 }
+  #define ARRAY_BY_EXTRUDERS(v1, v2, v3) { v1, v2 }
+  #define ARRAY_BY_EXTRUDERS_FILL(v)     { v,  v }
 #else
-  # define ARRAY_BY_EXTRUDERS(v1, v2, v3) { v1 }
+  #define ARRAY_BY_EXTRUDERS(v1, v2, v3) { v1 }
+  #define ARRAY_BY_EXTRUDERS_FILL(v)     { v }
 #endif
 
 extern "C"{

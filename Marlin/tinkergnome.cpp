@@ -70,7 +70,7 @@ static void lcd_print_tune_accel();
 static void lcd_print_tune_xyjerk();
 static void lcd_position_z_axis();
 
-#define EXPERT_VERSION 6
+#define EXPERT_VERSION 7
 
 void tinkergnome_init()
 {
@@ -78,6 +78,22 @@ void tinkergnome_init()
 
     uint16_t version = GET_EXPERT_VERSION()+1;
 
+    if (version > 7)
+    {
+#ifdef PREVENT_FILAMENT_GRIND
+        retract_length_min = GET_RETRACT_LENGTH_MIN();
+        filament_grab_max  = GET_FILAMENT_GRAB_MAX();
+#endif
+    }
+    else
+    {
+#ifndef PREVENT_FILAMENT_GRIND
+        float   retract_length_min = DEFAULT_RETRACT_LENGHT_MIN;
+        uint8_t filament_grab_max  = DEFAULT_FILAMENT_MAX_GRAB;
+#endif
+        SET_RETRACT_LENGTH_MIN(retract_length_min);
+        SET_FILAMENT_GRAB_MAX (filament_grab_max);
+    }
     if (version > 6)
     {
 #if defined(PIDTEMPBED) && (TEMP_SENSOR_BED != 0)
@@ -105,7 +121,7 @@ void tinkergnome_init()
         pidBed[1] = (DEFAULT_bedKi*PID_dT);
         pidBed[2] = (DEFAULT_bedKd/PID_dT);
 #endif
-        eeprom_write_block(pidBed, (uint8_t*)EEPROM_PID_BED, sizeof(pidBed));
+        eeprom_update_block(pidBed, (uint8_t*)EEPROM_PID_BED, sizeof(pidBed));
 
         SET_STEPS_E2(axis_steps_per_unit[3]);
     }
@@ -132,13 +148,13 @@ void tinkergnome_init()
         pid2[0] = Kp;
         pid2[1] = Ki;
         pid2[2] = Kd;
-        eeprom_write_block(pid2, (uint8_t*)EEPROM_PID_2, sizeof(pid2));
+        eeprom_update_block(pid2, (uint8_t*)EEPROM_PID_2, sizeof(pid2));
 #else
         float pid2[3];
         pid2[0] = Kp;
         pid2[1] = Ki;
         pid2[2] = Kd;
-        eeprom_write_block(pid2, (uint8_t*)EEPROM_PID_2, sizeof(pid2));
+        eeprom_update_block(pid2, (uint8_t*)EEPROM_PID_2, sizeof(pid2));
 #endif // EXTRUDERS
 
 #if EXTRUDERS > 1 && defined(MOTOR_CURRENT_PWM_E_PIN) && MOTOR_CURRENT_PWM_E_PIN > -1
@@ -166,8 +182,8 @@ void tinkergnome_init()
     }
     else
     {
-        eeprom_write_block(min_pos, (uint8_t *)EEPROM_AXIS_LIMITS, sizeof(min_pos));
-        eeprom_write_block(max_pos, (uint8_t *)(EEPROM_AXIS_LIMITS+sizeof(min_pos)), sizeof(max_pos));
+        eeprom_update_block(min_pos, (uint8_t *)EEPROM_AXIS_LIMITS, sizeof(min_pos));
+        eeprom_update_block(max_pos, (uint8_t *)(EEPROM_AXIS_LIMITS+sizeof(min_pos)), sizeof(max_pos));
     }
     if (version > 2)
     {
@@ -870,7 +886,11 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
             lcd_lib_draw_string_leftP(15, PSTR("Retract"));
             lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 15, retractLenGfx);
             // lcd_lib_draw_stringP(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 15, PSTR("L"));
+        #ifdef PREVENT_FILAMENT_GRIND
+            float_to_string2((flags & MENU_ACTIVE) ? retract_length : retract_length_current[active_extruder], buffer, PSTR("mm"));
+        #else
             float_to_string2(retract_length, buffer, PSTR("mm"));
+        #endif
             LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                                   , 15
                                   , 7*LCD_CHAR_SPACING

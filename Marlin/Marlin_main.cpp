@@ -203,7 +203,14 @@ bool position_error;
 #ifdef FWRETRACT
   bool autoretract_enabled=false;
   bool retracted=false;
-  float retract_length=4.5, retract_feedrate=25*60, retract_zlift=0.8;
+  float retract_feedrate=DEFAULT_RETRACT_FEEDRATE, retract_zlift=0.8;
+  float retract_length    =DEFAULT_RETRACT_LENGHT;
+#ifdef PREVENT_FILAMENT_GRIND
+  float retract_length_min=DEFAULT_RETRACT_LENGHT_MIN;
+  float retract_length_current[EXTRUDERS] = ARRAY_BY_EXTRUDERS_FILL(DEFAULT_RETRACT_LENGHT);
+  float   filament_grab_value [EXTRUDERS] = ARRAY_BY_EXTRUDERS_FILL(0);
+  uint8_t filament_grab_max=DEFAULT_FILAMENT_MAX_GRAB;
+#endif
 #if EXTRUDERS > 1
   float extruder_swap_retract_length=16.0;
 #endif
@@ -276,7 +283,6 @@ static void get_command();
 static void FlushSerialRequestResend();
 static void ClearToSend();
 
-
 void serial_echopair_P(const char *s_P, float v)
     { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char *s_P, double v)
@@ -302,6 +308,63 @@ extern "C"{
     return free_memory;
   }
 }
+
+template <class T>
+void cut_scope (T &value, T min, T max)
+{
+	if      (value < min) value = min;
+	else if (value > max) value = max;
+}
+
+#ifdef PREVENT_FILAMENT_GRIND
+void filament_grab_init()
+{
+	for (int i=0; i<EXTRUDERS; ++i)
+	{
+		retract_length_current[i] = retract_length;
+		filament_grab_value[i]    = 0;
+	}
+}
+
+void filament_grab_update(float filament_lenght)
+{
+	if (!is_prevent_filament_grind()) // prevent filament grind is off
+	{
+		filament_grab_value[active_extruder] = 0;
+		return;
+	}
+	else if (filament_lenght < 0) // retract
+	{
+		filament_grab_value[active_extruder] -= filament_lenght / filament_grab_max;
+	}
+	else if (!retracted) // normal extrude
+	{
+		filament_grab_value[active_extruder] -= filament_lenght;
+		cut_scope<float> (filament_grab_value[active_extruder], 0, retract_length*2);
+	}
+}
+
+#define FILAMENT_GRAB_VALUE_BEGIN 0.37
+void filament_grab_set_retract_lenght()
+{
+	cut_scope<float> (retract_length_min, 0, retract_length);
+	float value;
+	for (int i=0; i<EXTRUDERS; ++i)
+	{
+		value = filament_grab_value[i] / retract_length;
+		if      (value < FILAMENT_GRAB_VALUE_BEGIN || !is_prevent_filament_grind())
+			retract_length_current[i] = retract_length;
+		else if (value < 1.0)
+		{
+			value -= FILAMENT_GRAB_VALUE_BEGIN;
+			value *= 1.0/(1.0-FILAMENT_GRAB_VALUE_BEGIN);
+			retract_length_current[i] = retract_length - (retract_length - retract_length_min) * value;
+		}
+		else
+			retract_length_current[i] = retract_length_min;
+	}
+}
+#endif // PREVENT_FILAMENT_GRIND
 
 //Clear all the commands in the ASCII command buffer, to make sure we have room for abort commands.
 void clear_command_queue()
@@ -1051,20 +1114,27 @@ void process_command(const char *strCmd)
         break;
       if(!retracted)
       {
+        #ifdef PREVENT_FILAMENT_GRIND
+        filament_grab_set_retract_lenght();
+        #endif
         destination[X_AXIS]=current_position[X_AXIS];
         destination[Y_AXIS]=current_position[Y_AXIS];
         destination[Z_AXIS]=current_position[Z_AXIS];
         #if EXTRUDERS > 1
         if (code_seen(strCmd, 'S') && code_value_long() == 1)
-            destination[E_AXIS]=current_position[E_AXIS]-extruder_swap_retract_length/volume_to_filament_length[active_extruder];
+            retract_recover_length=extruder_swap_retract_length;
         else
-            destination[E_AXIS]=current_position[E_AXIS]-retract_length/volume_to_filament_length[active_extruder];
+            retract_recover_length=RETRACT_LENGTH_CURRENT;
         #else
-        destination[E_AXIS]=current_position[E_AXIS]-retract_length/volume_to_filament_length[active_extruder];
+        retract_recover_length=RETRACT_LENGTH_CURRENT;
         #endif
+        #ifdef PREVENT_FILAMENT_GRIND
+        filament_grab_update(-retract_recover_length);
+        #endif
+        retract_recover_length = retract_recover_length/volume_to_filament_length[active_extruder];//Set the recover length to whatever distance we retracted so we recover properly.
+        destination[E_AXIS]=current_position[E_AXIS]-retract_recover_length;
         float oldFeedrate = feedrate;
         feedrate=retract_feedrate;
-        retract_recover_length = current_position[E_AXIS]-destination[E_AXIS];//Set the recover length to whatever distance we retracted so we recover properly.
         retracted=true;
         prepare_move(strCmd);
         feedrate = oldFeedrate;
@@ -2153,12 +2223,12 @@ void process_command(const char *strCmd)
     #ifdef PREVENT_DANGEROUS_EXTRUDE
     case 302: // allow cold extrudes, or set the minimum extrude temperature
     {
-	  float temp = .0;
-	  if (code_seen(strCmd, 'S')) temp=code_value();
+      float temp = .0;
+      if (code_seen(strCmd, 'S')) temp=code_value();
       set_extrude_min_temp(temp);
     }
     break;
-	#endif
+    #endif
     case 303: // M303 PID autotune
     {
       float temp = 150.0;
@@ -2730,40 +2800,57 @@ static void get_coordinates(const char *cmd)
         if(next_feedrate > 0.0) feedrate = next_feedrate;
     }
     #ifdef FWRETRACT
-    if(autoretract_enabled)
+    #ifdef PREVENT_FILAMENT_GRIND
+    if ((seen & (1 << E_AXIS)) != 0)
     {
-        if (seen == (1 << E_AXIS))
+    #endif // PREVENT_FILAMENT_GRIND
+        float echange=destination[E_AXIS]-current_position[E_AXIS];
+        if(autoretract_enabled)
         {
-            // e only move
-            float echange=destination[E_AXIS]-current_position[E_AXIS];
-            if(echange<-MIN_RETRACT) //retract
+            if (seen == (1 << E_AXIS))
             {
-                if(!retracted)
+                // e only move
+                if(echange<-MIN_RETRACT) //retract
                 {
-                    destination[Z_AXIS]+=retract_zlift; //not sure why chaninging current_position negatively does not work.
-                    //if slicer retracted by echange=-1mm and you want to retract 3mm, corrrectede=-2mm additionally
-                    float correctede=-echange-retract_length;
-                    //to generate the additional steps, not the destination is changed, but inversely the current position
-                    current_position[E_AXIS]+=-correctede;
-                    feedrate=retract_feedrate;
-                    retracted=true;
+                    if(!retracted)
+                    {
+                        destination[Z_AXIS]+=retract_zlift; //not sure why chaninging current_position negatively does not work.
+                        //if slicer retracted by echange=-1mm and you want to retract 3mm, corrrectede=-2mm additionally
+                        float correctede=-echange-retract_length;
+                        //to generate the additional steps, not the destination is changed, but inversely the current position
+                        current_position[E_AXIS]+=-correctede;
+                        feedrate=retract_feedrate;
+                        retracted=true;
+                    }
+                }
+                else if(echange>MIN_RETRACT) //retract_recover
+                {
+                    if(retracted)
+                    {
+                        //current_position[Z_AXIS]+=-retract_zlift;
+                        //if slicer retracted_recovered by echange=+1mm and you want to retract_recover 3mm, corrrectede=2mm additionally
+                        float correctede=-echange+1*retract_length+retract_recover_length; //total unretract=retract_length+retract_recover_length[surplus]
+                        current_position[E_AXIS]+=correctede; //to generate the additional steps, not the destination is changed, but inversely the current position
+                        feedrate=retract_recover_feedrate;
+                        retracted=false;
+                    }
                 }
             }
-            else if(echange>MIN_RETRACT) //retract_recover
+            #ifdef PREVENT_FILAMENT_GRIND
+            else // normal extrude
             {
-                if(retracted)
-                {
-                    //current_position[Z_AXIS]+=-retract_zlift;
-                    //if slicer retracted_recovered by echange=+1mm and you want to retract_recover 3mm, corrrectede=2mm additionally
-                    float correctede=-echange+1*retract_length+retract_recover_length; //total unretract=retract_length+retract_recover_length[surplus]
-                    current_position[E_AXIS]+=correctede; //to generate the additional steps, not the destination is changed, but inversely the current position
-                    feedrate=retract_recover_feedrate;
-                    retracted=false;
-                }
+                filament_grab_update(echange * volume_to_filament_length[active_extruder]);
             }
+            #endif
+        }
+    #ifdef PREVENT_FILAMENT_GRIND
+        else
+        {
+            filament_grab_update(echange * volume_to_filament_length[active_extruder]);
         }
     }
-    #endif //FWRETRACT
+    #endif // PREVENT_FILAMENT_GRIND
+    #endif // FWRETRACT
 }
 
 static void get_arc_coordinates(const char *cmd)

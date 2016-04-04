@@ -568,7 +568,9 @@ void lcd_menu_print_select()
                         extrudemultiply[e] = 100;
                         e_smoothed_speed[e] = 0.0f;
                     }
-
+#ifdef PREVENT_FILAMENT_GRIND
+                    filament_grab_init();
+#endif
                     if (strncmp_P(buffer, PSTR(";FLAVOR:UltiGCode"), 17) == 0)
                     {
                         //New style GCode flavor without start/end code.
@@ -1181,17 +1183,24 @@ void lcd_menu_print_tune()
 static void lcd_retraction_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
     char buffer[32] = {0};
-    if (nr == 0)
+    uint8_t item = 0;
+    if (nr == item++)
         strcpy_P(buffer, PSTR("< RETURN"));
-    else if (nr == 1)
+    else if (nr == item++)
         strcpy_P(buffer, PSTR("Retract length"));
-    else if (nr == 2)
+    else if (nr == item++)
         strcpy_P(buffer, PSTR("Retract speed"));
-    else if (nr == 3)
+    else if (nr == item++)
         strcpy_P(buffer, PSTR("End of print length"));
 #if EXTRUDERS > 1
-    else if (nr == 4)
+    else if (nr == item++)
         strcpy_P(buffer, PSTR("Extruder change len"));
+#endif
+#ifdef PREVENT_FILAMENT_GRIND
+	else if(nr == item++)
+		strcpy_P(buffer, PSTR("Filament grab max"));
+	else if(nr == item++)
+		strcpy_P(buffer, PSTR("Retract length min"));
 #endif
     else
         strcpy_P(buffer, PSTR("???"));
@@ -1202,15 +1211,25 @@ static void lcd_retraction_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 static void lcd_retraction_details(uint8_t nr)
 {
     char buffer[32] = {0};
-    if(nr == 1)
+    uint8_t item = 1;
+    if(nr == item++)
         float_to_string2(retract_length, buffer, PSTR("mm"));
-    else if(nr == 2)
+    else if(nr == item++)
         int_to_string(retract_feedrate / 60 + 0.5, buffer, PSTR("mm/sec"));
-    else if(nr == 3)
+    else if(nr == item++)
         float_to_string2(end_of_print_retraction, buffer, PSTR("mm"));
 #if EXTRUDERS > 1
-    else if(nr == 4)
+    else if(nr == item++)
         int_to_string(extruder_swap_retract_length, buffer, PSTR("mm"));
+#endif
+#ifdef PREVENT_FILAMENT_GRIND
+	else if(nr == item++)
+		if (is_prevent_filament_grind())
+			int_to_string(filament_grab_max, buffer, PSTR(""));
+		else
+			strcpy_P(buffer, PSTR("0 - off"));
+	else if(nr == item++)
+		float_to_string2(retract_length_min, buffer, PSTR("mm"));
 #endif
     else
         return;
@@ -1219,20 +1238,27 @@ static void lcd_retraction_details(uint8_t nr)
 
 static void lcd_menu_print_tune_retraction()
 {
-    lcd_scroll_menu(PSTR("RETRACTION"), 4 + (EXTRUDERS > 1 ? 1 : 0), lcd_retraction_item, lcd_retraction_details);
+    lcd_scroll_menu(PSTR("RETRACTION"), 4 + (EXTRUDERS > 1 ? 1 : 0) + (IS_PREVENT_FILAMENT_GRIND ? 2 : 0), lcd_retraction_item, lcd_retraction_details);
     if (lcd_lib_button_pressed)
     {
-        if (IS_SELECTED_SCROLL(0))
+        uint8_t item = 0;
+        if (IS_SELECTED_SCROLL(item++))
             menu.return_to_previous();
-        else if (IS_SELECTED_SCROLL(1))
+        else if (IS_SELECTED_SCROLL(item++))
             LCD_EDIT_SETTING_FLOAT001(retract_length, "Retract length", "mm", 0, 50);
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(item++))
             LCD_EDIT_SETTING_SPEED(retract_feedrate, "Retract speed", "mm/sec", 0, max_feedrate[E_AXIS] * 60);
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(item++))
             LCD_EDIT_SETTING_FLOAT001(end_of_print_retraction, "End of print retract", "mm", 0, 50);
 #if EXTRUDERS > 1
-        else if (IS_SELECTED_SCROLL(4))
+        else if (IS_SELECTED_SCROLL(item++))
             LCD_EDIT_SETTING_FLOAT001(extruder_swap_retract_length, "Extruder change", "mm", 0, 50);
+#endif
+#ifdef PREVENT_FILAMENT_GRIND
+		else if (IS_SELECTED_SCROLL(item++))
+			LCD_EDIT_SETTING(filament_grab_max, "Filament grab count", "", 0, MAX_FILAMENT_MAX_GRAB);
+		else if (IS_SELECTED_SCROLL(item++))
+			LCD_EDIT_SETTING_FLOAT001(retract_length_min, "Retract length min", "mm", 0, retract_length);
 #endif
     }
     lcd_lib_update_screen();

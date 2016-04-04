@@ -19,38 +19,44 @@
 #define EEPROM_MOTOR_CURRENT_E2 0x438  // 2 Byte
 #define EEPROM_PID_BED 0x43A  // 12 Byte
 #define EEPROM_STEPS_E2 0x446  // 4 Byte
-#define EEPROM_RESERVED 0x44A  // next position
+#define EEPROM_RETRACT_LENGTH_MIN 0x44A  // 4 Byte
+#define EEPROM_FILAMENT_GRAB_MAX 0x44E  // 1 Byte
+#define EEPROM_RESERVED 0x44F  // next position
 
 #define GET_UI_MODE() (eeprom_read_byte((const uint8_t*)EEPROM_UI_MODE_OFFSET))
-#define SET_UI_MODE(n) do { eeprom_write_byte((uint8_t*)EEPROM_UI_MODE_OFFSET, n); } while(0)
+#define SET_UI_MODE(n) do { eeprom_update_byte((uint8_t*)EEPROM_UI_MODE_OFFSET, n); } while(0)
 #define GET_LED_TIMEOUT() (eeprom_read_word((const uint16_t*)EEPROM_LED_TIMEOUT_OFFSET))
-#define SET_LED_TIMEOUT(n) do { eeprom_write_word((uint16_t*)EEPROM_LED_TIMEOUT_OFFSET, n); } while(0)
+#define SET_LED_TIMEOUT(n) do { eeprom_update_word((uint16_t*)EEPROM_LED_TIMEOUT_OFFSET, n); } while(0)
 #define GET_LCD_TIMEOUT() (eeprom_read_word((const uint16_t*)EEPROM_LCD_TIMEOUT_OFFSET))
-#define SET_LCD_TIMEOUT(n) do { eeprom_write_word((uint16_t*)EEPROM_LCD_TIMEOUT_OFFSET, n); } while(0)
+#define SET_LCD_TIMEOUT(n) do { eeprom_update_word((uint16_t*)EEPROM_LCD_TIMEOUT_OFFSET, n); } while(0)
 #define GET_LCD_CONTRAST() (eeprom_read_byte((const uint8_t*)EEPROM_LCD_CONTRAST_OFFSET))
-#define SET_LCD_CONTRAST(n) do { eeprom_write_byte((uint8_t*)EEPROM_LCD_CONTRAST_OFFSET, n); } while(0)
+#define SET_LCD_CONTRAST(n) do { eeprom_update_byte((uint8_t*)EEPROM_LCD_CONTRAST_OFFSET, n); } while(0)
 #define GET_EXPERT_VERSION() (eeprom_read_word((const uint16_t*)EEPROM_EXPERT_VERSION_OFFSET))
-#define SET_EXPERT_VERSION(n) do { eeprom_write_word((uint16_t*)EEPROM_EXPERT_VERSION_OFFSET, n); } while(0)
+#define SET_EXPERT_VERSION(n) do { eeprom_update_word((uint16_t*)EEPROM_EXPERT_VERSION_OFFSET, n); } while(0)
 #define GET_SLEEP_BRIGHTNESS() (eeprom_read_byte((const uint8_t*)EEPROM_SLEEP_BRIGHTNESS_OFFSET))
-#define SET_SLEEP_BRIGHTNESS(n) do { eeprom_write_byte((uint8_t*)EEPROM_SLEEP_BRIGHTNESS_OFFSET, n); } while(0)
+#define SET_SLEEP_BRIGHTNESS(n) do { eeprom_update_byte((uint8_t*)EEPROM_SLEEP_BRIGHTNESS_OFFSET, n); } while(0)
 #define GET_SLEEP_CONTRAST() (eeprom_read_byte((const uint8_t*)EEPROM_SLEEP_CONTRAST_OFFSET))
-#define SET_SLEEP_CONTRAST(n) do { eeprom_write_byte((uint8_t*)EEPROM_SLEEP_CONTRAST_OFFSET, n); } while(0)
+#define SET_SLEEP_CONTRAST(n) do { eeprom_update_byte((uint8_t*)EEPROM_SLEEP_CONTRAST_OFFSET, n); } while(0)
 #define GET_SLEEP_GLOW() (eeprom_read_byte((const uint8_t*)EEPROM_SLEEP_GLOW_OFFSET))
-#define SET_SLEEP_GLOW(n) do { eeprom_write_byte((uint8_t*)EEPROM_SLEEP_GLOW_OFFSET, n); } while(0)
+#define SET_SLEEP_GLOW(n) do { eeprom_update_byte((uint8_t*)EEPROM_SLEEP_GLOW_OFFSET, n); } while(0)
 #define GET_EXPERT_FLAGS() (eeprom_read_byte((const uint8_t*)EEPROM_PID_FLAGS))
-#define SET_EXPERT_FLAGS(n) do { eeprom_write_byte((uint8_t*)EEPROM_PID_FLAGS, n); } while(0)
+#define SET_EXPERT_FLAGS(n) do { eeprom_update_byte((uint8_t*)EEPROM_PID_FLAGS, n); } while(0)
 #define GET_HEATER_TIMEOUT() (eeprom_read_byte((const uint8_t*)EEPROM_HEATER_TIMEOUT))
-#define SET_HEATER_TIMEOUT(n) do { eeprom_write_byte((uint8_t*)EEPROM_HEATER_TIMEOUT, n); } while(0)
+#define SET_HEATER_TIMEOUT(n) do { eeprom_update_byte((uint8_t*)EEPROM_HEATER_TIMEOUT, n); } while(0)
 #define GET_END_RETRACT() (eeprom_read_float((const float*)EEPROM_END_RETRACT))
-#define SET_END_RETRACT(n) do { eeprom_write_float((float*)EEPROM_END_RETRACT, n); } while(0)
+#define SET_END_RETRACT(n) do { eeprom_update_float((float*)EEPROM_END_RETRACT, n); } while(0)
 #define GET_HEATER_CHECK_TEMP() (eeprom_read_byte((const uint8_t*)EEPROM_HEATER_CHECK_TEMP))
-#define SET_HEATER_CHECK_TEMP(n) do { eeprom_write_byte((uint8_t*)EEPROM_HEATER_CHECK_TEMP, n); } while(0)
+#define SET_HEATER_CHECK_TEMP(n) do { eeprom_update_byte((uint8_t*)EEPROM_HEATER_CHECK_TEMP, n); } while(0)
 #define GET_HEATER_CHECK_TIME() (eeprom_read_byte((const uint8_t*)EEPROM_HEATER_CHECK_TIME))
-#define SET_HEATER_CHECK_TIME(n) do { eeprom_write_byte((uint8_t*)EEPROM_HEATER_CHECK_TIME, n); } while(0)
+#define SET_HEATER_CHECK_TIME(n) do { eeprom_update_byte((uint8_t*)EEPROM_HEATER_CHECK_TIME, n); } while(0)
 #define GET_MOTOR_CURRENT_E2() (eeprom_read_word((const uint16_t*)EEPROM_MOTOR_CURRENT_E2))
-#define SET_MOTOR_CURRENT_E2(n) do { eeprom_write_word((uint16_t*)EEPROM_MOTOR_CURRENT_E2, n); } while(0)
+#define SET_MOTOR_CURRENT_E2(n) do { eeprom_update_word((uint16_t*)EEPROM_MOTOR_CURRENT_E2, n); } while(0)
 #define GET_STEPS_E2() (eeprom_read_float((const float*)EEPROM_STEPS_E2))
-#define SET_STEPS_E2(n) do { eeprom_write_float((float*)EEPROM_STEPS_E2, n); } while(0)
+#define SET_STEPS_E2(n) do { eeprom_update_float((float*)EEPROM_STEPS_E2, n); } while(0)
+#define GET_RETRACT_LENGTH_MIN()  (eeprom_read_float((const float*)EEPROM_RETRACT_LENGTH_MIN))
+#define SET_RETRACT_LENGTH_MIN(n) do { eeprom_update_float((float*)EEPROM_RETRACT_LENGTH_MIN, n); } while(0)
+#define GET_FILAMENT_GRAB_MAX()  (eeprom_read_byte((const uint8_t*)EEPROM_FILAMENT_GRAB_MAX))
+#define SET_FILAMENT_GRAB_MAX(n) do { eeprom_update_byte((uint8_t*)EEPROM_FILAMENT_GRAB_MAX, n); } while(0)
 
 // UI Mode
 #define UI_MODE_STANDARD  0

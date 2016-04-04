@@ -575,12 +575,12 @@ static void doFactoryReset()
 {
     lcd_change_to_previous_menu();
     //Clear the EEPROM settings so they get read from default.
-    eeprom_write_byte((uint8_t*)100, 0);
-    eeprom_write_byte((uint8_t*)101, 0);
-    eeprom_write_byte((uint8_t*)102, 0);
-    eeprom_write_byte((uint8_t*)EEPROM_FIRST_RUN_DONE_OFFSET, 0);
-    eeprom_write_word((uint16_t*)EEPROM_EXPERT_VERSION_OFFSET, 0xFFFF);
-    eeprom_write_byte(EEPROM_MATERIAL_COUNT_OFFSET(), 0);
+    eeprom_update_byte((uint8_t*)100, 0);
+    eeprom_update_byte((uint8_t*)101, 0);
+    eeprom_update_byte((uint8_t*)102, 0);
+    eeprom_update_byte((uint8_t*)EEPROM_FIRST_RUN_DONE_OFFSET, 0);
+    eeprom_update_word((uint16_t*)EEPROM_EXPERT_VERSION_OFFSET, 0xFFFF);
+    eeprom_update_byte(EEPROM_MATERIAL_COUNT_OFFSET(), 0);
     doMachineRestart();
 }
 

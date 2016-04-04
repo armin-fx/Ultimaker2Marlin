@@ -30,11 +30,11 @@ float eeprom_read_float(const float* addr)
     n.i = eeprom_read_dword((uint32_t*)addr);
     return n.f;
 }
-void eeprom_write_float(const float* addr, float f)
+void eeprom_update_float(const float* addr, float f)
 {
     union { uint32_t i; float f; } n;
     n.f = f;
-    eeprom_write_dword((uint32_t*)addr, n.i);
+    eeprom_update_dword((uint32_t*)addr, n.i);
 }
 #endif
 

@@ -327,6 +327,18 @@ const int8_t dropsegments=5; //everything with less than this number of steps wi
 #define FWRETRACT  //ONLY PARTIALLY TESTED
 #define MIN_RETRACT 0.1 //minimum extruded mm to accept a automatic gcode retraction attempt
 
+// Reduces the firmware retract length automatic when needed to prevent filament grind.
+// This could may increase filament stringing, but it can prevent ruin the print.
+// The feeder will grab the filament not so often when retract lenght is lower.
+#define PREVENT_FILAMENT_GRIND
+// try to grab filament by feeder below this count
+#define DEFAULT_FILAMENT_MAX_GRAB 25
+#define MAX_FILAMENT_MAX_GRAB     200
+// default minimum filament retract lenght when prevent filament grind
+#define DEFAULT_RETRACT_LENGHT_MIN 2.0
+// default filament retract lenght
+#define DEFAULT_RETRACT_LENGHT     4.5
+#define DEFAULT_RETRACT_FEEDRATE (25 * 60)
 
 //adds support for experimental filament exchange support M600; requires display
 #ifdef ULTIPANEL
