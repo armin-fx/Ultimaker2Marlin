@@ -12,6 +12,7 @@
 #include "UltiLCD2_menu_material.h"
 #include "UltiLCD2_menu_maintenance.h"
 #include "UltiLCD2_menu_utils.h"
+#include "UltiLCD2_text.h"
 #include "preferences.h"
 
 struct materialSettings material[EXTRUDERS];
@@ -68,7 +69,7 @@ void lcd_menu_material_main_return()
 
 void lcd_menu_material_main()
 {
-    lcd_tripple_menu(PSTR("CHANGE"), PSTR("SETTINGS"), PSTR("RETURN"));
+    lcd_tripple_menu(MSGP_MENU_CHANGE, MSGP_MENU_SETTINGS, MSGP_MENU_RETURN);
 
     if (lcd_lib_button_pressed)
     {
@@ -173,7 +174,7 @@ static void lcd_menu_change_material_remove()
     last_user_interaction = millis();
     lcd_info_screen(lcd_change_to_previous_menu, cancelMaterialInsert);
 #if EXTRUDERS > 1
-    lcd_lib_draw_stringP(3, 10, PSTR("Extruder"));
+    lcd_lib_draw_stringP(3, 10, MSGP_EXTRUDER);
     char buffer[8] = {0};
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
@@ -222,9 +223,9 @@ static void lcd_menu_change_material_remove_wait_user()
 {
     LED_GLOW
     setTargetHotend(material[active_extruder].temperature[0], active_extruder);
-    lcd_question_screen(NULL, lcd_menu_change_material_remove_wait_user_ready, PSTR("READY"), lcd_change_to_material_main, cancelMaterialInsert, PSTR("CANCEL"));
+    lcd_question_screen(NULL, lcd_menu_change_material_remove_wait_user_ready, MSGP_MENU_READY, lcd_change_to_material_main, cancelMaterialInsert, MSGP_MENU_CANCEL);
 #if EXTRUDERS > 1
-    lcd_lib_draw_stringP(3, 10, PSTR("Extruder"));
+    lcd_lib_draw_stringP(3, 10, MSGP_EXTRUDER);
     char buffer[8] = {0};
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
@@ -287,7 +288,7 @@ static void lcd_menu_change_material_insert_wait_user()
         plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0.5 / volume_to_filament_length[active_extruder], FILAMENT_INSERT_SPEED, active_extruder);
     }
 
-    lcd_question_screen(NULL, lcd_menu_change_material_insert_wait_user_ready, PSTR("READY"), lcd_change_to_previous_menu, cancelMaterialInsert, PSTR("CANCEL"));
+    lcd_question_screen(NULL, lcd_menu_change_material_insert_wait_user_ready, MSGP_MENU_READY, lcd_change_to_previous_menu, cancelMaterialInsert, MSGP_MENU_CANCEL);
 #if EXTRUDERS > 1
     lcd_lib_draw_stringP(3, 10, PSTR("Insert new material"));
     lcd_lib_draw_stringP(3, 20, PSTR("for extruder"));
@@ -340,7 +341,7 @@ static void lcd_menu_change_material_insert_forward()
     last_user_interaction = millis();
     lcd_info_screen(lcd_change_to_previous_menu, cancelMaterialInsert);
 #if EXTRUDERS > 1
-    lcd_lib_draw_stringP(3, 10, PSTR("Extruder"));
+    lcd_lib_draw_stringP(3, 10, MSGP_EXTRUDER);
     char buffer[8] = {0};
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
@@ -397,7 +398,7 @@ static void lcd_menu_change_material_insert()
     {
         LED_GLOW
 
-        lcd_question_screen(lcd_menu_change_material_select_material, materialInsertReady, PSTR("READY"), lcd_change_to_previous_menu, cancelMaterialInsert, PSTR("CANCEL"));
+        lcd_question_screen(lcd_menu_change_material_select_material, materialInsertReady, MSGP_MENU_READY, lcd_change_to_previous_menu, cancelMaterialInsert, MSGP_MENU_CANCEL);
 #if EXTRUDERS > 1
         lcd_lib_draw_stringP(3, 20, PSTR("Wait till material"));
         lcd_lib_draw_stringP(3, 30, PSTR("comes out nozzle"));
@@ -439,21 +440,21 @@ static void lcd_menu_change_material_select_material_details_callback(uint8_t nr
 
     if (led_glow_dir)
     {
-        c = float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(nr)), c, PSTR("mm"));
+        c = float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(nr)), c, MSGP_UNIT_MM);
         while(c < buffer + 10) *c++ = ' ';
         strcpy_P(c, PSTR("Flow:"));
         c += 5;
-        c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(nr)), c, PSTR("%"));
+        c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(nr)), c, MSGP_UNIT_PERCENT);
     }else{
-        c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(nr)), c, PSTR("C"));
+        c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(nr)), c, MSGP_UNIT_CELSIUS);
 #if TEMP_SENSOR_BED != 0
         *c++ = ' ';
-        c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(nr)), c, PSTR("C"));
+        c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(nr)), c, MSGP_UNIT_CELSIUS);
 #endif
         while(c < buffer + 10) *c++ = ' ';
         strcpy_P(c, PSTR("Fan: "));
         c += 5;
-        c = int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(nr)), c, PSTR("%"));
+        c = int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(nr)), c, MSGP_UNIT_PERCENT);
     }
     lcd_lib_draw_string_left(BOTTOM_MENU_YPOS, buffer);
 }
@@ -462,7 +463,7 @@ static void lcd_menu_change_material_select_material()
 {
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
 
-    lcd_scroll_menu(PSTR("MATERIAL"), count, lcd_menu_change_material_select_material_callback, lcd_menu_change_material_select_material_details_callback);
+    lcd_scroll_menu(MSGP_MENU_MATERIAL, count, lcd_menu_change_material_select_material_callback, lcd_menu_change_material_select_material_details_callback);
     if (lcd_lib_button_pressed)
     {
         lcd_material_set_material(SELECTED_SCROLL_MENU_ITEM(), active_extruder);
@@ -485,7 +486,6 @@ static void lcd_menu_material_export_done()
 
 static void lcd_menu_material_export()
 {
-    const char* newline_P = PSTR("\n");
     if (!card.sdInserted)
     {
         lcd_menu_no_sdcard();
@@ -510,48 +510,48 @@ static void lcd_menu_material_export()
         char* ptr = buffer + strlen(buffer);
         eeprom_read_block(ptr, EEPROM_MATERIAL_NAME_OFFSET(n), MATERIAL_NAME_SIZE);
         ptr[MATERIAL_NAME_SIZE] = '\0';
-        strcat_P(buffer, newline_P);
+        strcat_P(buffer, MSGP_NEWLINE);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("temperature="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(n)), ptr, newline_P);
+        int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
         for(uint8_t nozzle=0; nozzle<MATERIAL_TEMPERATURE_COUNT; ++nozzle)
         {
             strcpy_P(buffer, PSTR("temperature_"));
             ptr = float_to_string2(nozzleIndexToNozzleSize(nozzle), buffer + strlen(buffer), PSTR("="));
-            int_to_string(eeprom_read_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(n, nozzle)), ptr, newline_P);
+            int_to_string(eeprom_read_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(n, nozzle)), ptr, MSGP_NEWLINE);
             card.write_string(buffer);
         }
 
 #if TEMP_SENSOR_BED != 0
         strcpy_P(buffer, PSTR("bed_temperature="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(n)), ptr, newline_P);
+        int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 #endif
 
         strcpy_P(buffer, PSTR("fan_speed="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(n)), ptr, newline_P);
+        int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("flow="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(n)), ptr, newline_P);
+        int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("diameter="));
         ptr = buffer + strlen(buffer);
-        float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(n)), ptr, newline_P);
+        float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
 #ifdef USE_CHANGE_TEMPERATURE
         strcpy_P(buffer, PSTR("change_temp="));
         ptr = buffer + strlen(buffer);
-        float_to_string2(eeprom_read_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(n)), ptr, newline_P);
+        float_to_string2(eeprom_read_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("change_wait="));
@@ -670,7 +670,7 @@ static void lcd_material_select_callback(uint8_t nr, uint8_t offsetY, uint8_t fl
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
     char buffer[32] = {0};
     if (nr == 0)
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == count + 1)
         strcpy_P(buffer, PSTR("Customize"));
     else if (nr == count + 2)
@@ -699,21 +699,21 @@ static void lcd_material_select_details_callback(uint8_t nr)
 
         if (led_glow_dir)
         {
-            c = float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(nr)), c, PSTR("mm"));
+            c = float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(nr)), c, MSGP_UNIT_MM);
             while(c < buffer + 10) *c++ = ' ';
             strcpy_P(c, PSTR("Flow:"));
             c += 5;
-            c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(nr)), c, PSTR("%"));
+            c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(nr)), c, MSGP_UNIT_PERCENT);
         }else{
-            c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(nr)), c, PSTR("C"));
+            c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(nr)), c, MSGP_UNIT_CELSIUS);
 #if TEMP_SENSOR_BED != 0
             *c++ = ' ';
-            c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(nr)), c, PSTR("C"));
+            c = int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(nr)), c, MSGP_UNIT_CELSIUS);
 #endif
             while(c < buffer + 10) *c++ = ' ';
             strcpy_P(c, PSTR("Fan: "));
             c += 5;
-            c = int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(nr)), c, PSTR("%"));
+            c = int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(nr)), c, MSGP_UNIT_PERCENT);
         }
         lcd_lib_draw_string_left(BOTTOM_MENU_YPOS, buffer);
     }else if (nr == count + 1)
@@ -732,7 +732,7 @@ void lcd_menu_material_select()
 {
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
 
-    lcd_scroll_menu(PSTR("MATERIAL"), count + 4, lcd_material_select_callback, lcd_material_select_details_callback);
+    lcd_scroll_menu(MSGP_MENU_MATERIAL, count + 4, lcd_material_select_callback, lcd_material_select_details_callback);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -769,7 +769,7 @@ static void lcd_material_settings_callback(uint8_t nr, uint8_t offsetY, uint8_t 
 {
     char buffer[32] = {0};
     if (nr == 0)
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == 1)
         strcpy_P(buffer, PSTR("Temperature"));
 #if TEMP_SENSOR_BED != 0
@@ -794,7 +794,7 @@ static void lcd_material_settings_callback(uint8_t nr, uint8_t offsetY, uint8_t 
         strcpy_P(buffer, PSTR("Store as preset"));
 #endif
     else
-        strcpy_P(buffer, PSTR("???"));
+        strcpy_P(buffer, MSGP_ENTRY_UNKNOWN);
 
     lcd_draw_scroll_entry(offsetY, buffer, flags);
 }
@@ -820,21 +820,21 @@ static void lcd_material_settings_details_callback(uint8_t nr)
 #if TEMP_SENSOR_BED != 0
     }else if (nr == 2)
     {
-        int_to_string(material[active_extruder].bed_temperature, buffer, PSTR("C"));
+        int_to_string(material[active_extruder].bed_temperature, buffer, MSGP_UNIT_CELSIUS);
 #endif
     }else if (nr == 2 + BED_MENU_OFFSET)
     {
-        float_to_string2(material[active_extruder].diameter, buffer, PSTR("mm"));
+        float_to_string2(material[active_extruder].diameter, buffer, MSGP_UNIT_MM);
     }else if (nr == 3 + BED_MENU_OFFSET)
     {
-        int_to_string(material[active_extruder].fan_speed, buffer, PSTR("%"));
+        int_to_string(material[active_extruder].fan_speed, buffer, MSGP_UNIT_PERCENT);
     }else if (nr == 4 + BED_MENU_OFFSET)
     {
-        int_to_string(material[active_extruder].flow, buffer, PSTR("%"));
+        int_to_string(material[active_extruder].flow, buffer, MSGP_UNIT_PERCENT);
 #ifdef USE_CHANGE_TEMPERATURE
     }else if (nr == 5 + BED_MENU_OFFSET)
     {
-        int_to_string(material[active_extruder].change_temperature, buffer, PSTR("C"));
+        int_to_string(material[active_extruder].change_temperature, buffer, MSGP_UNIT_CELSIUS);
     }else if (nr == 6 + BED_MENU_OFFSET)
     {
         int_to_string(material[active_extruder].change_preheat_wait_time, buffer, PSTR("Sec"));
@@ -846,9 +846,9 @@ static void lcd_material_settings_details_callback(uint8_t nr)
 static void lcd_menu_material_settings()
 {
 #ifdef USE_CHANGE_TEMPERATURE
-    lcd_scroll_menu(PSTR("MATERIAL"), 8 + BED_MENU_OFFSET, lcd_material_settings_callback, lcd_material_settings_details_callback);
+    lcd_scroll_menu(MSGP_MENU_MATERIAL, 8 + BED_MENU_OFFSET, lcd_material_settings_callback, lcd_material_settings_details_callback);
 #else
-    lcd_scroll_menu(PSTR("MATERIAL"), 6 + BED_MENU_OFFSET, lcd_material_settings_callback, lcd_material_settings_details_callback);
+    lcd_scroll_menu(MSGP_MENU_MATERIAL, 6 + BED_MENU_OFFSET, lcd_material_settings_callback, lcd_material_settings_details_callback);
 #endif
     if (lcd_lib_button_pressed)
     {
@@ -891,7 +891,7 @@ static void lcd_material_temperature_settings_callback(uint8_t nr, uint8_t offse
     char buffer[20] = {0};
     if (nr == 0)
     {
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     }
     else
     {
@@ -907,14 +907,14 @@ static void lcd_material_settings_temperature_details_callback(uint8_t nr)
     if (nr > 0)
     {
         char buffer[10] = {0};
-        int_to_string(material[active_extruder].temperature[nr - 1], buffer, PSTR("C"));
+        int_to_string(material[active_extruder].temperature[nr - 1], buffer, MSGP_UNIT_CELSIUS);
         lcd_lib_draw_string_left(BOTTOM_MENU_YPOS, buffer);
     }
 }
 
 static void lcd_menu_material_temperature_settings()
 {
-    lcd_scroll_menu(PSTR("MATERIAL"), 1 + MATERIAL_TEMPERATURE_COUNT, lcd_material_temperature_settings_callback, lcd_material_settings_temperature_details_callback);
+    lcd_scroll_menu(MSGP_MENU_MATERIAL, 1 + MATERIAL_TEMPERATURE_COUNT, lcd_material_temperature_settings_callback, lcd_material_settings_temperature_details_callback);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -936,7 +936,7 @@ static void lcd_menu_material_settings_store_callback(uint8_t nr, uint8_t offset
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
     char buffer[32] = {0};
     if (nr == 0)
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr > count)
         strcpy_P(buffer, PSTR("New preset"));
     else{

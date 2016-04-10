@@ -64,7 +64,7 @@ bool checkFilamentSensor()
 void lcd_menu_filament_outage()
 {
 #if defined(FILAMENT_SENSOR_PIN) && (FILAMENT_SENSOR_PIN > -1)
-    lcd_info_screen(lcd_change_to_previous_menu, NULL, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_change_to_previous_menu, NULL, MSGP_MENU_CONTINUE);
 
     lcd_lib_draw_string_centerP(10, PSTR("Material transport"));
     lcd_lib_draw_string_centerP(20, PSTR("issue detected."));

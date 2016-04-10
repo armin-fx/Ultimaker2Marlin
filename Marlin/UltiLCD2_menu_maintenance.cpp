@@ -8,6 +8,7 @@
 #include "UltiLCD2_menu_material.h"
 #include "UltiLCD2_menu_utils.h"
 #include "UltiLCD2_menu_prefs.h"
+#include "UltiLCD2_text.h"
 #include "cardreader.h"
 #include "lifetime_stats.h"
 #include "ConfigurationStore.h"
@@ -28,7 +29,7 @@ static void lcd_menu_preferences();
 
 void lcd_menu_maintenance()
 {
-    lcd_tripple_menu(PSTR("BUILD-|PLATE"), PSTR("ADVANCED"), PSTR("RETURN"));
+    lcd_tripple_menu(MSGP_MENU_BUILDPLATE, MSGP_MENU_ADVANCED, MSGP_MENU_RETURN);
 
     if (lcd_lib_button_pressed)
     {
@@ -51,12 +52,12 @@ static void lcd_advanced_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     uint8_t index(0);
     char buffer[32] = {0};
     if (nr == index++)
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == index++)
         strcpy_P(buffer, PSTR("Preferences"));
 #if EXTRUDERS > 1
     else if (nr == index++)
-        strcpy_P(buffer, PSTR("Swap extruders"));
+        strcpy_P(buffer, MSGP_SWAP_EXTRUDERS);
 #endif
     else if (nr == index++)
         strcpy_P(buffer, PSTR("Heatup nozzle"));
@@ -81,7 +82,7 @@ static void lcd_advanced_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     else if (nr == index++)
         strcpy_P(buffer, PSTR("Expert functions"));
     else
-        strcpy_P(buffer, PSTR("???"));
+        strcpy_P(buffer, MSGP_ENTRY_UNKNOWN);
 
     lcd_draw_scroll_entry(offsetY, buffer, flags);
 }
@@ -98,10 +99,10 @@ static void lcd_advanced_details(uint8_t nr)
     {
         // extruders swapped?
         uint8_t xpos = (swapExtruders() ? LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING : LCD_CHAR_MARGIN_LEFT);
-        lcd_lib_draw_stringP(xpos, BOTTOM_MENU_YPOS, PSTR("PRIMARY"));
+        lcd_lib_draw_stringP(xpos, BOTTOM_MENU_YPOS, MSGP_MENU_PRIMARY);
 
         xpos = (swapExtruders() ? LCD_CHAR_MARGIN_LEFT : LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-6*LCD_CHAR_SPACING);
-        lcd_lib_draw_stringP(xpos, BOTTOM_MENU_YPOS, PSTR("SECOND"));
+        lcd_lib_draw_stringP(xpos, BOTTOM_MENU_YPOS, MSGP_MENU_SECOND);
 
         lcd_lib_draw_stringP(LCD_GFX_WIDTH/2-LCD_CHAR_MARGIN_RIGHT-LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, PSTR("<->"));
         return;
@@ -112,20 +113,20 @@ static void lcd_advanced_details(uint8_t nr)
 #endif
     {
 #if EXTRUDERS > 1
-        int_to_string(int(target_temperature[1]), int_to_string(int(dsp_temperature[1]), int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/")), PSTR("C ")), PSTR("C/")), PSTR("C"));
+        int_to_string(int(target_temperature[1]), int_to_string(int(dsp_temperature[1]), int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/")), PSTR("C ")), PSTR("C/")), MSGP_UNIT_CELSIUS);
 #else
-        int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/")), PSTR("C"));
+        int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
 #endif // EXTRUDERS
     }
 #if TEMP_SENSOR_BED != 0
     else if (nr == EXTRUDERS + 2)
     {
-        int_to_string(int(target_temperature_bed), int_to_string(int(dsp_temperature_bed), buffer, PSTR("C/")), PSTR("C"));
+        int_to_string(int(target_temperature_bed), int_to_string(int(dsp_temperature_bed), buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
     }
 #endif
     else if (nr == EXTRUDERS + BED_MENU_OFFSET + 7)
     {
-        int_to_string(int(fanSpeed) * 100 / 255, buffer, PSTR("%"));
+        int_to_string(int(fanSpeed) * 100 / 255, buffer, MSGP_UNIT_PERCENT);
     }
     else
     {
@@ -139,7 +140,7 @@ static void lcd_preferences_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     uint8_t index(0);
     char buffer[32] = {0};
     if (nr == index++)
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == index++)
         strcpy_P(buffer, PSTR("User interface"));
     else if (nr == index++)
@@ -171,7 +172,7 @@ static void lcd_preferences_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     else if (nr == index++)
         strcpy_P(buffer, PSTR("Factory reset"));
     else
-        strcpy_P(buffer, PSTR("???"));
+        strcpy_P(buffer, MSGP_ENTRY_UNKNOWN);
 
     lcd_draw_scroll_entry(offsetY, buffer, flags);
 }
@@ -194,7 +195,7 @@ static void lcd_preferences_details(uint8_t nr)
     }
     else if (nr == 2)
     {
-        int_to_string(led_brightness_level, buffer, PSTR("%"));
+        int_to_string(led_brightness_level, buffer, MSGP_UNIT_PERCENT);
     }
     else if (nr == 3)
     {
@@ -213,7 +214,7 @@ static void lcd_preferences_details(uint8_t nr)
     }
     else if (nr == 5)
     {
-        int_to_string(float(lcd_contrast)*100/255 + 0.5f, buffer, PSTR("%"));
+        int_to_string(float(lcd_contrast)*100/255 + 0.5f, buffer, MSGP_UNIT_PERCENT);
     }
     else if (nr == 6)
     {
@@ -352,7 +353,7 @@ void lcd_dual_move_material()
 
 void lcd_menu_maintenance_advanced()
 {
-    lcd_scroll_menu(PSTR("ADVANCED"), BED_MENU_OFFSET + EXTRUDERS + ((ui_mode & UI_MODE_EXPERT) ? 10 : 9), lcd_advanced_item, lcd_advanced_details);
+    lcd_scroll_menu(MSGP_MENU_ADVANCED, BED_MENU_OFFSET + EXTRUDERS + ((ui_mode & UI_MODE_EXPERT) ? 10 : 9), lcd_advanced_item, lcd_advanced_details);
     if (lcd_lib_button_pressed)
     {
         uint8_t index = 0;
@@ -448,10 +449,10 @@ static void lcd_menu_maintenance_advanced_heatup()
 
     lcd_lib_clear();
     lcd_lib_draw_string_centerP(20, PSTR("Nozzle temperature:"));
-    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, PSTR("Click to return"));
+    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
     char buffer[16] = {0};
     int_to_string(int(dsp_temperature[active_extruder]), buffer, PSTR("C/"));
-    int_to_string(int(target_temperature[active_extruder]), buffer+strlen(buffer), PSTR("C"));
+    int_to_string(int(target_temperature[active_extruder]), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(active_extruder));
     lcd_lib_update_screen();
@@ -488,11 +489,11 @@ static void lcd_menu_maintenance_extrude()
     lcd_lib_clear();
     lcd_lib_draw_string_centerP(10, PSTR("Nozzle temperature:"));
     lcd_lib_draw_string_centerP(40, PSTR("Rotate to extrude"));
-    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, PSTR("Click to return"));
+    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
 
     char buffer[32] = {0};
     ;
-    int_to_string(int(target_temperature[active_extruder]), int_to_string(int(dsp_temperature[active_extruder]), buffer, PSTR("C/")), PSTR("C"));
+    int_to_string(int(target_temperature[active_extruder]), int_to_string(int(dsp_temperature[active_extruder]), buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(20, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 30, getHeaterPower(active_extruder));
     lcd_lib_update_screen();
@@ -512,10 +513,10 @@ void lcd_menu_maintenance_advanced_bed_heatup()
 
     lcd_lib_clear();
     lcd_lib_draw_string_centerP(20, PSTR("Buildplate temp.:"));
-    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, PSTR("Click to return"));
+    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
     char buffer[16] = {0};
     int_to_string(int(dsp_temperature_bed), buffer, PSTR("C/"));
-    int_to_string(int(target_temperature_bed), buffer+strlen(buffer), PSTR("C"));
+    int_to_string(int(target_temperature_bed), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(-1));
     lcd_lib_update_screen();
@@ -524,7 +525,7 @@ void lcd_menu_maintenance_advanced_bed_heatup()
 
 static void lcd_menu_advanced_version()
 {
-    lcd_info_screen(NULL, lcd_change_to_previous_menu, PSTR("Return"));
+    lcd_info_screen(NULL, lcd_change_to_previous_menu, MSGP_MENU_RETURN);
     lcd_lib_draw_string_centerP(30, PSTR(STRING_VERSION_CONFIG_H));
     lcd_lib_draw_string_centerP(40, PSTR(STRING_CONFIG_H_AUTHOR));
     lcd_lib_update_screen();
@@ -532,7 +533,7 @@ static void lcd_menu_advanced_version()
 
 static void lcd_menu_advanced_stats()
 {
-    lcd_info_screen(NULL, lcd_change_to_previous_menu, PSTR("Return"));
+    lcd_info_screen(NULL, lcd_change_to_previous_menu, MSGP_MENU_RETURN);
     lcd_lib_draw_string_centerP(10, PSTR("Machine on for:"));
     char buffer[16] = {0};
     char* c = int_to_string(lifetime_minutes / 60, buffer, PSTR(":"));
@@ -586,7 +587,7 @@ static void doFactoryReset()
 
 static void lcd_menu_advanced_factory_reset()
 {
-    lcd_question_screen(NULL, doFactoryReset, PSTR("YES"), NULL, lcd_change_to_previous_menu, PSTR("NO"));
+    lcd_question_screen(NULL, doFactoryReset, MSGP_MENU_YES, NULL, lcd_change_to_previous_menu, MSGP_MENU_NO);
 
     lcd_lib_draw_string_centerP(10, PSTR("Reset everything"));
     lcd_lib_draw_string_centerP(20, PSTR("to default?"));
@@ -597,9 +598,9 @@ static void lcd_motion_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
     char buffer[32] = {0};
     if (nr == 0)
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == 1)
-        strcpy_P(buffer, PSTR("Acceleration"));
+        strcpy_P(buffer, MSGP_ACCELERATION);
     else if (nr == 2)
         strcpy_P(buffer, PSTR("Max. axis speed"));
     else if (nr == 3)
@@ -607,7 +608,7 @@ static void lcd_motion_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     else if (nr == 4)
         strcpy_P(buffer, PSTR("Axis steps/mm"));
     else
-       strcpy_P(buffer, PSTR("???"));
+       strcpy_P(buffer, MSGP_ENTRY_UNKNOWN);
 
     lcd_draw_scroll_entry(offsetY, buffer, flags);
 }
@@ -635,7 +636,7 @@ static void lcd_led_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
     char buffer[32] = {0};
     if (nr == 0)
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == 1)
         strcpy_P(buffer, PSTR("Brightness"));
     else if (nr == 2)
@@ -647,7 +648,7 @@ static void lcd_led_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     else if (nr == 5)
         strcpy_P(buffer, PSTR(" Glow when done"));
     else
-        strcpy_P(buffer, PSTR("???"));
+        strcpy_P(buffer, MSGP_ENTRY_UNKNOWN);
     if (nr - 2 == led_mode)
         buffer[0] = '>';
 
@@ -661,7 +662,7 @@ static void lcd_led_details(uint8_t nr)
         return;
     else if(nr == 1)
     {
-        int_to_string(led_brightness_level, buffer, PSTR("%"));
+        int_to_string(led_brightness_level, buffer, MSGP_UNIT_PERCENT);
         lcd_lib_draw_string(5, BOTTOM_MENU_YPOS, buffer);
     }
 }
@@ -721,13 +722,13 @@ static void lcd_uimode_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
     if (nr == 0)
     {
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     }
     else if (nr == 1)
     {
         if (!(ui_mode & UI_MODE_EXPERT))
         {
-            strcpy_P(buffer, PSTR(">"));
+            strcpy_P(buffer, MSGP_ENTRY_SWITCH);
         }
         strcpy_P(buffer+1, PSTR("Standard Mode"));
     }
@@ -735,13 +736,13 @@ static void lcd_uimode_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     {
         if (ui_mode & UI_MODE_EXPERT)
         {
-            strcpy_P(buffer, PSTR(">"));
+            strcpy_P(buffer, MSGP_ENTRY_SWITCH);
         }
         strcpy_P(buffer+1, PSTR("Geek Mode"));
     }
     else
     {
-        strcpy_P(buffer+1, PSTR("???"));
+        strcpy_P(buffer+1, MSGP_ENTRY_UNKNOWN);
     }
 
     lcd_draw_scroll_entry(offsetY, buffer, flags);
@@ -752,13 +753,13 @@ static void lcd_clicksound_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     char buffer[20] = {' '};
     if (nr == 0)
     {
-        strcpy_P(buffer, PSTR("< RETURN"));
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
     }
     else if (nr == 1)
     {
         if (!(ui_mode & (UI_BEEP_OFF | UI_BEEP_SHORT)))
         {
-            strcpy_P(buffer, PSTR(">"));
+            strcpy_P(buffer, MSGP_ENTRY_SWITCH);
         }
         strcpy_P(buffer+1, PSTR("Standard beep"));
     }
@@ -766,7 +767,7 @@ static void lcd_clicksound_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     {
         if (ui_mode & UI_BEEP_SHORT)
         {
-            strcpy_P(buffer, PSTR(">"));
+            strcpy_P(buffer, MSGP_ENTRY_SWITCH);
         }
         strcpy_P(buffer+1, PSTR("Short tick"));
     }
@@ -774,13 +775,13 @@ static void lcd_clicksound_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     {
         if (ui_mode & UI_BEEP_OFF)
         {
-            strcpy_P(buffer, PSTR(">"));
+            strcpy_P(buffer, MSGP_ENTRY_SWITCH);
         }
         strcpy_P(buffer+1, PSTR("Off"));
     }
     else
     {
-        strcpy_P(buffer, PSTR(" ???"));
+        strcpy_P(buffer, MSGP_ENTRY_UNKNOWN);
     }
 
     lcd_draw_scroll_entry(offsetY, buffer, flags);
@@ -852,10 +853,10 @@ static void lcd_menu_screen_contrast()
 
     lcd_lib_clear();
     lcd_lib_draw_string_centerP(10, PSTR("Screen contrast"));
-    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, PSTR("Click to return"));
+    lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
 
     char buffer[32] = {0};
-    int_to_string(float(lcd_contrast)*100/255 + 0.5f, buffer, PSTR("%"));
+    int_to_string(float(lcd_contrast)*100/255 + 0.5f, buffer, MSGP_UNIT_PERCENT);
 
     lcd_lib_draw_string_center(22, buffer);
 

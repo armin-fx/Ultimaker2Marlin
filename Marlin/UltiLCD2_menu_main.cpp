@@ -10,6 +10,7 @@
 #include "UltiLCD2_menu_main.h"
 #include "UltiLCD2_menu_print.h"
 #include "UltiLCD2_menu_utils.h"
+#include "UltiLCD2_text.h"
 #include "tinkergnome.h"
 #include "machinesettings.h"
 #include "preferences.h"
@@ -370,12 +371,12 @@ static void drawPreheatSubmenu (uint8_t nr, uint8_t &flags)
         {
             lcd_lib_draw_string_leftP(5, PSTR("Start print"));
             flags |= MENU_STATUSLINE;
-            lcd_lib_clear_stringP(LCD_CHAR_MARGIN_LEFT + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, PSTR("PRINT"));
+            lcd_lib_clear_stringP(LCD_CHAR_MARGIN_LEFT + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, MSGP_MENU_PRINT);
             // lcd_lib_clear_gfx(1*LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, startGfx);
         }
         else
         {
-            lcd_lib_draw_stringP(LCD_CHAR_MARGIN_LEFT + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, PSTR("PRINT"));
+            lcd_lib_draw_stringP(LCD_CHAR_MARGIN_LEFT + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, MSGP_MENU_PRINT);
             // lcd_lib_draw_gfx(1*LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, startGfx);
         }
     }
@@ -416,12 +417,12 @@ static void drawPreheatSubmenu (uint8_t nr, uint8_t &flags)
                            , flags);
         if (flags & MENU_SELECTED)
         {
-            lcd_lib_clear_stringP(89 + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, PSTR("BACK"));
+            lcd_lib_clear_stringP(89 + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, MSGP_MENU_BACK);
             // lcd_lib_clear_gfx(86, BOTTOM_MENU_YPOS, backGfx);
         }
         else
         {
-            lcd_lib_draw_stringP(89 + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, PSTR("BACK"));
+            lcd_lib_draw_stringP(89 + LCD_CHAR_SPACING, BOTTOM_MENU_YPOS, MSGP_MENU_BACK);
             // lcd_lib_draw_gfx(86, BOTTOM_MENU_YPOS, backGfx);
         }
     }
@@ -602,7 +603,7 @@ static void lcd_main_preheat()
     uint8_t ypos = 40;
 #if TEMP_SENSOR_BED != 0
     // bed temperature
-    lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-26, ypos, PSTR("/"));
+    lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-26, ypos, MSGP_SLASH);
     int_to_string(dsp_temperature_bed, buffer, PSTR(DEGREE_SYMBOL));
     lcd_lib_draw_string_right(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-34, ypos, buffer);
     lcd_lib_draw_gfx(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-71, ypos, bedTempGfx);
@@ -611,14 +612,14 @@ static void lcd_main_preheat()
 #endif // TEMP_SENSOR_BED
 #if EXTRUDERS > 1
     // temperature second extruder
-    lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-26, ypos, PSTR("/"));
+    lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-26, ypos, MSGP_SLASH);
     int_to_string(dsp_temperature[1], buffer, PSTR(DEGREE_SYMBOL));
     lcd_lib_draw_string_right(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-34, ypos, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-70, ypos, getHeaterPower(1));
     ypos -= LCD_LINE_HEIGHT+1;
 #endif // EXTRUDERS
     // temperature first extruder
-    lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-26, ypos, PSTR("/"));
+    lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-26, ypos, MSGP_SLASH);
     int_to_string(dsp_temperature[0], buffer, PSTR(DEGREE_SYMBOL));
     lcd_lib_draw_string_right(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-34, ypos, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-70, ypos, getHeaterPower(0));
@@ -632,7 +633,7 @@ static void lcd_main_preheat()
     }
     if (!(flags & MENU_STATUSLINE))
     {
-        lcd_lib_draw_string_leftP(5, PSTR("Preheat"));
+        lcd_lib_draw_string_leftP(5, MSGP_MENU_PREHEAT);
     }
 
     lcd_lib_update_screen();
@@ -684,7 +685,7 @@ void drawMainStandard(uint8_t nr, uint8_t &flags)
                                 , LCD_LINE_HEIGHT
                                 , 52
                                 , LCD_LINE_HEIGHT*4
-                                , PSTR("PRINT")
+                                , MSGP_MENU_PRINT
                                 , ALIGN_CENTER
                                 , flags);
     }
@@ -694,7 +695,7 @@ void drawMainStandard(uint8_t nr, uint8_t &flags)
                                 , LCD_LINE_HEIGHT
                                 , 52
                                 , LCD_LINE_HEIGHT*4
-                                , PSTR("MATERIAL")
+                                , MSGP_MENU_MATERIAL
                                 , ALIGN_CENTER
                                 , flags);
     }
@@ -704,7 +705,7 @@ void drawMainStandard(uint8_t nr, uint8_t &flags)
                                 , BOTTOM_MENU_YPOS
                                 , 14*LCD_CHAR_SPACING
                                 , LCD_CHAR_HEIGHT
-                                , PSTR("MAINTENANCE")
+                                , MSGP_MENU_MAINTENANCE
                                 , ALIGN_CENTER
                                 , flags);
     }
@@ -750,7 +751,7 @@ void drawMainExpert(uint8_t nr, uint8_t &flags)
                                 , 17
                                 , 52
                                 , 13
-                                , PSTR("PREHEAT")
+                                , MSGP_MENU_PREHEAT
                                 , ALIGN_LEFT | ALIGN_VCENTER
                                 , flags);
     }
@@ -760,7 +761,7 @@ void drawMainExpert(uint8_t nr, uint8_t &flags)
                                 , 31
                                 , 52
                                 , 13
-                                , PSTR("PRINT")
+                                , MSGP_MENU_PRINT
                                 , ALIGN_LEFT | ALIGN_VCENTER
                                 , flags);
     }
@@ -770,7 +771,7 @@ void drawMainExpert(uint8_t nr, uint8_t &flags)
                                 , 45
                                 , 52
                                 , 13
-                                , PSTR("ADVANCED")
+                                , MSGP_MENU_ADVANCED
                                 , ALIGN_LEFT | ALIGN_VCENTER
                                 , flags);
     }
@@ -780,7 +781,7 @@ void drawMainExpert(uint8_t nr, uint8_t &flags)
                                 , 17
                                 , 52
                                 , 13
-                                , PSTR("SETTINGS")
+                                , MSGP_MENU_SETTINGS
                                 , ALIGN_LEFT | ALIGN_VCENTER
                                 , flags);
     }
@@ -790,7 +791,7 @@ void drawMainExpert(uint8_t nr, uint8_t &flags)
                                 , 31
                                 , 52
                                 , 13
-                                , PSTR("MOVE")
+                                , MSGP_MENU_MOVE
                                 , ALIGN_LEFT | ALIGN_VCENTER
                                 , flags);
     }
@@ -800,7 +801,7 @@ void drawMainExpert(uint8_t nr, uint8_t &flags)
                                 , 45
                                 , 52
                                 , 13
-                                , PSTR("CHANGE")
+                                , MSGP_MENU_CHANGE
                                 , ALIGN_LEFT | ALIGN_VCENTER
                                 , flags);
     }
@@ -815,8 +816,8 @@ void lcd_menu_main()
         lcd_lib_draw_vline(LCD_GFX_WIDTH/2, 5, 60);
         lcd_lib_set(0, 0, LCD_GFX_WIDTH-1, 12);
         lcd_lib_clear(LCD_GFX_WIDTH/2, 1, LCD_GFX_WIDTH/2, 12);
-        lcd_lib_clear_string_center_atP(32, 4, PSTR("START"));
-        lcd_lib_clear_string_center_atP(96, 4, PSTR("MATERIAL"));
+        lcd_lib_clear_string_center_atP(32, 4, MSGP_MENU_START);
+        lcd_lib_clear_string_center_atP(96, 4, MSGP_MENU_MATERIAL);
     }
     else
     {

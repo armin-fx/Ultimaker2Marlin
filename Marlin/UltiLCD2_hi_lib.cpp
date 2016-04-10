@@ -5,8 +5,9 @@
 #ifdef ENABLE_ULTILCD2
 #include "UltiLCD2.h"
 #include "UltiLCD2_hi_lib.h"
-#include "temperature.h"
 #include "UltiLCD2_menu_utils.h"
+#include "UltiLCD2_text.h"
+#include "temperature.h"
 
 menuFunc_t postMenuCheck;
 uint8_t minProgress;
@@ -184,7 +185,7 @@ void lcd_info_screen(menuFunc_t cancelMenu, menuFunc_t callbackOnCancel, const c
 
     lcd_basic_screen();
 
-    if (!cancelButtonText) cancelButtonText = PSTR("CANCEL");
+    if (!cancelButtonText) cancelButtonText = MSGP_MENU_CANCEL;
     if (IS_SELECTED_MAIN(0))
     {
         lcd_lib_draw_box(3+2, BOTTOM_MENU_YPOS-1, 124-2, BOTTOM_MENU_YPOS+7);
@@ -386,7 +387,7 @@ static void lcd_menu_material_reheat()
 
     char buffer[16] = {0};
     char *c = int_to_string(int(dsp_temperature[active_extruder]), buffer, PSTR("C/"));
-    int_to_string(int(target_temperature[active_extruder]), c, PSTR("C"));
+    int_to_string(int(target_temperature[active_extruder]), c, MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(24, buffer);
     // lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(active_extruder));
 
@@ -437,7 +438,7 @@ bool check_preheat()
 #if EXTRUDERS > 1
 void lcd_select_nozzle(menuFunc_t callbackOnSelect, menuFunc_t callbackOnAbort)
 {
-    lcd_tripple_menu(PSTR("EXTRUDER|1"), PSTR("EXTRUDER|2"), PSTR("RETURN"));
+    lcd_tripple_menu(PSTR("EXTRUDER|1"), PSTR("EXTRUDER|2"), MSGP_MENU_RETURN);
 
     if (lcd_lib_button_pressed)
     {

@@ -14,6 +14,7 @@
 #include "UltiLCD2_menu_first_run.h"
 #include "UltiLCD2_menu_print.h"
 #include "UltiLCD2_menu_utils.h"
+#include "UltiLCD2_text.h"
 
 static void lcd_menu_first_run_init_2();
 static void lcd_menu_first_run_init_3();
@@ -48,7 +49,7 @@ static void lcd_menu_first_run_print_card_detect();
 void lcd_menu_first_run_init()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_init_2, NULL, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_init_2, NULL, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(1);
     lcd_lib_draw_string_centerP(10, PSTR("Welcome to the first"));
     lcd_lib_draw_string_centerP(20, PSTR("startup of your"));
@@ -69,7 +70,7 @@ static void homeAndParkHeadForCenterAdjustment2()
 //Started bed leveling from the calibration menu
 void lcd_menu_first_run_start_bed_leveling()
 {
-    lcd_question_screen(lcd_menu_first_run_bed_level_center_adjust, homeAndParkHeadForCenterAdjustment2, PSTR("CONTINUE"), NULL, lcd_change_to_previous_menu, PSTR("CANCEL"));
+    lcd_question_screen(lcd_menu_first_run_bed_level_center_adjust, homeAndParkHeadForCenterAdjustment2, MSGP_MENU_CONTINUE, NULL, lcd_change_to_previous_menu, MSGP_MENU_CANCEL);
     lcd_lib_draw_string_centerP(10, PSTR("I will guide you"));
     lcd_lib_draw_string_centerP(20, PSTR("through the process"));
     lcd_lib_draw_string_centerP(30, PSTR("of adjusting your"));
@@ -88,7 +89,7 @@ static void homeAndRaiseBed()
 static void lcd_menu_first_run_init_2()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_init_3, homeAndRaiseBed, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_init_3, homeAndRaiseBed, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(2);
     lcd_lib_draw_string_centerP(10, PSTR("Because this is the"));
     lcd_lib_draw_string_centerP(20, PSTR("first startup I will"));
@@ -108,7 +109,7 @@ static void homeAndParkHeadForCenterAdjustment()
 static void lcd_menu_first_run_init_3()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_center_adjust, homeAndParkHeadForCenterAdjustment, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_bed_level_center_adjust, homeAndParkHeadForCenterAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(3);
     lcd_lib_draw_string_centerP(10, PSTR("After transportation"));
     lcd_lib_draw_string_centerP(20, PSTR("we need to do some"));
@@ -132,6 +133,16 @@ static void parkHeadForLeftAdjustment()
     enquecommand(buffer);
 }
 
+const char MSGP_BED_LEVEL_1_CENTER[] PROGMEM = {"Rotate the button"};
+const char MSGP_BED_LEVEL_2_CENTER[] PROGMEM = {"until the nozzle"};
+//
+const char MSGP_BED_LEVEL_1_LEFT[]   PROGMEM = {"Turn left buildplate"};
+const char MSGP_BED_LEVEL_1_RIGHT[]  PROGMEM = {"Turn right buildplate"};
+const char MSGP_BED_LEVEL_2[]        PROGMEM = {"screw till the nozzle"};
+//
+const char MSGP_BED_LEVEL_3[]        PROGMEM = {"is a millimeter away"};
+const char MSGP_BED_LEVEL_4[]        PROGMEM = {"from the buildplate."};
+
 static void lcd_menu_first_run_bed_level_center_adjust()
 {
     LED_GLOW
@@ -147,14 +158,14 @@ static void lcd_menu_first_run_bed_level_center_adjust()
     lcd_lib_encoder_pos = 0;
 
     if (movesplanned() > 0)
-        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
+        lcd_info_screen(NULL, NULL, MSGP_MENU_CONTINUE);
     else
-        lcd_info_screen(lcd_menu_first_run_bed_level_left_adjust, parkHeadForLeftAdjustment, PSTR("CONTINUE"));
+        lcd_info_screen(lcd_menu_first_run_bed_level_left_adjust, parkHeadForLeftAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(4);
-    lcd_lib_draw_string_centerP(10, PSTR("Rotate the button"));
-    lcd_lib_draw_string_centerP(20, PSTR("until the nozzle is"));
-    lcd_lib_draw_string_centerP(30, PSTR("a millimeter away"));
-    lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
+    lcd_lib_draw_string_centerP(10, MSGP_BED_LEVEL_1_CENTER);
+    lcd_lib_draw_string_centerP(20, MSGP_BED_LEVEL_2_CENTER);
+    lcd_lib_draw_string_centerP(30, MSGP_BED_LEVEL_3);
+    lcd_lib_draw_string_centerP(40, MSGP_BED_LEVEL_4);
     lcd_lib_update_screen();
 }
 
@@ -174,12 +185,12 @@ static void lcd_menu_first_run_bed_level_left_adjust()
     LED_GLOW
     SELECT_MAIN_MENU_ITEM(0);
 
-    lcd_info_screen(lcd_menu_first_run_bed_level_right_adjust, parkHeadForRightAdjustment, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_bed_level_right_adjust, parkHeadForRightAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(5);
-    lcd_lib_draw_string_centerP(10, PSTR("Turn left buildplate"));
-    lcd_lib_draw_string_centerP(20, PSTR("screw till the nozzle"));
-    lcd_lib_draw_string_centerP(30, PSTR("is a millimeter away"));
-    lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
+    lcd_lib_draw_string_centerP(10, MSGP_BED_LEVEL_1_LEFT);
+    lcd_lib_draw_string_centerP(20, MSGP_BED_LEVEL_2);
+    lcd_lib_draw_string_centerP(30, MSGP_BED_LEVEL_3);
+    lcd_lib_draw_string_centerP(40, MSGP_BED_LEVEL_4);
 
     lcd_lib_update_screen();
 }
@@ -188,12 +199,12 @@ static void lcd_menu_first_run_bed_level_right_adjust()
 {
     LED_GLOW
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper, NULL, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_bed_level_paper, NULL, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(6);
-    lcd_lib_draw_string_centerP(10, PSTR("Turn right buildplate"));
-    lcd_lib_draw_string_centerP(20, PSTR("screw till the nozzle"));
-    lcd_lib_draw_string_centerP(30, PSTR("is a millimeter away"));
-    lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
+    lcd_lib_draw_string_centerP(10, MSGP_BED_LEVEL_1_RIGHT);
+    lcd_lib_draw_string_centerP(20, MSGP_BED_LEVEL_2);
+    lcd_lib_draw_string_centerP(30, MSGP_BED_LEVEL_3);
+    lcd_lib_draw_string_centerP(40, MSGP_BED_LEVEL_4);
 
     lcd_lib_update_screen();
 }
@@ -212,7 +223,7 @@ static void parkHeadForCenterAdjustment()
 static void lcd_menu_first_run_bed_level_paper()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper_center, parkHeadForCenterAdjustment, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_bed_level_paper_center, parkHeadForCenterAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(7);
     lcd_lib_draw_string_centerP(10, PSTR("Repeat this step, but"));
     lcd_lib_draw_string_centerP(20, PSTR("now use a sheet of"));
@@ -236,9 +247,9 @@ static void lcd_menu_first_run_bed_level_paper_center()
     }
 
     if (movesplanned() > 0)
-        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
+        lcd_info_screen(NULL, NULL, MSGP_MENU_CONTINUE);
     else
-        lcd_info_screen(lcd_menu_first_run_bed_level_paper_left, parkHeadForLeftAdjustment, PSTR("CONTINUE"));
+        lcd_info_screen(lcd_menu_first_run_bed_level_paper_left, parkHeadForLeftAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(8);
     lcd_lib_draw_string_centerP(10, PSTR("Slide a paper between"));
     lcd_lib_draw_string_centerP(20, PSTR("buildplate and nozzle"));
@@ -252,7 +263,7 @@ static void lcd_menu_first_run_bed_level_paper_left()
     LED_GLOW
 
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper_right, parkHeadForRightAdjustment, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_bed_level_paper_right, parkHeadForRightAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(9);
     lcd_lib_draw_string_centerP(20, PSTR("Repeat this for"));
     lcd_lib_draw_string_centerP(30, PSTR("the left corner..."));
@@ -289,9 +300,9 @@ static void lcd_menu_first_run_bed_level_paper_right()
 
     SELECT_MAIN_MENU_ITEM(0);
     if (IS_FIRST_RUN_DONE())
-        lcd_info_screen(lcd_menu_first_run_material_select_1, lcd_menu_first_run_bed_level_done, PSTR("CONTINUE"));
+        lcd_info_screen(lcd_menu_first_run_material_select_1, lcd_menu_first_run_bed_level_done, MSGP_MENU_CONTINUE);
     else
-        lcd_info_screen(lcd_menu_first_run_material_load, storeBedLeveling, PSTR("CONTINUE"));
+        lcd_info_screen(lcd_menu_first_run_material_load, storeBedLeveling, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(10);
     lcd_lib_draw_string_centerP(20, PSTR("Repeat this for"));
     lcd_lib_draw_string_centerP(30, PSTR("the right corner..."));
@@ -311,7 +322,7 @@ static void parkHeadForHeating()
 static void lcd_menu_first_run_material_load()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_material_load_heatup, parkHeadForHeating, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_material_load_heatup, parkHeadForHeating, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR(11);
     lcd_lib_draw_string_centerP(10, PSTR("Now that we leveled"));
     lcd_lib_draw_string_centerP(20, PSTR("the buildplate"));
@@ -384,7 +395,7 @@ static void lcd_menu_first_run_material_load_insert()
     }
 
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_material_load_forward, runMaterialForward, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_material_load_forward, runMaterialForward, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR(13);
     lcd_lib_draw_string_centerP(10, PSTR("Insert new material"));
     lcd_lib_draw_string_centerP(20, PSTR("from the rear of"));
@@ -420,7 +431,7 @@ static void lcd_menu_first_run_material_load_wait()
 {
     LED_GLOW
 
-    lcd_info_screen(lcd_menu_first_run_material_select_1, doCooldown, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_material_select_1, doCooldown, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR(15);
     lcd_lib_draw_string_centerP(10, PSTR("Push button when"));
     lcd_lib_draw_string_centerP(20, PSTR("material exits"));
@@ -448,7 +459,7 @@ static void lcd_menu_first_run_material_select_1()
         return;
     }
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_material_select_material, doCooldown, PSTR("READY"));
+    lcd_info_screen(lcd_menu_first_run_material_select_material, doCooldown, MSGP_MENU_READY);
     DRAW_PROGRESS_NR(16);
     lcd_lib_draw_string_centerP(10, PSTR("Next, select the"));
     lcd_lib_draw_string_centerP(20, PSTR("material you have"));
@@ -474,7 +485,7 @@ static void lcd_menu_first_run_material_select_material()
 {
     LED_GLOW
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
-    lcd_scroll_menu(PSTR("MATERIAL"), count, lcd_material_select_callback, lcd_material_select_details_callback);
+    lcd_scroll_menu(MSGP_MENU_MATERIAL, count, lcd_material_select_callback, lcd_material_select_details_callback);
     CLEAR_PROGRESS_NR(17);
     lcd_lib_update_screen();
 
@@ -494,7 +505,7 @@ static void lcd_menu_first_run_material_select_material()
 static void lcd_menu_first_run_material_select_confirm_material()
 {
     LED_GLOW
-    lcd_question_screen(lcd_menu_first_run_material_select_2, lcd_remove_menu, PSTR("YES"), lcd_menu_first_run_material_select_material, lcd_remove_menu, PSTR("NO"));
+    lcd_question_screen(lcd_menu_first_run_material_select_2, lcd_remove_menu, MSGP_MENU_YES, lcd_menu_first_run_material_select_material, lcd_remove_menu, MSGP_MENU_NO);
     DRAW_PROGRESS_NR(18);
     lcd_lib_draw_string_centerP(20, PSTR("You have chosen"));
     lcd_lib_draw_string_center(30, LCD_CACHE_FILENAME(0));
@@ -505,7 +516,7 @@ static void lcd_menu_first_run_material_select_confirm_material()
 static void lcd_menu_first_run_material_select_2()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_print_1, NULL, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_print_1, NULL, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR(19);
     lcd_lib_draw_string_centerP(10, PSTR("Now your Ultimaker2"));
     lcd_lib_draw_string_centerP(20, PSTR("knows what kind"));
@@ -542,7 +553,7 @@ static void lcd_menu_first_run_print_card_detect()
     {
         lcd_info_screen(NULL, lcd_return_to_main_menu);
         DRAW_PROGRESS_NR(21);
-        lcd_lib_draw_string_centerP(30, PSTR("Reading card..."));
+        lcd_lib_draw_string_centerP(30, MSGP_READING_CARD);
         lcd_lib_update_screen();
         card.initsd();
         return;

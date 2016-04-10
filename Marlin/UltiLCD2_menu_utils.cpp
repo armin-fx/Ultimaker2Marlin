@@ -2,6 +2,7 @@
 #include "Configuration.h"
 #ifdef ENABLE_ULTILCD2
 #include "preferences.h"
+#include "UltiLCD2_text.h"
 #include "UltiLCD2_menu_utils.h"
 #include "UltiLCD2_hi_lib.h"
 #include "UltiLCD2.h"
@@ -643,7 +644,7 @@ void lcd_menu_no_sdcard()
 void lcd_menu_reading_card()
 {
     lcd_info_screen(NULL, lcd_change_to_previous_menu);
-    lcd_lib_draw_string_centerP(16, PSTR("Reading card..."));
+    lcd_lib_draw_string_centerP(16, MSGP_READING_CARD);
     lcd_lib_update_screen();
     card.initsd();
 }

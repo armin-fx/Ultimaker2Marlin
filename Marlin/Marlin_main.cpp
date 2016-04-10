@@ -31,6 +31,7 @@
 
 #include "ultralcd.h"
 #include "UltiLCD2.h"
+#include "UltiLCD2_text.h"
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
@@ -1092,7 +1093,7 @@ void process_command(const char *strCmd)
       if (printing_state == PRINT_STATE_RECOVER)
         break;
 
-      serial_action_P(PSTR("pause"));
+      serial_action_P(MSGP_PAUSE);
       LCD_MESSAGEPGM(MSG_DWELL);
       codenum = 0;
       if(code_seen(strCmd, 'P')) codenum = code_value(); // milliseconds to wait
@@ -1106,7 +1107,7 @@ void process_command(const char *strCmd)
       {
           idle();
       }
-      serial_action_P(PSTR("resume"));
+      serial_action_P(MSGP_RESUME);
 
       break;
       #ifdef FWRETRACT
@@ -1363,7 +1364,7 @@ void process_command(const char *strCmd)
       printing_state = PRINT_STATE_WAIT_USER;
       LCD_MESSAGEPGM(MSG_USERWAIT);
 
-      serial_action_P(PSTR("pause"));
+      serial_action_P(MSGP_PAUSE);
 
       codenum = 0;
       if(code_seen(strCmd, 'P')) codenum = code_value(); // milliseconds to wait
@@ -1381,7 +1382,7 @@ void process_command(const char *strCmd)
           idle();
         }
       }
-      serial_action_P(PSTR("resume"));
+      serial_action_P(MSGP_RESUME);
       LCD_MESSAGEPGM(MSG_RESUMING);
     }
     break;
@@ -1393,13 +1394,13 @@ void process_command(const char *strCmd)
         if (printing_state == PRINT_STATE_RECOVER)
           break;
 
-        serial_action_P(PSTR("pause"));
+        serial_action_P(MSGP_PAUSE);
         card.pause = true;
         while(card.pause)
         {
           idle();
         }
-        serial_action_P(PSTR("resume"));
+        serial_action_P(MSGP_RESUME);
     }
     break;
 #endif
@@ -2412,7 +2413,7 @@ void process_command(const char *strCmd)
         if (printing_state == PRINT_STATE_RECOVER)
           break;
 
-        serial_action_P(PSTR("pause"));
+        serial_action_P(MSGP_PAUSE);
 
         st_synchronize();
         float target[4];
@@ -2488,7 +2489,7 @@ void process_command(const char *strCmd)
             current_position[Z_AXIS] = lastpos[Z_AXIS];
             current_position[E_AXIS] = lastpos[E_AXIS];
         }
-        serial_action_P(PSTR("resume"));
+        serial_action_P(MSGP_RESUME);
     }
     break;
 
