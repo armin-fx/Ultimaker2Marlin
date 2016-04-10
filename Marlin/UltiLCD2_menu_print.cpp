@@ -146,9 +146,12 @@ void doStartPrint()
     plan_set_e_position(0);
 
 	// since we are going to prime the nozzle, forget about any G10/G11 retractions that happened at end of previous print
-	retracted = false;
+	for (int i=0; i<EXTRUDERS; ++i) retracted[i]=false;
 	primed = false;
 	position_error = false;
+#ifdef PREVENT_FILAMENT_GRIND
+    filament_grab_init();
+#endif
 
     for(uint8_t e = 0; e<EXTRUDERS; e++)
     {
@@ -468,22 +471,13 @@ void lcd_menu_print_select()
 {
     if (!card.sdInserted)
     {
-        LED_GLOW
-        lcd_lib_encoder_pos = MAIN_MENU_ITEM_POS(0);
-        lcd_info_screen(NULL, lcd_change_to_previous_menu);
-        lcd_lib_draw_string_centerP(15, PSTR("No SD-CARD!"));
-        lcd_lib_draw_string_centerP(25, PSTR("Please insert card"));
-        lcd_lib_update_screen();
-        card.release();
+        lcd_menu_no_sdcard();
         return;
     }
     if (!card.isOk())
     {
-        lcd_info_screen(NULL, lcd_change_to_previous_menu);
-        lcd_lib_draw_string_centerP(16, PSTR("Reading card..."));
-        lcd_lib_update_screen();
+        lcd_menu_reading_card();
         lcd_clear_cache();
-        card.initsd();
         return;
     }
 
@@ -568,9 +562,7 @@ void lcd_menu_print_select()
                         extrudemultiply[e] = 100;
                         e_smoothed_speed[e] = 0.0f;
                     }
-#ifdef PREVENT_FILAMENT_GRIND
-                    filament_grab_init();
-#endif
+
                     if (strncmp_P(buffer, PSTR(";FLAVOR:UltiGCode"), 17) == 0)
                     {
                         //New style GCode flavor without start/end code.
@@ -1198,7 +1190,7 @@ static void lcd_retraction_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 #endif
 #ifdef PREVENT_FILAMENT_GRIND
 	else if(nr == item++)
-		strcpy_P(buffer, PSTR("Filament grab max"));
+		strcpy_P(buffer, PSTR("Filament grab count"));
 	else if(nr == item++)
 		strcpy_P(buffer, PSTR("Retract length min"));
 #endif

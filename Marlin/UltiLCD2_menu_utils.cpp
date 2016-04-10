@@ -629,4 +629,23 @@ void lcd_lib_draw_heater(uint8_t x, uint8_t y, uint8_t heaterPower)
     }
 }
 
+void lcd_menu_no_sdcard()
+{
+    LED_GLOW
+    lcd_lib_encoder_pos = MAIN_MENU_ITEM_POS(0);
+    lcd_info_screen(NULL, lcd_change_to_previous_menu);
+    lcd_lib_draw_string_centerP(15, PSTR("No SD-CARD!"));
+    lcd_lib_draw_string_centerP(25, PSTR("Please insert card"));
+    lcd_lib_update_screen();
+    card.release();
+}
+
+void lcd_menu_reading_card()
+{
+    lcd_info_screen(NULL, lcd_change_to_previous_menu);
+    lcd_lib_draw_string_centerP(16, PSTR("Reading card..."));
+    lcd_lib_update_screen();
+    card.initsd();
+}
+
 #endif

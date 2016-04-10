@@ -227,7 +227,7 @@ extern unsigned char fanSpeedSoftPwm;
 
 #ifdef FWRETRACT
 extern bool autoretract_enabled;
-extern bool retracted;
+extern bool retracted[EXTRUDERS];
 extern float retract_length, retract_feedrate, retract_zlift;
 #ifdef PREVENT_FILAMENT_GRIND
 extern float retract_length_min;
@@ -244,7 +244,7 @@ inline bool is_prevent_filament_grind()  {return filament_grab_max != 0;}
 #if EXTRUDERS > 1
 extern float extruder_swap_retract_length;
 #endif
-extern float retract_recover_length, retract_recover_feedrate;
+extern float retract_recover_length[EXTRUDERS], retract_recover_length_surplus, retract_recover_feedrate;
 #endif
 
 extern unsigned long starttime;

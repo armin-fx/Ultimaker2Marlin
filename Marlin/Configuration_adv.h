@@ -338,7 +338,9 @@ const int8_t dropsegments=5; //everything with less than this number of steps wi
 #define DEFAULT_RETRACT_LENGHT_MIN 2.0
 // default filament retract lenght
 #define DEFAULT_RETRACT_LENGHT     4.5
-#define DEFAULT_RETRACT_FEEDRATE (25 * 60)
+#define DEFAULT_RETRACT_FEEDRATE   (25 * 60)
+#define DEFAULT_UNRETRACT_FEEDRATE (25 * 60)
+#define DEFAULT_RETRACT_ZLIFT      0.8
 
 //adds support for experimental filament exchange support M600; requires display
 #ifdef ULTIPANEL

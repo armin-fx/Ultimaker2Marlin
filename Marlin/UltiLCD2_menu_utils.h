@@ -171,4 +171,7 @@ void lcd_progressline(uint8_t progress);
 void lcd_lib_draw_bargraph( uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, float value );
 void lcd_lib_draw_heater(uint8_t x, uint8_t y, uint8_t heaterPower);
 
+void lcd_menu_no_sdcard();
+void lcd_menu_reading_card();
+
 #endif

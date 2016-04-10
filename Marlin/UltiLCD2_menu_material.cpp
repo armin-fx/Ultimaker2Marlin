@@ -482,25 +482,18 @@ static void lcd_menu_material_export_done()
     lcd_lib_update_screen();
 }
 
+
 static void lcd_menu_material_export()
 {
+    const char* newline_P = PSTR("\n");
     if (!card.sdInserted)
     {
-        LED_GLOW
-        lcd_lib_encoder_pos = MAIN_MENU_ITEM_POS(0);
-        lcd_info_screen(NULL, lcd_change_to_previous_menu);
-        lcd_lib_draw_string_centerP(15, PSTR("No SD-CARD!"));
-        lcd_lib_draw_string_centerP(25, PSTR("Please insert card"));
-        lcd_lib_update_screen();
-        card.release();
+        lcd_menu_no_sdcard();
         return;
     }
     if (!card.isOk())
     {
-        lcd_info_screen(NULL, lcd_change_to_previous_menu);
-        lcd_lib_draw_string_centerP(16, PSTR("Reading card..."));
-        lcd_lib_update_screen();
-        card.initsd();
+        lcd_menu_reading_card();
         return;
     }
 
@@ -517,48 +510,48 @@ static void lcd_menu_material_export()
         char* ptr = buffer + strlen(buffer);
         eeprom_read_block(ptr, EEPROM_MATERIAL_NAME_OFFSET(n), MATERIAL_NAME_SIZE);
         ptr[MATERIAL_NAME_SIZE] = '\0';
-        strcat_P(buffer, PSTR("\n"));
+        strcat_P(buffer, newline_P);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("temperature="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(n)), ptr, PSTR("\n"));
+        int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(n)), ptr, newline_P);
         card.write_string(buffer);
 
         for(uint8_t nozzle=0; nozzle<MATERIAL_TEMPERATURE_COUNT; ++nozzle)
         {
             strcpy_P(buffer, PSTR("temperature_"));
             ptr = float_to_string2(nozzleIndexToNozzleSize(nozzle), buffer + strlen(buffer), PSTR("="));
-            int_to_string(eeprom_read_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(n, nozzle)), ptr, PSTR("\n"));
+            int_to_string(eeprom_read_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(n, nozzle)), ptr, newline_P);
             card.write_string(buffer);
         }
 
 #if TEMP_SENSOR_BED != 0
         strcpy_P(buffer, PSTR("bed_temperature="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(n)), ptr, PSTR("\n"));
+        int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(n)), ptr, newline_P);
         card.write_string(buffer);
 #endif
 
         strcpy_P(buffer, PSTR("fan_speed="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(n)), ptr, PSTR("\n"));
+        int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(n)), ptr, newline_P);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("flow="));
         ptr = buffer + strlen(buffer);
-        int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(n)), ptr, PSTR("\n"));
+        int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(n)), ptr, newline_P);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("diameter="));
         ptr = buffer + strlen(buffer);
-        float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(n)), ptr, PSTR("\n"));
+        float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(n)), ptr, newline_P);
         card.write_string(buffer);
 
 #ifdef USE_CHANGE_TEMPERATURE
         strcpy_P(buffer, PSTR("change_temp="));
         ptr = buffer + strlen(buffer);
-        float_to_string2(eeprom_read_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(n)), ptr, PSTR("\n"));
+        float_to_string2(eeprom_read_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(n)), ptr, newline_P);
         card.write_string(buffer);
 
         strcpy_P(buffer, PSTR("change_wait="));
@@ -584,21 +577,12 @@ static void lcd_menu_material_import()
 {
     if (!card.sdInserted)
     {
-        LED_GLOW
-        lcd_lib_encoder_pos = MAIN_MENU_ITEM_POS(0);
-        lcd_info_screen(NULL, lcd_change_to_previous_menu);
-        lcd_lib_draw_string_centerP(15, PSTR("No SD-CARD!"));
-        lcd_lib_draw_string_centerP(25, PSTR("Please insert card"));
-        lcd_lib_update_screen();
-        card.release();
+        lcd_menu_no_sdcard();
         return;
     }
     if (!card.isOk())
     {
-        lcd_info_screen(NULL, lcd_change_to_previous_menu);
-        lcd_lib_draw_string_centerP(16, PSTR("Reading card..."));
-        lcd_lib_update_screen();
-        card.initsd();
+        lcd_menu_reading_card();
         return;
     }
 
