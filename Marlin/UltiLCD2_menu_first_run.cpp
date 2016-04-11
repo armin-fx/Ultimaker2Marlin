@@ -158,7 +158,7 @@ static void lcd_menu_first_run_bed_level_center_adjust()
     lcd_lib_encoder_pos = 0;
 
     if (blocks_queued())
-        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
+        lcd_info_screen(NULL, NULL, MSGP_MENU_CONTINUE);
     else
         lcd_info_screen(lcd_menu_first_run_bed_level_left_adjust, parkHeadForLeftAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(4);
@@ -247,7 +247,7 @@ static void lcd_menu_first_run_bed_level_paper_center()
     }
 
     if (blocks_queued())
-        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
+        lcd_info_screen(NULL, NULL, MSGP_MENU_CONTINUE);
     else
         lcd_info_screen(lcd_menu_first_run_bed_level_paper_left, parkHeadForLeftAdjustment, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(8);
