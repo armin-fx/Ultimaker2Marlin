@@ -569,7 +569,8 @@ void lcd_menu_print_select()
                         //New style GCode flavor without start/end code.
                         // Temperature settings, filament settings, fan settings, start and end-code are machine controlled.
 #if TEMP_SENSOR_BED != 0
-                        target_temperature_bed = 0;
+                        target_temperature_bed      = 0;
+                        target_temperature_bed_next = 0;
 #endif
                         fanSpeedPercent = 0;
                         for(uint8_t e=0; e<EXTRUDERS; ++e)
@@ -590,7 +591,8 @@ void lcd_menu_print_select()
 
                             target_temperature[e] = 0;//material[e].temperature;
 #if TEMP_SENSOR_BED != 0
-                            target_temperature_bed = max(target_temperature_bed, material[e].bed_temperature);
+                            target_temperature_bed      = max(target_temperature_bed,      material[e].bed_temperature_first_layer);
+                            target_temperature_bed_next = max(target_temperature_bed_next, material[e].bed_temperature);
 #endif
                             fanSpeedPercent = max(fanSpeedPercent, material[e].fan_speed);
                             volume_to_filament_length[e] = 1.0 / (M_PI * (material[e].diameter / 2.0) * (material[e].diameter / 2.0));
@@ -633,6 +635,9 @@ void lcd_menu_print_select()
                     else
                     {
                         //Classic gcode file
+#if TEMP_SENSOR_BED != 0 
+                        CheckFirstLayerOff();
+#endif
                         menu.add_menu(menu_t(lcd_menu_print_classic_warning, MAIN_MENU_ITEM_POS(0)));
                     }
                 }
@@ -985,7 +990,7 @@ static void tune_item_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 #if EXTRUDERS > 1
         strcpy_P(buffer, PSTR("Temperature 1"));
 #else
-        strcpy_P(buffer, PSTR("Temperature"));
+        strcpy_P(buffer, MSGP_TEMPERATURE);
 #endif
 #if EXTRUDERS > 1
     else if (index++ == nr)
@@ -993,19 +998,21 @@ static void tune_item_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 #endif
 #if TEMP_SENSOR_BED != 0
     else if (index++ == nr)
-        strcpy_P(buffer, PSTR("Buildplate temp."));
+        strcpy_P(buffer, MSGP_BUILDPLATE_TEMPERATURE);
+    else if (index++ == nr)
+        strcpy_P(buffer, MSGP_BUILDPLATE_TEMPERATURE_NEXT);
 #endif
     else if (index++ == nr)
-        strcpy_P(buffer, PSTR("Fan speed"));
+        strcpy_P(buffer, MSGP_FAN_SPEED);
     else if (index++ == nr)
 #if EXTRUDERS > 1
-        strcpy_P(buffer, PSTR("Material flow 1"));
+        strcpy_P(buffer, MSGP_MATERIAL_FLOW_1);
 #else
-        strcpy_P(buffer, PSTR("Material flow"));
+        strcpy_P(buffer, MSGP_MATERIAL_FLOW);
 #endif
 #if EXTRUDERS > 1
     else if (index++ == nr)
-        strcpy_P(buffer, PSTR("Material flow 2"));
+        strcpy_P(buffer, MSGP_MATERIAL_FLOW_2);
 #endif
     else if (index++ == nr)
         strcpy_P(buffer, PSTR("Retraction"));
@@ -1041,16 +1048,23 @@ static void tune_item_details_callback(uint8_t nr)
     {
         int_to_string(target_temperature_bed, int_to_string(dsp_temperature_bed, buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
     }
+    else if (nr == 3 + EXTRUDERS)
+    {
+        if (isCheckFirstLayer())
+            int_to_string(target_temperature_bed_next, buffer, MSGP_UNIT_CELSIUS);
+        else
+            strcpy_P(buffer, MSGP_OFF_BY_0);
+    }
 #endif
-    else if (nr == 2 + BED_MENU_OFFSET + EXTRUDERS)
+    else if (nr == 2 + 2*BED_MENU_OFFSET + EXTRUDERS)
         int_to_string(int(fanSpeed) * 100 / 255, buffer, MSGP_UNIT_PERCENT);
-    else if (nr == 3 + BED_MENU_OFFSET + EXTRUDERS)
+    else if (nr == 3 + 2*BED_MENU_OFFSET + EXTRUDERS)
         int_to_string(extrudemultiply[0], buffer, MSGP_UNIT_PERCENT);
 #if EXTRUDERS > 1
-    else if (nr == 4 + BED_MENU_OFFSET + EXTRUDERS)
+    else if (nr == 4 + 2*BED_MENU_OFFSET + EXTRUDERS)
         int_to_string(extrudemultiply[1], buffer, MSGP_UNIT_PERCENT);
 #endif
-    else if (nr == 4 + BED_MENU_OFFSET + 2*EXTRUDERS)
+    else if (nr == 4 + 2*BED_MENU_OFFSET + 2*EXTRUDERS)
     {
         int_to_string(led_brightness_level, buffer, MSGP_UNIT_PERCENT);
 //        if (led_mode == LED_MODE_ALWAYS_ON || led_mode == LED_MODE_WHILE_PRINTING || led_mode == LED_MODE_BLINK_ON_DONE)
@@ -1139,7 +1153,7 @@ void lcd_menu_print_tune()
         if (IS_SELECTED_SCROLL(index++))
             menu.return_to_previous();
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING(feedmultiply, "Print speed", "%", 10, 1000);
+            LCD_EDIT_SETTING_P(feedmultiply, PSTR("Print speed"), MSGP_UNIT_PERCENT, 10, 1000);
         else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_print_tune_heatup_nozzle0, 0));
 #if EXTRUDERS > 1
@@ -1148,23 +1162,25 @@ void lcd_menu_print_tune()
 #endif
 #if TEMP_SENSOR_BED != 0
         else if (IS_SELECTED_SCROLL(index++))
-            menu.add_menu(menu_t(lcd_menu_maintenance_advanced_bed_heatup, 0));//Use the maintainace heatup menu, which shows the current temperature.
+            menu.add_menu(menu_t(lcd_menu_maintenance_advanced_bed_heatup, 0));//Use the maintainance heatup menu, which shows the current temperature.
+        else if (IS_SELECTED_SCROLL(index++))
+            LCD_EDIT_SETTING_OFF_P(target_temperature_bed_next, MSGP_BUILDPLATE_TEMPERATURE_NEXT, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15);
 #endif
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING_BYTE_PERCENT(fanSpeed, "Fan speed", "%", 0, 100);
+            LCD_EDIT_SETTING_BYTE_PERCENT_P(fanSpeed, MSGP_FAN_SPEED, MSGP_UNIT_PERCENT, 0, 100);
 #if EXTRUDERS > 1
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING(extrudemultiply[0], "Material flow 1", "%", 10, 1000);
+            LCD_EDIT_SETTING_P(extrudemultiply[0], MSGP_MATERIAL_FLOW_1, MSGP_UNIT_PERCENT, 10, 1000);
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING(extrudemultiply[1], "Material flow 2", "%", 10, 1000);
+            LCD_EDIT_SETTING_P(extrudemultiply[1], MSGP_MATERIAL_FLOW_2, MSGP_UNIT_PERCENT, 10, 1000);
 #else
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING(extrudemultiply[0], "Material flow", "%", 10, 1000);
+            LCD_EDIT_SETTING_P(extrudemultiply[0], MSGP_MATERIAL_FLOW, MSGP_UNIT_PERCENT, 10, 1000);
 #endif
         else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_print_tune_retraction, 0));
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING(led_brightness_level, "Brightness", "%", 0, 100);
+            LCD_EDIT_SETTING_P(led_brightness_level, MSGP_MATERIAL_FLOW, MSGP_UNIT_PERCENT, 0, 100);
         else if ((ui_mode & UI_MODE_EXPERT) && card.sdprinting && card.pause && IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(NULL, lcd_menu_expert_extrude, lcd_extrude_quit_menu, 0)); // Move material
         else if ((ui_mode & UI_MODE_EXPERT) && IS_SELECTED_SCROLL(index++))
@@ -1208,7 +1224,7 @@ static void lcd_retraction_details(uint8_t nr)
     if(nr == item++)
         float_to_string2(retract_length, buffer, MSGP_UNIT_MM);
     else if(nr == item++)
-        int_to_string(retract_feedrate / 60 + 0.5, buffer, PSTR("mm/sec"));
+        int_to_string(retract_feedrate / 60 + 0.5, buffer, MSGP_UNIT_MM_PER_SECOND2);
     else if(nr == item++)
         float_to_string2(end_of_print_retraction, buffer, MSGP_UNIT_MM);
 #if EXTRUDERS > 1
@@ -1220,7 +1236,7 @@ static void lcd_retraction_details(uint8_t nr)
 		if (is_prevent_filament_grind())
 			int_to_string(filament_grab_max, buffer, PSTR(""));
 		else
-			strcpy_P(buffer, PSTR("0 - off"));
+			strcpy_P(buffer, MSGP_OFF_BY_0);
 	else if(nr == item++)
 		float_to_string2(retract_length_min, buffer, MSGP_UNIT_MM);
 #endif
@@ -1238,20 +1254,20 @@ static void lcd_menu_print_tune_retraction()
         if (IS_SELECTED_SCROLL(item++))
             menu.return_to_previous();
         else if (IS_SELECTED_SCROLL(item++))
-            LCD_EDIT_SETTING_FLOAT001(retract_length, "Retract length", "mm", 0, 50);
+            LCD_EDIT_SETTING_FLOAT001_P(retract_length, MSGP_RETRACT_LENGTH, MSGP_UNIT_MM, 0, 50);
         else if (IS_SELECTED_SCROLL(item++))
-            LCD_EDIT_SETTING_SPEED(retract_feedrate, "Retract speed", "mm/sec", 0, max_feedrate[E_AXIS] * 60);
+            LCD_EDIT_SETTING_SPEED_P(retract_feedrate, MSGP_RETRACT_SPEED, MSGP_UNIT_MM_PER_SECOND2, 0, max_feedrate[E_AXIS] * 60);
         else if (IS_SELECTED_SCROLL(item++))
-            LCD_EDIT_SETTING_FLOAT001(end_of_print_retraction, "End of print retract", "mm", 0, 50);
+            LCD_EDIT_SETTING_FLOAT001_P(end_of_print_retraction, PSTR("End of print retract"), MSGP_UNIT_MM, 0, 50);
 #if EXTRUDERS > 1
         else if (IS_SELECTED_SCROLL(item++))
-            LCD_EDIT_SETTING_FLOAT001(extruder_swap_retract_length, "Extruder change", "mm", 0, 50);
+            LCD_EDIT_SETTING_FLOAT001_P(extruder_swap_retract_length, MSGP_EXTRUDER_CHANGE, MSGP_UNIT_MM, 0, 50);
 #endif
 #ifdef PREVENT_FILAMENT_GRIND
 		else if (IS_SELECTED_SCROLL(item++))
-			LCD_EDIT_SETTING(filament_grab_max, "Filament grab count", "", 0, MAX_FILAMENT_MAX_GRAB);
+			LCD_EDIT_SETTING_OFF_P(filament_grab_max, MSGP_FILAMENT_GRAB_COUNT, PSTR(""), 0, MAX_FILAMENT_MAX_GRAB);
 		else if (IS_SELECTED_SCROLL(item++))
-			LCD_EDIT_SETTING_FLOAT001(retract_length_min, "Retract length min", "mm", 0, retract_length);
+			LCD_EDIT_SETTING_FLOAT001_P(retract_length_min, MSGP_RETRACT_LENGTH_MIN, MSGP_UNIT_MM, 0, retract_length);
 #endif
     }
     lcd_lib_update_screen();

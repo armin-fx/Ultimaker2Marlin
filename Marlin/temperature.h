@@ -37,7 +37,9 @@ extern int target_temperature[EXTRUDERS];
 extern float current_temperature[EXTRUDERS];
 #if TEMP_SENSOR_BED != 0
 extern int target_temperature_bed;
+extern int target_temperature_bed_next;
 extern float current_temperature_bed;
+extern float first_layer_last_z;
 #endif
 #ifdef TEMP_SENSOR_1_AS_REDUNDANT
   extern float redundant_temperature;
@@ -85,6 +87,14 @@ FORCE_INLINE bool isHeatingBed() {
 
 FORCE_INLINE bool isCoolingBed() {
   return target_temperature_bed < current_temperature_bed;
+}
+
+FORCE_INLINE bool isCheckFirstLayer() {
+	return target_temperature_bed_next != 0;
+}
+
+FORCE_INLINE void CheckFirstLayerOff() {
+	target_temperature_bed_next = 0;
 }
 #endif // TEMP_SENSOR_BED
 

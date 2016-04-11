@@ -45,30 +45,42 @@ extern int16_t lcd_setting_start_value;
 extern menuFunc_t postMenuCheck;
 extern uint8_t minProgress;
 
-#define LCD_EDIT_SETTING(_setting, _name, _postfix, _min, _max) do { \
+#define LCD_SETTINGS_TYPE_OFF_OFFSET 16
+
+#define LCD_EDIT_SETTING_P(_setting, _name, _postfix, _min, _max) do { \
             menu.add_menu(menu_t(lcd_menu_edit_setting)); \
-            lcd_setting_name = PSTR(_name); \
-            lcd_setting_postfix = PSTR(_postfix); \
+            lcd_setting_name = _name; \
+            lcd_setting_postfix = _postfix; \
             lcd_setting_ptr = &_setting; \
             lcd_setting_type = sizeof(_setting); \
             lcd_setting_start_value = lcd_lib_encoder_pos = _setting; \
             lcd_setting_min = _min; \
             lcd_setting_max = _max; \
         } while(0)
-#define LCD_EDIT_SETTING_BYTE_PERCENT(_setting, _name, _postfix, _min, _max) do { \
+#define LCD_EDIT_SETTING_OFF_P(_setting, _name, _postfix, _min, _max) do { \
             menu.add_menu(menu_t(lcd_menu_edit_setting)); \
-            lcd_setting_name = PSTR(_name); \
-            lcd_setting_postfix = PSTR(_postfix); \
+            lcd_setting_name = _name; \
+            lcd_setting_postfix = _postfix; \
+            lcd_setting_ptr = &_setting; \
+            lcd_setting_type = sizeof(_setting) + LCD_SETTINGS_TYPE_OFF_OFFSET; \
+            lcd_setting_start_value = lcd_lib_encoder_pos = _setting; \
+            lcd_setting_min = _min; \
+            lcd_setting_max = _max; \
+        } while(0)
+#define LCD_EDIT_SETTING_BYTE_PERCENT_P(_setting, _name, _postfix, _min, _max) do { \
+            menu.add_menu(menu_t(lcd_menu_edit_setting)); \
+            lcd_setting_name = _name; \
+            lcd_setting_postfix = _postfix; \
             lcd_setting_ptr = &_setting; \
             lcd_setting_type = 5; \
             lcd_setting_start_value = lcd_lib_encoder_pos = int(_setting) * 100 / 255; \
             lcd_setting_min = _min; \
             lcd_setting_max = _max; \
         } while(0)
-#define LCD_EDIT_SETTING_FLOAT001(_setting, _name, _postfix, _min, _max) do { \
+#define LCD_EDIT_SETTING_FLOAT001_P(_setting, _name, _postfix, _min, _max) do { \
             menu.add_menu(menu_t(lcd_menu_edit_setting)); \
-            lcd_setting_name = PSTR(_name); \
-            lcd_setting_postfix = PSTR(_postfix); \
+            lcd_setting_name = _name; \
+            lcd_setting_postfix = _postfix; \
             lcd_setting_ptr = &_setting; \
             lcd_setting_type = 3; \
             lcd_setting_start_value = lcd_lib_encoder_pos = (_setting) * 100.0 + 0.5; \
@@ -85,26 +97,32 @@ extern uint8_t minProgress;
             lcd_setting_min = (_min) / 100 + 0.5; \
             lcd_setting_max = (_max) / 100 + 0.5; \
         } while(0)
-#define LCD_EDIT_SETTING_FLOAT1(_setting, _name, _postfix, _min, _max) do { \
+#define LCD_EDIT_SETTING_FLOAT1_P(_setting, _name, _postfix, _min, _max) do { \
             menu.add_menu(menu_t(lcd_menu_edit_setting)); \
-            lcd_setting_name = PSTR(_name); \
-            lcd_setting_postfix = PSTR(_postfix); \
+            lcd_setting_name = _name; \
+            lcd_setting_postfix = _postfix; \
             lcd_setting_ptr = &(_setting); \
             lcd_setting_type = 8; \
             lcd_setting_start_value = lcd_lib_encoder_pos = (_setting) + 0.5; \
             lcd_setting_min = (_min) + 0.5; \
             lcd_setting_max = (_max) + 0.5; \
         } while(0)
-#define LCD_EDIT_SETTING_SPEED(_setting, _name, _postfix, _min, _max) do { \
+#define LCD_EDIT_SETTING_SPEED_P(_setting, _name, _postfix, _min, _max) do { \
             menu.add_menu(menu_t(lcd_menu_edit_setting)); \
-            lcd_setting_name = PSTR(_name); \
-            lcd_setting_postfix = PSTR(_postfix); \
+            lcd_setting_name = _name; \
+            lcd_setting_postfix = _postfix; \
             lcd_setting_ptr = &(_setting); \
             lcd_setting_type = 6; \
             lcd_setting_start_value = lcd_lib_encoder_pos = (_setting) / 60 + 0.5; \
             lcd_setting_min = (_min) / 60 + 0.5; \
             lcd_setting_max = (_max) / 60 + 0.5; \
         } while(0)
+
+#define LCD_EDIT_SETTING(_setting, _name, _postfix, _min, _max)              LCD_EDIT_SETTING_P             (_setting, PSTR(_name), PSTR(_postfix), _min, _max)
+#define LCD_EDIT_SETTING_BYTE_PERCENT(_setting, _name, _postfix, _min, _max) LCD_EDIT_SETTING_BYTE_PERCENT_P(_setting, PSTR(_name), PSTR(_postfix), _min, _max)
+#define LCD_EDIT_SETTING_FLOAT001(_setting, _name, _postfix, _min, _max)     LCD_EDIT_SETTING_FLOAT001_P    (_setting, PSTR(_name), PSTR(_postfix), _min, _max)
+#define LCD_EDIT_SETTING_FLOAT1(_setting, _name, _postfix, _min, _max)       LCD_EDIT_SETTING_FLOAT1_P      (_setting, PSTR(_name), PSTR(_postfix), _min, _max)
+#define LCD_EDIT_SETTING_SPEED(_setting, _name, _postfix, _min, _max)        LCD_EDIT_SETTING_SPEED_P       (_setting, PSTR(_name), PSTR(_postfix), _min, _max)
 
 extern uint16_t lineEntryPos;
 extern int8_t   lineEntryWait;

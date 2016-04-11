@@ -421,7 +421,7 @@ void lcd_menu_maintenance_advanced()
         }
         else if (IS_SELECTED_SCROLL(index++))
         {
-            LCD_EDIT_SETTING_BYTE_PERCENT(fanSpeed, "Fan speed", "%", 0, 100);
+            LCD_EDIT_SETTING_BYTE_PERCENT_P(fanSpeed, MSGP_FAN_SPEED, MSGP_UNIT_PERCENT, 0, 100);
         }
         else if ((ui_mode & UI_MODE_EXPERT) && (IS_SELECTED_SCROLL(index++)))
         {
@@ -690,7 +690,7 @@ static void lcd_menu_maintenance_led()
         else if (IS_SELECTED_SCROLL(1))
         {
             menu.currentMenu().initMenuFunc = NULL;
-            LCD_EDIT_SETTING(led_brightness_level, "Brightness", "%", 0, 100);
+            LCD_EDIT_SETTING_P(led_brightness_level, PSTR("Brightness"), MSGP_UNIT_PERCENT, 0, 100);
         }
         else if (IS_SELECTED_SCROLL(2))
         {

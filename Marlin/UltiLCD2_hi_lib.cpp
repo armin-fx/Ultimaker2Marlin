@@ -325,37 +325,53 @@ void lcd_menu_edit_setting()
     if (lcd_lib_encoder_pos > lcd_setting_max)
         lcd_lib_encoder_pos = lcd_setting_max;
 
-    if (lcd_setting_type == 1)
+    uint8_t lcd_setting_type_nr     = lcd_setting_type % LCD_SETTINGS_TYPE_OFF_OFFSET;
+
+    if       (lcd_setting_type_nr == 1)
         *(uint8_t*)lcd_setting_ptr = lcd_lib_encoder_pos;
-    else if (lcd_setting_type == 2)
+    else if (lcd_setting_type_nr == 2)
         *(uint16_t*)lcd_setting_ptr = lcd_lib_encoder_pos;
-    else if (lcd_setting_type == 3)
+    else if (lcd_setting_type_nr == 3)
         *(float*)lcd_setting_ptr = float(lcd_lib_encoder_pos) / 100.0;
-    else if (lcd_setting_type == 4)
+    else if (lcd_setting_type_nr == 4)
         *(int32_t*)lcd_setting_ptr = lcd_lib_encoder_pos;
-    else if (lcd_setting_type == 5)
+    else if (lcd_setting_type_nr == 5)
         *(uint8_t*)lcd_setting_ptr = lcd_lib_encoder_pos * 255 / 100;
-    else if (lcd_setting_type == 6)
+    else if (lcd_setting_type_nr == 6)
         *(float*)lcd_setting_ptr = float(lcd_lib_encoder_pos) * 60;
-    else if (lcd_setting_type == 7)
+    else if (lcd_setting_type_nr == 7)
         *(float*)lcd_setting_ptr = float(lcd_lib_encoder_pos) * 100;
-    else if (lcd_setting_type == 8)
+    else if (lcd_setting_type_nr == 8)
         *(float*)lcd_setting_ptr = float(lcd_lib_encoder_pos);
 
     lcd_basic_screen();
     lcd_lib_draw_string_centerP(20, lcd_setting_name);
     char buffer[20] = {0};
-    if (lcd_setting_type == 3)
-        float_to_string2(float(lcd_lib_encoder_pos) / 100.0, buffer, lcd_setting_postfix);
+    if(lcd_setting_type > LCD_SETTINGS_TYPE_OFF_OFFSET && lcd_lib_encoder_pos == 0)
+    {
+        strcpy_P(buffer, MSGP_OFF_BY_0);
+    }
     else
-        int_to_string(lcd_lib_encoder_pos, buffer, lcd_setting_postfix);
+    {
+        if (lcd_setting_type_nr == 3)
+            float_to_string2(float(lcd_lib_encoder_pos) / 100.0, buffer, lcd_setting_postfix);
+        else
+            int_to_string(lcd_lib_encoder_pos, buffer, lcd_setting_postfix);
+    }
     lcd_lib_draw_string_center(30, buffer);
 
     strcpy_P(buffer, PSTR("Prev: "));
-    if (lcd_setting_type == 3)
-        float_to_string2(float(lcd_setting_start_value) / 100.0, buffer + 6, lcd_setting_postfix);
+    if(lcd_setting_type > LCD_SETTINGS_TYPE_OFF_OFFSET && lcd_setting_start_value == 0)
+    {
+        strcpy_P(buffer + 6, MSGP_OFF_BY_0);
+    }
     else
-        int_to_string(lcd_setting_start_value, buffer + 6, lcd_setting_postfix);
+    {
+        if (lcd_setting_type_nr == 3)
+            float_to_string2(float(lcd_setting_start_value) / 100.0, buffer + 6, lcd_setting_postfix);
+        else
+            int_to_string(lcd_setting_start_value, buffer + 6, lcd_setting_postfix);
+    }
     lcd_lib_draw_string_center(BOTTOM_MENU_YPOS, buffer);
 
     if (lcd_lib_button_pressed)

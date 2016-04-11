@@ -2246,7 +2246,7 @@ static void drawAutotuneSubmenu(uint8_t nr, uint8_t &flags)
             lcd_lib_draw_string_leftP(5, PSTR("tuning temperature"));
             flags |= MENU_STATUSLINE;
         }
-        lcd_lib_draw_stringP(LCD_CHAR_MARGIN_LEFT, 30, PSTR("Temperature"));
+        lcd_lib_draw_stringP(LCD_CHAR_MARGIN_LEFT, 30, MSGP_TEMPERATURE);
         int_to_string(WORD_SETTING(2), buffer, PSTR(DEGREE_SYMBOL));
 
         LCDMenu::drawMenuString(LCD_CHAR_MARGIN_LEFT + 12*LCD_CHAR_SPACING

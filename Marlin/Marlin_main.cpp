@@ -311,13 +311,6 @@ extern "C"{
   }
 }
 
-template <class T>
-void cut_scope (T &value, T min, T max)
-{
-	if      (value < min) value = min;
-	else if (value > max) value = max;
-}
-
 #ifdef PREVENT_FILAMENT_GRIND
 void filament_grab_init()
 {
@@ -1565,7 +1558,11 @@ void process_command(const char *strCmd)
       break;
     case 140: // M140 set bed temp
 #if TEMP_SENSOR_BED != 0
-      if (code_seen(strCmd, 'S')) setTargetBed(code_value());
+      if (code_seen(strCmd, 'S'))
+      {
+        setTargetBed(code_value());
+        CheckFirstLayerOff();
+      }
 #endif // TEMP_SENSOR_BED
       break;
     case 105 : // M105
@@ -1658,7 +1655,11 @@ void process_command(const char *strCmd)
       break;
     case 190: // M190 - Wait for bed heater to reach target.
     #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1 && TEMP_SENSOR_BED != 0
-        if (code_seen(strCmd, 'S')) setTargetBed(code_value());
+        if (code_seen(strCmd, 'S'))
+        {
+            setTargetBed(code_value());
+            CheckFirstLayerOff();
+        }
 
         if (printing_state == PRINT_STATE_RECOVER)
             break;

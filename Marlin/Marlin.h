@@ -196,6 +196,23 @@ void filament_grab_update(float filament_lenght);
 void filament_grab_set_retract_lenght();
 #endif
 
+template <class T>
+void cut_scope (T &value, T min, T max)
+{
+	if      (value < min) value = min;
+	else if (value > max) value = max;
+}
+template <class T>
+void cut_min (T &value, T min)
+{
+	if      (value < min) value = min;
+}
+template <class T>
+void cut_max (T &value, T max)
+{
+	if (value > max) value = max;
+}
+
 #ifdef FAST_PWM_FAN
 void setPwmFrequency(uint8_t pin, int val);
 #endif
