@@ -402,7 +402,7 @@ static void lcd_menu_material_reheat()
     lcd_lib_draw_string_centerP(10, PSTR("Heating printhead"));
 
     char buffer[16] = {0};
-    char *c = int_to_string(int(dsp_temperature[active_extruder]), buffer, PSTR("C/"));
+    char *c = int_to_string(int(dsp_temperature[active_extruder]), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature[active_extruder]), c, MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(24, buffer);
     // lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(active_extruder));

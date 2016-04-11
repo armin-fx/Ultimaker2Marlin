@@ -253,9 +253,9 @@ static void lcd_toggle_preheat_bed()
     if (PREHEAT_FLAG(0))
     {
   #if EXTRUDERS == 2
-        setTargetBed(material[swapExtruders() ? 1 : 0].bed_temperature_first_layer);
+        setTargetBed(get_bed_temperature_first_layer(material[swapExtruders() ? 1 : 0]));
   #else
-        setTargetBed(material[0].bed_temperature_first_layer);
+        setTargetBed(get_bed_temperature_first_layer(material[0]));
   #endif
     }
     else
@@ -276,9 +276,9 @@ static void init_preheat()
     // init preheat Temperature settings
 #if TEMP_SENSOR_BED != 0
   #if EXTRUDERS == 2
-    setTargetBed(material[swapExtruders() ? 1 : 0].bed_temperature_first_layer);
+    setTargetBed(get_bed_temperature_first_layer(material[swapExtruders() ? 1 : 0]));
   #else
-    setTargetBed(target_temperature_bed = material[0].bed_temperature_first_layer);
+    setTargetBed(get_bed_temperature_first_layer(material[0]));
   #endif
     PREHEAT_FLAG(0) = ((int)degTargetBed() > 0) ? 1 : 0;
 #endif

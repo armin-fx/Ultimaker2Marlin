@@ -838,16 +838,23 @@ static void lcd_material_settings_details_callback(uint8_t nr)
         if (led_glow_dir)
         {
             for(uint8_t n=0; n<3; ++n)
-                c = int_to_string(material[active_extruder].temperature[n], c, PSTR("C "));
+                c = int_to_string(material[active_extruder].temperature[n], c, MSGP_UNIT_CELSIUS_LIST);
         }else{
             for(uint8_t n=3; n<MATERIAL_TEMPERATURE_COUNT; ++n)
-                c = int_to_string(material[active_extruder].temperature[n], c, PSTR("C "));
+                c = int_to_string(material[active_extruder].temperature[n], c, MSGP_UNIT_CELSIUS_LIST);
         }
 #if TEMP_SENSOR_BED != 0
     }else if (nr == 2)
     {
-        int_to_string(material[active_extruder].bed_temperature, buffer, PSTR("C ("));
-        int_to_string(material[active_extruder].bed_temperature_first_layer, buffer+strlen(buffer), PSTR("C)"));
+        if (material[active_extruder].bed_temperature_first_layer == 0)
+        {
+            int_to_string(material[active_extruder].bed_temperature, buffer, MSGP_UNIT_CELSIUS);
+        }
+        else
+        {
+            int_to_string(material[active_extruder].bed_temperature, buffer, PSTR("C ("));
+            int_to_string(material[active_extruder].bed_temperature_first_layer, buffer+strlen(buffer), PSTR("C)"));
+        }
 #endif
     }else if (nr == 2 + BED_MENU_OFFSET)
     {
@@ -988,7 +995,10 @@ static void lcd_material_settings_bed_temperature_details_callback(uint8_t nr)
     }
     if (nr == 2)
     {
-        int_to_string(material[active_extruder].bed_temperature_first_layer, buffer, MSGP_UNIT_CELSIUS);
+        if (material[active_extruder].bed_temperature_first_layer == 0)
+            strcpy_P(buffer, MSGP_OFF_BY_0);
+        else
+            int_to_string(material[active_extruder].bed_temperature_first_layer, buffer, MSGP_UNIT_CELSIUS);
         lcd_lib_draw_string_left(BOTTOM_MENU_YPOS, buffer);
     }
 }
@@ -1010,7 +1020,7 @@ static void lcd_menu_material_bed_temperature_settings()
         else if (IS_SELECTED_SCROLL(2))
         {
             //menu.return_to_previous();
-            LCD_EDIT_SETTING_P(material[active_extruder].bed_temperature_first_layer, MSGP_BUILDPLATE_TEMPERATURE_FIRST_LAYER, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15);
+            LCD_EDIT_SETTING_OFF_P(material[active_extruder].bed_temperature_first_layer, MSGP_BUILDPLATE_TEMPERATURE_FIRST_LAYER, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15);
         }
     }
     lcd_lib_update_screen();
@@ -1064,6 +1074,26 @@ static void lcd_menu_material_settings_store()
     lcd_lib_update_screen();
 }
 
+void lcd_material_reset_CPE (char* buffer, uint8_t nr)
+{
+    strcpy_P(buffer, PSTR("CPE"));
+    eeprom_update_block(buffer, EEPROM_MATERIAL_NAME_OFFSET(nr), 4);
+    eeprom_update_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(nr), 250);
+    eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(nr),      60);
+    eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(nr), 70);
+    eeprom_update_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(nr), 50);
+    eeprom_update_word(EEPROM_MATERIAL_FLOW_OFFSET(nr), 100);
+    eeprom_update_float(EEPROM_MATERIAL_DIAMETER_OFFSET(nr), 2.85);
+    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(nr, 0), 250);//0.4
+    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(nr, 1), 245);//0.25
+    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(nr, 2), 255);//0.6
+    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(nr, 3), 260);//0.8
+    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(nr, 4), 260);//1.0
+
+    eeprom_update_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(nr), 85);
+    eeprom_update_byte(EEPROM_MATERIAL_CHANGE_WAIT_TIME(nr), 15);
+}
+
 void lcd_material_reset_defaults()
 {
     //Fill in the defaults
@@ -1105,23 +1135,7 @@ void lcd_material_reset_defaults()
     eeprom_update_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(1), 90);
     eeprom_update_byte(EEPROM_MATERIAL_CHANGE_WAIT_TIME(1), 30);
 
-    strcpy_P(buffer, PSTR("CPE"));
-    eeprom_update_block(buffer, EEPROM_MATERIAL_NAME_OFFSET(2), 4);
-    eeprom_update_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(2), 250);
-    eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(2), 60);
-    eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(2), 70);
-    eeprom_update_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(2), 50);
-    eeprom_update_word(EEPROM_MATERIAL_FLOW_OFFSET(2), 100);
-    eeprom_update_float(EEPROM_MATERIAL_DIAMETER_OFFSET(2), 2.85);
-
-    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(2, 0), 250);//0.4
-    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(2, 1), 245);//0.25
-    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(2, 2), 255);//0.6
-    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(2, 3), 260);//0.8
-    eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(2, 4), 260);//1.0
-
-    eeprom_update_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(2), 85);
-    eeprom_update_byte(EEPROM_MATERIAL_CHANGE_WAIT_TIME(2), 15);
+    lcd_material_reset_CPE (buffer, 2);
 
     eeprom_update_byte(EEPROM_MATERIAL_COUNT_OFFSET(), 3);
 
@@ -1324,23 +1338,7 @@ bool lcd_material_verify_material_settings()
     cnt = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
     if (!hasCPE && cnt < EEPROM_MATERIAL_SETTINGS_MAX_COUNT)
     {
-        strcpy_P(buffer, PSTR("CPE"));
-        eeprom_update_block(buffer, EEPROM_MATERIAL_NAME_OFFSET(cnt), 4);
-        eeprom_update_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(cnt), 250);
-        eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(cnt),      60);
-        eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(cnt), 70);
-        eeprom_update_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(cnt), 50);
-        eeprom_update_word(EEPROM_MATERIAL_FLOW_OFFSET(cnt), 100);
-        eeprom_update_float(EEPROM_MATERIAL_DIAMETER_OFFSET(cnt), 2.85);
-        eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(cnt, 0), 250);//0.4
-        eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(cnt, 1), 245);//0.25
-        eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(cnt, 2), 255);//0.6
-        eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(cnt, 3), 260);//0.8
-        eeprom_update_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(cnt, 4), 260);//1.0
-
-        eeprom_update_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(cnt), 85);
-        eeprom_update_byte(EEPROM_MATERIAL_CHANGE_WAIT_TIME(cnt), 15);
-
+        lcd_material_reset_CPE (buffer, cnt);
         eeprom_update_byte(EEPROM_MATERIAL_COUNT_OFFSET(), cnt + 1);
     }
     return true;

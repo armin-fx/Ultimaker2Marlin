@@ -39,7 +39,8 @@ extern float current_temperature[EXTRUDERS];
 extern int target_temperature_bed;
 extern int target_temperature_bed_next;
 extern float current_temperature_bed;
-extern float first_layer_last_z;
+extern float first_layer_z_trigger;
+#define FIRST_LAYER_Z_OFFSET 0.025
 #endif
 #ifdef TEMP_SENSOR_1_AS_REDUNDANT
   extern float redundant_temperature;
@@ -94,7 +95,13 @@ FORCE_INLINE bool isCheckFirstLayer() {
 }
 
 FORCE_INLINE void CheckFirstLayerOff() {
-	target_temperature_bed_next = 0;
+    target_temperature_bed_next = 0;
+    first_layer_z_trigger       = 0;
+}
+
+FORCE_INLINE void CheckFirstLayerInit() {
+    target_temperature_bed_next = 0;
+    first_layer_z_trigger       = 10000;
 }
 #endif // TEMP_SENSOR_BED
 

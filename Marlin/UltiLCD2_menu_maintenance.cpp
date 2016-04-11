@@ -113,15 +113,17 @@ static void lcd_advanced_details(uint8_t nr)
 #endif
     {
 #if EXTRUDERS > 1
-        int_to_string(int(target_temperature[1]), int_to_string(int(dsp_temperature[1]), int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/")), PSTR("C ")), PSTR("C/")), MSGP_UNIT_CELSIUS);
+        int_to_string(    int(target_temperature[1]), int_to_string(int(dsp_temperature[1]),
+            int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]),
+            buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS_LIST), MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
 #else
-        int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+        int_to_string(int(target_temperature[0]), int_to_string(int(dsp_temperature[0]), buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
 #endif // EXTRUDERS
     }
 #if TEMP_SENSOR_BED != 0
     else if (nr == EXTRUDERS + 2)
     {
-        int_to_string(int(target_temperature_bed), int_to_string(int(dsp_temperature_bed), buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+        int_to_string(int(target_temperature_bed), int_to_string(int(dsp_temperature_bed), buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
     }
 #endif
     else if (nr == EXTRUDERS + BED_MENU_OFFSET + 7)
@@ -451,7 +453,7 @@ static void lcd_menu_maintenance_advanced_heatup()
     lcd_lib_draw_string_centerP(20, PSTR("Nozzle temperature:"));
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
     char buffer[16] = {0};
-    int_to_string(int(dsp_temperature[active_extruder]), buffer, PSTR("C/"));
+    int_to_string(int(dsp_temperature[active_extruder]), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature[active_extruder]), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(active_extruder));
@@ -493,7 +495,7 @@ static void lcd_menu_maintenance_extrude()
 
     char buffer[32] = {0};
     ;
-    int_to_string(int(target_temperature[active_extruder]), int_to_string(int(dsp_temperature[active_extruder]), buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+    int_to_string(int(target_temperature[active_extruder]), int_to_string(int(dsp_temperature[active_extruder]), buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(20, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 30, getHeaterPower(active_extruder));
     lcd_lib_update_screen();
@@ -515,7 +517,7 @@ void lcd_menu_maintenance_advanced_bed_heatup()
     lcd_lib_draw_string_centerP(20, PSTR("Buildplate temp.:"));
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
     char buffer[16] = {0};
-    int_to_string(int(dsp_temperature_bed), buffer, PSTR("C/"));
+    int_to_string(int(dsp_temperature_bed), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature_bed), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(-1));

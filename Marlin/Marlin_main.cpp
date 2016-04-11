@@ -1165,7 +1165,7 @@ void process_command(const char *strCmd)
 
       enable_endstops(true);
 
-      for(int8_t i=0; i < NUM_AXIS; i++) {
+      for(int8_t i=0; i < NUM_AXIS; ++i) {
         destination[i] = current_position[i];
       }
           feedrate = 0.0;
@@ -2777,19 +2777,23 @@ static void ClearToSend()
   SERIAL_PROTOCOLLNPGM(MSG_OK);
 }
 
+#define IS_AXIS_MOVED(axis_seen, axis_nr)      ((axis_seen &  (1 << axis_nr)) != 0)
+#define IS_AXIS_MOVED_ONLY(axis_seen, axis_nr) ( axis_seen == (1 << axis_nr))
+
 static void get_coordinates(const char *cmd)
 {
-  #ifdef FWRETRACT
     uint8_t seen=0;
-  #endif
     for(uint8_t i=0; i<NUM_AXIS; ++i)
     {
         if(code_seen(cmd, axis_codes[i]))
         {
-            destination[i] = (float)code_value() + ((axis_relative_state & (1 << i)) || (axis_relative_state & RELATIVE_MODE))*current_position[i];
-          #ifdef FWRETRACT
+            if ((axis_relative_state & (1 << i)) || (axis_relative_state & RELATIVE_MODE))
+                // relative mode
+                destination[i] = (float)code_value() + current_position[i];
+            else
+                // absolute mode
+                destination[i] = (float)code_value();
             seen |= (1 << i);
-          #endif
         }
         else
         {
@@ -2801,17 +2805,41 @@ static void get_coordinates(const char *cmd)
         next_feedrate = code_value();
         if(next_feedrate > 0.0) feedrate = next_feedrate;
     }
+
+#if TEMP_SENSOR_BED != 0 || defined(FWRETRACT)
+    float echange=destination[E_AXIS]-current_position[E_AXIS];
+#endif
+
+#if TEMP_SENSOR_BED != 0
+    // first layer end check
+    if (isCheckFirstLayer())
+    {
+        if (IS_AXIS_MOVED(seen, Z_AXIS)) // find deepest Z position
+        {
+            if (first_layer_z_trigger >= destination[Z_AXIS])
+                first_layer_z_trigger  = destination[Z_AXIS] + FIRST_LAYER_Z_OFFSET;
+        }
+        else if (IS_AXIS_MOVED(seen, E_AXIS)) // find first layer end after deepest Z position
+             if (first_layer_z_trigger < destination[Z_AXIS])
+             if (echange > 0)
+             if (IS_AXIS_MOVED(seen, X_AXIS) || IS_AXIS_MOVED(seen, Y_AXIS))
+        {
+            setTargetBed(target_temperature_bed_next);
+            CheckFirstLayerOff();
+        }
+    }
+#endif
+
     #ifdef FWRETRACT
     #ifdef PREVENT_FILAMENT_GRIND
-    if ((seen & (1 << E_AXIS)) != 0)
+    if (IS_AXIS_MOVED(seen, E_AXIS)) // e is moved
     {
     #endif // PREVENT_FILAMENT_GRIND
-        float echange=destination[E_AXIS]-current_position[E_AXIS];
+        //float echange=destination[E_AXIS]-current_position[E_AXIS];
         if(autoretract_enabled)
         {
-            if (seen == (1 << E_AXIS))
+            if (IS_AXIS_MOVED_ONLY(seen, E_AXIS)) // e only move
             {
-                // e only move
                 if(echange<-MIN_RETRACT) //retract
                 {
                     if(!retracted[active_extruder])

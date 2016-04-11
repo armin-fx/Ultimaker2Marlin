@@ -53,6 +53,8 @@ const char MSGP_UNIT_MM_PER_SECOND2[] PROGMEM = {"mm/sec"};
 const char MSGP_UNIT_MM[]             PROGMEM = {"mm"};
 const char MSGP_UNIT_PERCENT[]        PROGMEM = {"%"};
 const char MSGP_UNIT_CELSIUS[]        PROGMEM = {"C"};
+const char MSGP_UNIT_CELSIUS_LIST[]   PROGMEM = {"C "};
+const char MSGP_UNIT_CELSIUS_FROM[]   PROGMEM = {"C/"};
 
 //const char MSGP_MENU_[] PROGMEM = {""};
 const char MSGP_MENU_PRINT[]       PROGMEM = {"PRINT"};

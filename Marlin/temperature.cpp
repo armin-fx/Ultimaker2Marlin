@@ -51,6 +51,7 @@ int target_temperature_bed = 0;
 int target_temperature_bed_next = 0;
 int current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
+float first_layer_z_trigger   = 0.0;
 #endif // TEMP_SENSOR_BED
 #ifdef TEMP_SENSOR_1_AS_REDUNDANT
   int redundant_temperature_raw = 0;

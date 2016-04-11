@@ -41,6 +41,14 @@ struct materialSettings
 
 extern struct materialSettings material[EXTRUDERS];
 
+FORCE_INLINE int16_t get_bed_temperature_first_layer (struct materialSettings _material)
+{
+	if (_material.bed_temperature_first_layer == 0)
+		return _material.bed_temperature;
+	else
+		return _material.bed_temperature_first_layer;
+}
+
 #define FILAMENT_FAST_STEPS  26500
 #define FILAMENT_LONG_ACCELERATION_STEPS    7200
 
@@ -86,6 +94,6 @@ void lcd_menu_material_select();
 // Oh yes, these totally do not belong here. But I need to put them somewhere.
 // Anyhow, these functions convert a nozzle size to an index in the material-temperature setting array or vise-versa.
 uint8_t nozzleSizeToTemperatureIndex(float nozzle_size);
-float nozzleIndexToNozzleSize(uint8_t nozzle_index);
+float   nozzleIndexToNozzleSize(uint8_t nozzle_index);
 
 #endif//ULTI_LCD2_MENU_MATERIAL_H

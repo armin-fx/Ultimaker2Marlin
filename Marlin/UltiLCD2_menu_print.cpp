@@ -569,10 +569,12 @@ void lcd_menu_print_select()
                         //New style GCode flavor without start/end code.
                         // Temperature settings, filament settings, fan settings, start and end-code are machine controlled.
 #if TEMP_SENSOR_BED != 0
-                        target_temperature_bed      = 0;
-                        target_temperature_bed_next = 0;
+                        target_temperature_bed = 0;
+                        CheckFirstLayerInit();
 #endif
                         fanSpeedPercent = 0;
+
+                        uint8_t count_first_layer = 0;
                         for(uint8_t e=0; e<EXTRUDERS; ++e)
                         {
 //                            SERIAL_ECHOPGM("MATERIAL_");
@@ -591,13 +593,24 @@ void lcd_menu_print_select()
 
                             target_temperature[e] = 0;//material[e].temperature;
 #if TEMP_SENSOR_BED != 0
-                            target_temperature_bed      = max(target_temperature_bed,      material[e].bed_temperature_first_layer);
-                            target_temperature_bed_next = max(target_temperature_bed_next, material[e].bed_temperature);
+                            if (material[e].bed_temperature_first_layer == 0)
+                            {
+                                target_temperature_bed      = max(target_temperature_bed, material[e].bed_temperature);
+                                target_temperature_bed_next = max(target_temperature_bed_next, material[e].bed_temperature);
+                            }
+                            else
+                            {
+                                ++count_first_layer;
+                                target_temperature_bed      = max(target_temperature_bed,      material[e].bed_temperature_first_layer);
+                                target_temperature_bed_next = max(target_temperature_bed_next, material[e].bed_temperature);
+                            }
 #endif
                             fanSpeedPercent = max(fanSpeedPercent, material[e].fan_speed);
                             volume_to_filament_length[e] = 1.0 / (M_PI * (material[e].diameter / 2.0) * (material[e].diameter / 2.0));
                             extrudemultiply[e] = material[e].flow;
                         }
+
+                        if (count_first_layer == 0) CheckFirstLayerOff();
 
                         if (printing_state == PRINT_STATE_RECOVER)
                         {
@@ -769,13 +782,13 @@ static void lcd_menu_print_printing()
             break;
         case PRINT_STATE_HEATING:
             lcd_lib_draw_string_centerP(20, PSTR("Heating"));
-            int_to_string(target_temperature[0], int_to_string(dsp_temperature[0], buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+            int_to_string(target_temperature[0], int_to_string(dsp_temperature[0], buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
             lcd_lib_draw_string_center(30, buffer);
             break;
 #if TEMP_SENSOR_BED != 0
         case PRINT_STATE_HEATING_BED:
             lcd_lib_draw_string_centerP(20, PSTR("Heating buildplate"));
-            int_to_string(target_temperature_bed, int_to_string(dsp_temperature_bed, buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+            int_to_string(target_temperature_bed, int_to_string(dsp_temperature_bed, buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
             lcd_lib_draw_string_center(30, buffer);
             break;
 #endif
@@ -932,7 +945,7 @@ void lcd_menu_print_ready()
 
     c = buffer;
     for(uint8_t e=0; e<EXTRUDERS; e++)
-        c = int_to_string(dsp_temperature[e], c, PSTR("C "));
+        c = int_to_string(dsp_temperature[e], c, MSGP_UNIT_CELSIUS_LIST);
 #if TEMP_SENSOR_BED != 0
     int_to_string(dsp_temperature_bed, c, MSGP_UNIT_CELSIUS);
 #endif
@@ -1035,18 +1048,18 @@ static void tune_item_details_callback(uint8_t nr)
         int_to_string(feedmultiply, buffer, MSGP_UNIT_PERCENT);
     else if (nr == 2)
     {
-        int_to_string(target_temperature[0], int_to_string(dsp_temperature[0], buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+        int_to_string(target_temperature[0], int_to_string(dsp_temperature[0], buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
     }
 #if EXTRUDERS > 1
     else if (nr == 3)
     {
-        int_to_string(target_temperature[1], int_to_string(dsp_temperature[1], buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+        int_to_string(target_temperature[1], int_to_string(dsp_temperature[1], buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
     }
 #endif
 #if TEMP_SENSOR_BED != 0
     else if (nr == 2 + EXTRUDERS)
     {
-        int_to_string(target_temperature_bed, int_to_string(dsp_temperature_bed, buffer, PSTR("C/")), MSGP_UNIT_CELSIUS);
+        int_to_string(target_temperature_bed, int_to_string(dsp_temperature_bed, buffer, MSGP_UNIT_CELSIUS_FROM), MSGP_UNIT_CELSIUS);
     }
     else if (nr == 3 + EXTRUDERS)
     {
@@ -1097,7 +1110,7 @@ void lcd_menu_print_tune_heatup_nozzle0()
 #endif
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
     char buffer[16] = {0};
-    int_to_string(int(dsp_temperature[0]), buffer, PSTR("C/"));
+    int_to_string(int(dsp_temperature[0]), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature[0]), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(0));
@@ -1122,7 +1135,7 @@ void lcd_menu_print_tune_heatup_nozzle1()
     lcd_lib_draw_string_centerP(20, PSTR("Nozzle 2 temperature"));
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
     char buffer[16] = {0};
-    int_to_string(int(dsp_temperature[1]), buffer, PSTR("C/"));
+    int_to_string(int(dsp_temperature[1]), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature[1]), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
     lcd_lib_draw_heater(LCD_GFX_WIDTH/2-2, 40, getHeaterPower(1));
