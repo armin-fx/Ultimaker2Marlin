@@ -39,6 +39,15 @@ struct materialSettings
     int8_t change_preheat_wait_time; //when reaching the change material temperature, wait for this amount of seconds for the temperature to stabalize and the material to heatup.
 };
 
+struct materialSettingsEEPROM : materialSettings
+{
+    int16_t temperature_default;
+#if TEMP_SENSOR_BED == 0
+    int16_t bed_temperature;
+    int16_t bed_temperature_first_layer;
+#endif
+};
+
 extern struct materialSettings material[EXTRUDERS];
 
 FORCE_INLINE int16_t get_bed_temperature_first_layer (struct materialSettings _material)

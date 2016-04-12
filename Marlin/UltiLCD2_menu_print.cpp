@@ -595,7 +595,7 @@ void lcd_menu_print_select()
 #if TEMP_SENSOR_BED != 0
                             if (material[e].bed_temperature_first_layer == 0)
                             {
-                                target_temperature_bed      = max(target_temperature_bed, material[e].bed_temperature);
+                                target_temperature_bed      = max(target_temperature_bed,      material[e].bed_temperature);
                                 target_temperature_bed_next = max(target_temperature_bed_next, material[e].bed_temperature);
                             }
                             else
