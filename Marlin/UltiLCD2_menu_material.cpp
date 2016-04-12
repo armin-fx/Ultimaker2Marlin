@@ -745,15 +745,12 @@ static void lcd_menu_material_import()
         }
     }
     if (count != 0xFF)
-    { // verify and store imported material settings
+    {
+        // verify and store imported material settings - last entry
         materialSettingsEEPROM_repair(materialEEPROM);
         materialSettingsEEPROM_store (materialEEPROM, count);
-    }
-
-    count++;
-    if (count > 0)
-    {
-        eeprom_update_byte(EEPROM_MATERIAL_COUNT_OFFSET(), count);
+        // update materials count
+        eeprom_update_byte(EEPROM_MATERIAL_COUNT_OFFSET(), count + 1);
     }
     card.closefile();
 
