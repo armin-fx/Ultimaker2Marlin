@@ -505,7 +505,7 @@ static void lcd_menu_material_export()
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
     for(uint8_t n=0; n<count; ++n)
     {
-        char buffer[32] = {0};
+        char buffer[36] = {0};
         strcpy_P(buffer, PSTR("[material]\n"));
         card.write_string(buffer);
 
@@ -673,10 +673,10 @@ static void lcd_menu_material_import()
         return;
     }
 
-    char buffer[32] = {0};
+    char buffer[36] = {0};
     uint8_t count = 0xFF;
     materialSettingsEEPROM materialEEPROM;
-    
+
     while(card.fgets(buffer, sizeof(buffer)) > 0)
     {
         buffer[sizeof(buffer)-1] = '\0';
