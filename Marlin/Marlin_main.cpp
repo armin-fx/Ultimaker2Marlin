@@ -335,14 +335,14 @@ void filament_grab_update(float filament_lenght)
 	else if (!retracted[active_extruder]) // normal extrude
 	{
 		filament_grab_value[active_extruder] -= filament_lenght;
-		cut_scope<float> (filament_grab_value[active_extruder], 0, retract_length*2);
+		cut_scope (filament_grab_value[active_extruder], 0, retract_length*2);
 	}
 }
 
 #define FILAMENT_GRAB_VALUE_BEGIN 0.37
 void filament_grab_set_retract_lenght()
 {
-	cut_scope<float> (retract_length_min, 0, retract_length);
+	cut_scope (retract_length_min, 0, retract_length);
 	float value;
 	for (int i=0; i<EXTRUDERS; ++i)
 	{

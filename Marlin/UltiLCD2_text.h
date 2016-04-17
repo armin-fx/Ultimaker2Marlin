@@ -2,8 +2,10 @@
 #define ULTILCD2_TEXT_H
 
 //const char MSGP_[] PROGMEM = {""};
-const char MSGP_NEWLINE[] PROGMEM = {"\n"};
-const char MSGP_SLASH[]   PROGMEM = {"/"};
+const char MSGP_NEWLINE[]       PROGMEM = {"\n"};
+const char MSGP_SLASH[]         PROGMEM = {"/"};
+const char MSGP_BRACKED_OPEN[]  PROGMEM = {"("};
+const char MSGP_BRACKED_CLOSE[] PROGMEM = {")"};
 const char MSGP_CLICK_TO_RETURN[]    PROGMEM = {"Click to return"};
 const char MSGP_PAUSE[]              PROGMEM = {"pause"};
 const char MSGP_RESUME[]             PROGMEM = {"resume"};
@@ -80,6 +82,8 @@ const char MSGP_MENU_PRIMARY[]     PROGMEM = {"PRIMARY"};
 const char MSGP_MENU_SECOND[]      PROGMEM = {"SECOND"};
 const char MSGP_MENU_AUTO[]        PROGMEM = {"AUTO"};
 const char MSGP_MENU_BUILDPLATE[]  PROGMEM = {"BUILD-|PLATE"};
+
+//const char MSGP_STORE_[] PROGMEM = {""};
 
 //const char MSGP_ENTRY_[] PROGMEM = {""};
 const char MSGP_ENTRY_RETURN[]  PROGMEM = {"< RETURN"};

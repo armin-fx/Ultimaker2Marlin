@@ -26,6 +26,7 @@ MaterialChangeWait: 0x0D30-0x0D42 (18)       =0x012
 
 struct materialSettings
 {
+    int16_t temperature_default;
     int16_t temperature[MAX_MATERIAL_TEMPERATURES];
 #if TEMP_SENSOR_BED != 0
     int16_t bed_temperature;
@@ -41,7 +42,6 @@ struct materialSettings
 
 struct materialSettingsEEPROM : materialSettings
 {
-    int16_t temperature_default;
 #if TEMP_SENSOR_BED == 0
     int16_t bed_temperature;
     int16_t bed_temperature_first_layer;

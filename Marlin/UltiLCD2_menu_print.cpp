@@ -688,6 +688,8 @@ void lcd_menu_print_heatup()
                 continue;
 #endif
             target_temperature[e] = material[e].temperature[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
+            if (target_temperature[e] == 0)
+                target_temperature[e] = material[e].temperature_default;
             // printing_state = PRINT_STATE_START;
         }
 
@@ -755,7 +757,10 @@ void lcd_menu_print_heatup()
 void lcd_change_to_menu_change_material_return()
 {
     plan_set_e_position(current_position[E_AXIS]);
-    setTargetHotend(material[active_extruder].temperature[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(active_extruder))], active_extruder);
+    int16_t temperature = material[active_extruder].temperature[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(active_extruder))];
+    if (temperature == 0)
+        temperature = material[active_extruder].temperature_default;
+    setTargetHotend(temperature, active_extruder);
     menu.return_to_previous(false);
 }
 

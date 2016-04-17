@@ -205,13 +205,20 @@ void cut_scope (T &value, T min, T max)
 template <class T>
 void cut_min (T &value, T min)
 {
-	if      (value < min) value = min;
+	if (value < min) value = min;
 }
 template <class T>
 void cut_max (T &value, T max)
 {
 	if (value > max) value = max;
 }
+
+template <class T, class V1, class V2>
+inline void cut_scope (T &value, V1 min, V2 max)  {cut_scope (value, (T) min, (T) max);}
+template <class T, class V1>
+inline void cut_min (T &value, V1 min)  {cut_min (value, (T) min);}
+template <class T, class V1>
+inline void cut_max (T &value, V1 max)  {cut_max (value, (T) max);}
 
 #ifdef FAST_PWM_FAN
 void setPwmFrequency(uint8_t pin, int val);

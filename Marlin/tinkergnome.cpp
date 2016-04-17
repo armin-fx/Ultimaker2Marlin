@@ -1265,6 +1265,8 @@ void lcd_menu_print_heatup_tg()
                 continue;
 #endif
             target_temperature[e] = material[e].temperature[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
+            if (target_temperature[e] == 0)
+                target_temperature[e] = material[e].temperature_default;
         }
 
 #if TEMP_SENSOR_BED != 0
