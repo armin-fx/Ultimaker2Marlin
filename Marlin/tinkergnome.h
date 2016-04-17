@@ -17,6 +17,7 @@ extern float e_smoothed_speed[EXTRUDERS];
 extern float current_nominal_speed;
 
 void tinkergnome_init();
+void armin_fx_init();
 void lcd_menu_maintenance_expert();
 void lcd_menu_print_heatup_tg();
 void lcd_menu_printing_tg();

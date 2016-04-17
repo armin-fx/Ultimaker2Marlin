@@ -71,7 +71,8 @@ static void lcd_print_tune_accel();
 static void lcd_print_tune_xyjerk();
 static void lcd_position_z_axis();
 
-#define EXPERT_VERSION 7
+#define EXPERT_VERSION 6
+#define EXPERT_VERSION_2 0
 
 void tinkergnome_init()
 {
@@ -79,22 +80,6 @@ void tinkergnome_init()
 
     uint16_t version = GET_EXPERT_VERSION()+1;
 
-    if (version > 7)
-    {
-#ifdef PREVENT_FILAMENT_GRIND
-        retract_length_min = GET_RETRACT_LENGTH_MIN();
-        filament_grab_max  = GET_FILAMENT_GRAB_MAX();
-#endif
-    }
-    else
-    {
-#ifndef PREVENT_FILAMENT_GRIND
-        float   retract_length_min = DEFAULT_RETRACT_LENGHT_MIN;
-        uint8_t filament_grab_max  = DEFAULT_FILAMENT_MAX_GRAB;
-#endif
-        SET_RETRACT_LENGTH_MIN(retract_length_min);
-        SET_FILAMENT_GRAB_MAX (filament_grab_max);
-    }
     if (version > 6)
     {
 #if defined(PIDTEMPBED) && (TEMP_SENSOR_BED != 0)
@@ -236,6 +221,35 @@ void tinkergnome_init()
     if (version < EXPERT_VERSION+1)
     {
         SET_EXPERT_VERSION(EXPERT_VERSION);
+    }
+
+    armin_fx_init();
+}
+
+void armin_fx_init()
+{
+    uint16_t version_2 = GET_EXPERT_VERSION_2()+1;
+
+    if (version_2 > 0)
+    {
+#ifdef PREVENT_FILAMENT_GRIND
+        retract_length_min = GET_RETRACT_LENGTH_MIN();
+        filament_grab_max  = GET_FILAMENT_GRAB_MAX();
+#endif
+    }
+    else
+    {
+#ifndef PREVENT_FILAMENT_GRIND
+        float   retract_length_min = DEFAULT_RETRACT_LENGHT_MIN;
+        uint8_t filament_grab_max  = DEFAULT_FILAMENT_MAX_GRAB;
+#endif
+        SET_RETRACT_LENGTH_MIN(retract_length_min);
+        SET_FILAMENT_GRAB_MAX (filament_grab_max);
+    }
+
+    if (version_2 < EXPERT_VERSION_2+1)
+    {
+        SET_EXPERT_VERSION_2(EXPERT_VERSION_2);
     }
 }
 

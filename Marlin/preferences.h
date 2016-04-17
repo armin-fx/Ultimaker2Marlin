@@ -19,9 +19,13 @@
 #define EEPROM_MOTOR_CURRENT_E2 0x438  // 2 Byte
 #define EEPROM_PID_BED 0x43A  // 12 Byte
 #define EEPROM_STEPS_E2 0x446  // 4 Byte
-#define EEPROM_RETRACT_LENGTH_MIN 0x44A  // 4 Byte
-#define EEPROM_FILAMENT_GRAB_MAX 0x44E  // 1 Byte
-#define EEPROM_RESERVED 0x44F  // next position
+#define EEPROM_RESERVED 0x44A  // next position
+
+#define EEPROM_EXPERT_VERSION_2_OFFSET 0x500
+#define EEPROM_RETRACT_LENGTH_MIN 0x502  // 4 Byte
+#define EEPROM_FILAMENT_GRAB_MAX 0x506  // 1 Byte
+#define EEPROM_RESERVED_2 0x507  // next position
+
 
 #define GET_UI_MODE() (eeprom_read_byte((const uint8_t*)EEPROM_UI_MODE_OFFSET))
 #define SET_UI_MODE(n) do { eeprom_update_byte((uint8_t*)EEPROM_UI_MODE_OFFSET, n); } while(0)
@@ -53,6 +57,9 @@
 #define SET_MOTOR_CURRENT_E2(n) do { eeprom_update_word((uint16_t*)EEPROM_MOTOR_CURRENT_E2, n); } while(0)
 #define GET_STEPS_E2() (eeprom_read_float((const float*)EEPROM_STEPS_E2))
 #define SET_STEPS_E2(n) do { eeprom_update_float((float*)EEPROM_STEPS_E2, n); } while(0)
+
+#define GET_EXPERT_VERSION_2() (eeprom_read_word((const uint16_t*)EEPROM_EXPERT_VERSION_2_OFFSET))
+#define SET_EXPERT_VERSION_2(n) do { eeprom_update_word((uint16_t*)EEPROM_EXPERT_VERSION_2_OFFSET, n); } while(0)
 #define GET_RETRACT_LENGTH_MIN()  (eeprom_read_float((const float*)EEPROM_RETRACT_LENGTH_MIN))
 #define SET_RETRACT_LENGTH_MIN(n) do { eeprom_update_float((float*)EEPROM_RETRACT_LENGTH_MIN, n); } while(0)
 #define GET_FILAMENT_GRAB_MAX()  (eeprom_read_byte((const uint8_t*)EEPROM_FILAMENT_GRAB_MAX))
