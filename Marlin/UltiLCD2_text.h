@@ -90,4 +90,8 @@ const char MSGP_ENTRY_RETURN[]  PROGMEM = {"< RETURN"};
 const char MSGP_ENTRY_UNKNOWN[] PROGMEM = {"???"};
 const char MSGP_ENTRY_SWITCH[]  PROGMEM = {">"};
 
+//const char MSGP_CMD_[] PROGMEM = {""};
+const char MSGP_CMD_COMMENT_ULTIGCODE[] PROGMEM = {";FLAVOR:UltiGCode"};
+const char MSGP_CMD_MOVE_FAST_TO_XY[]   PROGMEM = {"G1 F12000 X%i Y%i"};
+
 #endif

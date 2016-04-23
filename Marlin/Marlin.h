@@ -18,6 +18,7 @@
 #include <avr/interrupt.h>
 
 
+#include "limiter.h"
 #include "fastio.h"
 #include "Configuration.h"
 #include "pins.h"
@@ -186,6 +187,7 @@ uint8_t StoppedReason();
 void clear_command_queue();
 void enquecommand(const char *cmd); //put an ascii command at the end of the current buffer.
 void enquecommand_P(const char *cmd); //put an ascii command at the end of the current buffer, read from flash
+
 bool is_command_queued();
 uint8_t commands_queued();
 void clamp_to_software_endstops(float target[3]);
@@ -195,30 +197,6 @@ void filament_grab_init();
 void filament_grab_update(float filament_lenght);
 void filament_grab_set_retract_lenght();
 #endif
-
-template <class T>
-void cut_scope (T &value, T min, T max)
-{
-	if      (value < min) value = min;
-	else if (value > max) value = max;
-}
-template <class T>
-void cut_min (T &value, T min)
-{
-	if (value < min) value = min;
-}
-template <class T>
-void cut_max (T &value, T max)
-{
-	if (value > max) value = max;
-}
-
-template <class T, class V1, class V2>
-inline void cut_scope (T &value, V1 min, V2 max)  {cut_scope (value, (T) min, (T) max);}
-template <class T, class V1>
-inline void cut_min (T &value, V1 min)  {cut_min (value, (T) min);}
-template <class T, class V1>
-inline void cut_max (T &value, V1 max)  {cut_max (value, (T) max);}
 
 #ifdef FAST_PWM_FAN
 void setPwmFrequency(uint8_t pin, int val);

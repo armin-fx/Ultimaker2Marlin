@@ -335,29 +335,39 @@ void filament_grab_update(float filament_lenght)
 	else if (!retracted[active_extruder]) // normal extrude
 	{
 		filament_grab_value[active_extruder] -= filament_lenght;
+	  #if EXTRUDERS > 1
+		cut_scope (filament_grab_value[active_extruder], 0, retract_length + extruder_swap_retract_length);
+	  #else
 		cut_scope (filament_grab_value[active_extruder], 0, retract_length*2);
+	  #endif
 	}
 }
 
 #define FILAMENT_GRAB_VALUE_BEGIN 0.37
+
+// Hold current retract length on custom retract length until (FILAMENT_GRAB_VALUE_BEGIN * filament_grab_max).
+// Then reduce linear the retract length to 0 - this could hold the maximum filament grab value.
+// The retract length will set up to retract_length_min if it is lower.
 void filament_grab_set_retract_lenght()
 {
-	cut_scope (retract_length_min, 0, retract_length);
-	float value;
-	for (int i=0; i<EXTRUDERS; ++i)
-	{
-		value = filament_grab_value[i] / retract_length;
-		if      (value < FILAMENT_GRAB_VALUE_BEGIN || !is_prevent_filament_grind())
-			retract_length_current[i] = retract_length;
-		else if (value < 1.0)
-		{
-			value -= FILAMENT_GRAB_VALUE_BEGIN;
-			value *= 1.0/(1.0-FILAMENT_GRAB_VALUE_BEGIN);
-			retract_length_current[i] = retract_length - (retract_length - retract_length_min) * value;
-		}
-		else
-			retract_length_current[i] = retract_length_min;
-	}
+    cut_scope (retract_length_min, 0, retract_length);
+    for (int i=0; i<EXTRUDERS; ++i)
+    {
+        float value = filament_grab_value[i] / retract_length;
+        if      (value < FILAMENT_GRAB_VALUE_BEGIN || !is_prevent_filament_grind())
+            retract_length_current[i] = retract_length;
+        else if (value < 1.0)
+        {
+            value -= FILAMENT_GRAB_VALUE_BEGIN;
+            value *= 1.0/(1.0-FILAMENT_GRAB_VALUE_BEGIN);
+        //  retract_length_current[i] = retract_length * (1.0 - value) + retract_length_min * (value);   // beautiful way
+        //  retract_length_current[i] = retract_length * (1.0 - value);                                  // exact way
+            retract_length_current[i] = retract_length * (1.0 - value) + retract_length_min/2 * (value); // compromise way
+            cut_min (retract_length_current[i], retract_length_min);
+        }
+        else
+            retract_length_current[i] = retract_length_min;
+    }
 }
 #endif // PREVENT_FILAMENT_GRIND
 
@@ -374,12 +384,13 @@ void clear_command_queue()
 //adds an command to the main command buffer
 //thats really done in a non-safe way.
 //needs overworking someday
-void enquecommand(const char *cmd)
+void enquecommand_run(const char *cmd, bool isProgmem)
 {
   if(buflen < BUFSIZE)
   {
-    //this is dangerous if a mixing of serial and this happsens
-    strcpy(&(cmdbuffer[bufindw][0]),cmd);
+    //this is dangerous if a mixing of serial and this happens
+    if (isProgmem) strcpy_P(&(cmdbuffer[bufindw][0]),cmd);
+    else           strcpy  (&(cmdbuffer[bufindw][0]),cmd);
     // clear serial flag
     serialCmd &= ~(1 << bufindw);
     SERIAL_ECHO_START;
@@ -392,22 +403,14 @@ void enquecommand(const char *cmd)
   }
 }
 
+void enquecommand(const char *cmd)
+{
+	enquecommand_run(cmd, false);
+}
+
 void enquecommand_P(const char *cmd)
 {
-  if(buflen < BUFSIZE)
-  {
-    //this is dangerous if a mixing of serial and this happsens
-    strcpy_P(&(cmdbuffer[bufindw][0]),cmd);
-    // clear serial flag
-    serialCmd &= ~(1 << bufindw);
-    SERIAL_ECHO_START;
-    SERIAL_ECHOPGM("enqueing \"");
-    SERIAL_ECHO(cmdbuffer[bufindw]);
-    SERIAL_ECHOLNPGM("\"");
-    ++bufindw;
-    bufindw %= BUFSIZE;
-    ++buflen;
-  }
+	enquecommand_run(cmd, true);
 }
 
 bool is_command_queued()

@@ -541,7 +541,7 @@ void lcd_menu_print_select()
                     char buffer[64];
                     card.fgets(buffer, sizeof(buffer));
                     buffer[sizeof(buffer)-1] = '\0';
-                    if (strncmp_P(buffer, PSTR(";FLAVOR:UltiGCode"), 17) != 0)
+                    if (strncmp_P(buffer, MSGP_CMD_COMMENT_ULTIGCODE, 17) != 0)
                     {
                         card.fgets(buffer, sizeof(buffer));
                         buffer[sizeof(buffer)-1] = '\0';
@@ -564,7 +564,7 @@ void lcd_menu_print_select()
                         e_smoothed_speed[e] = 0.0f;
                     }
 
-                    if (strncmp_P(buffer, PSTR(";FLAVOR:UltiGCode"), 17) == 0)
+                    if (strncmp_P(buffer, MSGP_CMD_COMMENT_ULTIGCODE, 17) == 0)
                     {
                         //New style GCode flavor without start/end code.
                         // Temperature settings, filament settings, fan settings, start and end-code are machine controlled.
@@ -626,7 +626,7 @@ void lcd_menu_print_select()
                         #endif // EXTRUDERS
                             // move to heatup position
                             char buffer[32] = {0};
-                            sprintf_P(buffer, PSTR("G1 F12000 X%i Y%i"), max(int(min_pos[X_AXIS]), 0)+5, max(int(min_pos[Y_AXIS]), 0)+5);
+                            sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, max(int(min_pos[X_AXIS]), 0)+5, max(int(min_pos[Y_AXIS]), 0)+5);
                             homeAll();
                             enquecommand(buffer);
                             printing_state = PRINT_STATE_NORMAL;

@@ -2623,7 +2623,7 @@ static void lcd_extrude_headtofront()
     lcd_lib_keyclick();
     // move to center front
     char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F12000 X%i Y%i"), int(AXIS_CENTER_POS(X_AXIS)), int(min_pos[Y_AXIS])+5);
+    sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, int(AXIS_CENTER_POS(X_AXIS)), int(min_pos[Y_AXIS])+5);
 
     homeHead();
     enquecommand(buffer);
@@ -3080,7 +3080,7 @@ void recover_start_print(const char *cmd)
     // move to heatup position
     homeAll();
     char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F12000 X%i Y%i"), int(min_pos[X_AXIS])+5, int(min_pos[Y_AXIS])+5);
+    sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, int(min_pos[X_AXIS])+5, int(min_pos[Y_AXIS])+5);
     enquecommand(buffer);
 
     menu.return_to_main();
