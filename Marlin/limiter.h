@@ -4,38 +4,38 @@
 // cut value direct to limit
 
 template <class T>
-void cut_scope (T& value, T& min, T& max)
+void cut_scope (T& value, T min, T max)
 {
 	if      (value < min) value = min;
 	else if (value > max) value = max;
 }
 
 template <class T>
-void cut_inside (T& value, T& var1, T& var2)
+void cut_inside (T& value, T var1, T var2)
 {
 	if (var1 < var2) cut_scope (value, var1, var2);
 	else             cut_scope (value, var2, var1);
 }
 
 template <class T>
-void cut_min (T& value, T& min)
+void cut_min (T& value, T min)
 {
 	if (value < min) value = min;
 }
 template <class T>
-void cut_min (T& value, T& min1, T& min2)
+void cut_min (T& value, T min1, T min2)
 {
 	if (value < min1) value = min1;
 	if (value < min2) value = min2;
 }
 
 template <class T>
-void cut_max (T& value, T& max)
+void cut_max (T& value, T max)
 {
 	if (value > max) value = max;
 }
 template <class T>
-void cut_max (T& value, T& max1, T& max2)
+void cut_max (T& value, T max1, T max2)
 {
 	if (value > max1) value = max1;
 	if (value > max2) value = max2;
@@ -61,7 +61,7 @@ inline void cut_max (T& value, V1 max1, V2 max2)  {cut_max (value, (T) max1, (T)
 // get limited value
 
 template <class T>
-T get_cut_scope (T& value, T& min, T& max)
+T get_cut_scope (T& value, T min, T max)
 {
 	if      (value < min) return min;
 	else if (value > max) return max;
@@ -69,20 +69,20 @@ T get_cut_scope (T& value, T& min, T& max)
 }
 
 template <class T>
-T get_cut_inside (T& value, T& var1, T& var2)
+T get_cut_inside (T& value, T var1, T var2)
 {
 	if (var1 < var2) return get_cut_scope (value, var1, var2);
 	else             return get_cut_scope (value, var2, var1);
 }
 
 template <class T>
-T get_cut_min (T& value, T& min)
+T get_cut_min (T& value, T min)
 {
 	if (value < min) return min;
 	return value;
 }
 template <class T>
-T get_cut_min (T& value, T& min1, T& min2)
+T get_cut_min (T& value, T min1, T min2)
 {
 	if (min1 > min2)
 	{
@@ -98,13 +98,13 @@ T get_cut_min (T& value, T& min1, T& min2)
 }
 
 template <class T>
-T get_cut_max (T& value, T& max)
+T get_cut_max (T& value, T max)
 {
 	if (value > max) return max;
 	return value;
 }
 template <class T>
-T get_cut_max (T& value, T& max1, T& max2)
+T get_cut_max (T& value, T max1, T max2)
 {
 	if (max1 < max2)
 	{
@@ -139,7 +139,7 @@ inline T get_cut_max (T& value, V1 max1, V2 max2)  {return get_cut_max (value, (
 // check, return true if is in limit
 
 template <class T>
-bool is_cut_scope (T& value, T& min, T& max)
+bool is_cut_scope (T& value, T min, T max)
 {
 	if      (value < min) return false;
 	else if (value > max) return false;
@@ -147,20 +147,20 @@ bool is_cut_scope (T& value, T& min, T& max)
 }
 
 template <class T>
-bool is_cut_inside (T& value, T& var1, T& var2)
+bool is_cut_inside (T& value, T var1, T var2)
 {
 	if (var1 < var2) return is_cut_scope (value, var1, var2);
 	else             return is_cut_scope (value, var2, var1);
 }
 
 template <class T>
-bool is_cut_min (T& value, T& min)
+bool is_cut_min (T& value, T min)
 {
 	if (value < min) return false;
 	return true;
 }
 template <class T>
-bool is_cut_min (T& value, T& min1, T& min2)
+bool is_cut_min (T& value, T min1, T min2)
 {
 	if (min1 > min2)
 	{
@@ -176,13 +176,13 @@ bool is_cut_min (T& value, T& min1, T& min2)
 }
 
 template <class T>
-bool is_cut_max (T& value, T& max)
+bool is_cut_max (T& value, T max)
 {
 	if (value > max) return false;
 	return true;
 }
 template <class T>
-bool is_cut_max (T& value, T& max1, T& max2)
+bool is_cut_max (T& value, T max1, T max2)
 {
 	if (max1 < max2)
 	{
@@ -217,7 +217,7 @@ inline bool is_cut_max (T& value, V1 max1, V2 max2)  {return is_cut_max (value, 
 // cut value direct to limit, return true if it was limit
 
 template <class T>
-bool was_cut_scope (T& value, T& min, T& max)
+bool was_cut_scope (T& value, T min, T max)
 {
 	if      (value < min) {value = min; return false;}
 	else if (value > max) {value = max; return false;}
@@ -225,20 +225,20 @@ bool was_cut_scope (T& value, T& min, T& max)
 }
 
 template <class T>
-bool was_cut_inside (T& value, T& var1, T& var2)
+bool was_cut_inside (T& value, T var1, T var2)
 {
 	if (var1 < var2) return was_cut_scope (value, var1, var2);
 	else             return was_cut_scope (value, var2, var1);
 }
 
 template <class T>
-bool was_cut_min (T& value, T& min)
+bool was_cut_min (T& value, T min)
 {
 	if (value < min) {value = min; return false;}
 	return true;
 }
 template <class T>
-bool was_cut_min (T& value, T& min1, T& min2)
+bool was_cut_min (T& value, T min1, T min2)
 {
 	bool is_unchanged = true;
 	if (value < min1) {value = min1; is_unchanged = false;}
@@ -253,7 +253,7 @@ bool was_cut_max (T& value, T& max)
 	return true;
 }
 template <class T>
-bool was_cut_max (T& value, T& max1, T& max2)
+bool was_cut_max (T& value, T max1, T max2)
 {
 	bool is_unchanged = true;
 	if (value > max1) {value = max1; is_unchanged = false;}

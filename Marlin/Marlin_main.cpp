@@ -351,9 +351,10 @@ void filament_grab_update(float filament_lenght)
 void filament_grab_set_retract_lenght()
 {
     cut_scope (retract_length_min, 0, retract_length);
+	float value;
     for (int i=0; i<EXTRUDERS; ++i)
     {
-        float value = filament_grab_value[i] / retract_length;
+        value = filament_grab_value[i] / retract_length;
         if      (value < FILAMENT_GRAB_VALUE_BEGIN || !is_prevent_filament_grind())
             retract_length_current[i] = retract_length;
         else if (value < 1.0)
