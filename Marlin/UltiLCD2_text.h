@@ -6,6 +6,8 @@ const char MSGP_NEWLINE[]       PROGMEM = {"\n"};
 const char MSGP_SLASH[]         PROGMEM = {"/"};
 const char MSGP_BRACKED_OPEN[]  PROGMEM = {"("};
 const char MSGP_BRACKED_CLOSE[] PROGMEM = {")"};
+const char MSGP_EQUAL[]         PROGMEM = {"="};
+const char MSGP_UNDERLINE[]     PROGMEM = {"_"};
 const char MSGP_CLICK_TO_RETURN[]    PROGMEM = {"Click to return"};
 const char MSGP_PAUSE[]              PROGMEM = {"pause"};
 const char MSGP_RESUME[]             PROGMEM = {"resume"};
@@ -50,13 +52,14 @@ const char MSGP_TEMPERATURE[]     PROGMEM = {"Temperature"};
 const char MSGP_OFF_BY_0[] PROGMEM = {"off"};
 
 //const char MSGP_UNIT_[] PROGMEM = {""};
-const char MSGP_UNIT_MM_PER_SECOND[]  PROGMEM = {"mm/s"};
-const char MSGP_UNIT_MM_PER_SECOND2[] PROGMEM = {"mm/sec"};
-const char MSGP_UNIT_MM[]             PROGMEM = {"mm"};
-const char MSGP_UNIT_PERCENT[]        PROGMEM = {"%"};
-const char MSGP_UNIT_CELSIUS[]        PROGMEM = {"C"};
-const char MSGP_UNIT_CELSIUS_LIST[]   PROGMEM = {"C "};
-const char MSGP_UNIT_CELSIUS_FROM[]   PROGMEM = {"C/"};
+const char MSGP_UNIT_SPEED[]        PROGMEM = {"mm/s"};
+const char MSGP_UNIT_SPEED2[]       PROGMEM = {"mm/sec"};
+const char MSGP_UNIT_FLOW_VOLUME[]  PROGMEM = {"mm\x1D/s"};
+const char MSGP_UNIT_MM[]           PROGMEM = {"mm"};
+const char MSGP_UNIT_PERCENT[]      PROGMEM = {"%"};
+const char MSGP_UNIT_CELSIUS[]      PROGMEM = {"C"};
+const char MSGP_UNIT_CELSIUS_LIST[] PROGMEM = {"C "};
+const char MSGP_UNIT_CELSIUS_FROM[] PROGMEM = {"C/"};
 
 //const char MSGP_MENU_[] PROGMEM = {""};
 const char MSGP_MENU_PRINT[]       PROGMEM = {"PRINT"};
@@ -84,6 +87,16 @@ const char MSGP_MENU_AUTO[]        PROGMEM = {"AUTO"};
 const char MSGP_MENU_BUILDPLATE[]  PROGMEM = {"BUILD-|PLATE"};
 
 //const char MSGP_STORE_[] PROGMEM = {""};
+const char MSGP_STORE_ENTRY_MATERIAL[]              PROGMEM = {"[material]"};
+const char MSGP_STORE_NAME[]                        PROGMEM = {"name"};
+const char MSGP_STORE_TEMPERATURE[]                 PROGMEM = {"temperature"};
+const char MSGP_STORE_TEMPERATURE_BED[]             PROGMEM = {"bed_temperature"};
+const char MSGP_STORE_TEMPERATURE_BED_FIRST_LAYER[] PROGMEM = {"bed_temp_first_layer"};
+const char MSGP_STORE_FAN_SPEED[]                   PROGMEM = {"fan_speed"};
+const char MSGP_STORE_FLOW[]                        PROGMEM = {"flow"};
+const char MSGP_STORE_DIAMETER[]                    PROGMEM = {"diameter"};
+const char MSGP_STORE_CHANGE_TEMPERATURE[]          PROGMEM = {"change_temp"};
+const char MSGP_STORE_CHANGE_WAIT[]                 PROGMEM = {"change_wait"};
 
 //const char MSGP_ENTRY_[] PROGMEM = {""};
 const char MSGP_ENTRY_RETURN[]  PROGMEM = {"< RETURN"};
@@ -93,5 +106,6 @@ const char MSGP_ENTRY_SWITCH[]  PROGMEM = {">"};
 //const char MSGP_CMD_[] PROGMEM = {""};
 const char MSGP_CMD_COMMENT_ULTIGCODE[] PROGMEM = {";FLAVOR:UltiGCode"};
 const char MSGP_CMD_MOVE_FAST_TO_XY[]   PROGMEM = {"G1 F12000 X%i Y%i"};
+const char MSGP_CMD_MOVE_TO_XY[]        PROGMEM = {"G1 F%i X%i Y%i"};
 
 #endif

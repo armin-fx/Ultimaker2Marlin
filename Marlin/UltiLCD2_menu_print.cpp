@@ -30,6 +30,7 @@ static void lcd_menu_print_error_position();
 static void lcd_menu_print_classic_warning();
 static void lcd_menu_print_material_warning();
 static void lcd_menu_print_tune_retraction();
+static void lcd_menu_print_limits();
 
 static bool primed = false;
 //static bool pauseRequested = false;
@@ -557,11 +558,14 @@ void lcd_menu_print_select()
 
                     //reset all printing parameters to defaults
                     fanSpeedPercent = 100;
+                    max_print_feedrate  = 0;
+                    max_travel_feedrate = 0;
                     for(uint8_t e=0; e<EXTRUDERS; e++)
                     {
                         volume_to_filament_length[e] = 1.0;
                         extrudemultiply[e] = 100;
                         e_smoothed_speed[e] = 0.0f;
+                        max_extrude_volume[e] = 0;
                     }
 
                     if (strncmp_P(buffer, MSGP_CMD_COMMENT_ULTIGCODE, 17) == 0)
@@ -606,7 +610,7 @@ void lcd_menu_print_select()
                             }
 #endif
                             fanSpeedPercent = max(fanSpeedPercent, material[e].fan_speed);
-                            volume_to_filament_length[e] = 1.0 / (M_PI * (material[e].diameter / 2.0) * (material[e].diameter / 2.0));
+                            volume_to_filament_length[e] = 1.0 / (M_PI / 4.0 * material[e].diameter * material[e].diameter);
                             extrudemultiply[e] = material[e].flow;
                         }
 
@@ -1033,6 +1037,8 @@ static void tune_item_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
         strcpy_P(buffer, MSGP_MATERIAL_FLOW_2);
 #endif
     else if (index++ == nr)
+        strcpy_P(buffer, PSTR("Limits"));
+    else if (index++ == nr)
         strcpy_P(buffer, PSTR("Retraction"));
     else if (index++ == nr)
         strcpy_P(buffer, PSTR("LED Brightness"));
@@ -1095,13 +1101,10 @@ static void tune_item_details_callback(uint8_t nr)
 
 void lcd_menu_print_tune_heatup_nozzle0()
 {
-    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
+    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM != 0)
     {
-        target_temperature[0] = int(target_temperature[0]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM);
-        if (target_temperature[0] < 0)
-            target_temperature[0] = 0;
-        if (target_temperature[0] > get_maxtemp(0) - 15)
-            target_temperature[0] = get_maxtemp(0) - 15;
+        target_temperature[0] = int(target_temperature[0]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM);
+        cut_scope (target_temperature[0], 0, get_maxtemp(0) - 15);
         lcd_lib_encoder_pos = 0;
     }
     if (lcd_lib_button_pressed)
@@ -1124,13 +1127,10 @@ void lcd_menu_print_tune_heatup_nozzle0()
 #if EXTRUDERS > 1
 void lcd_menu_print_tune_heatup_nozzle1()
 {
-    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
+    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM != 0)
     {
-        target_temperature[1] = int(target_temperature[1]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM);
-        if (target_temperature[1] < 0)
-            target_temperature[1] = 0;
-        if (target_temperature[1] > get_maxtemp(1) - 15)
-            target_temperature[1] = get_maxtemp(1) - 15;
+        target_temperature[1] = int(target_temperature[1]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM);
+        cut_scope (target_temperature[0], 0, get_maxtemp(0) - 15);
         lcd_lib_encoder_pos = 0;
     }
     if (lcd_lib_button_pressed)
@@ -1154,7 +1154,7 @@ void lcd_menu_print_tune()
 //    {
 //        lcd_print_pause();
 //    }
-    uint8_t len = 5 + BED_MENU_OFFSET + EXTRUDERS * 2;
+    uint8_t len = 6 + 2*BED_MENU_OFFSET + 2*EXTRUDERS;
     if (ui_mode & UI_MODE_EXPERT)
     {
         ++len; // sleep timer
@@ -1182,7 +1182,7 @@ void lcd_menu_print_tune()
         else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_maintenance_advanced_bed_heatup, 0));//Use the maintainance heatup menu, which shows the current temperature.
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING_OFF_P(target_temperature_bed_next, MSGP_BUILDPLATE_TEMPERATURE_NEXT, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15);
+            LCD_EDIT_SETTING_P(target_temperature_bed_next, MSGP_BUILDPLATE_TEMPERATURE_NEXT, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15, LCD_SETTINGS_TYPE_OFF);
 #endif
         else if (IS_SELECTED_SCROLL(index++))
             LCD_EDIT_SETTING_BYTE_PERCENT_P(fanSpeed, MSGP_FAN_SPEED, MSGP_UNIT_PERCENT, 0, 100);
@@ -1196,9 +1196,11 @@ void lcd_menu_print_tune()
             LCD_EDIT_SETTING_P(extrudemultiply[0], MSGP_MATERIAL_FLOW, MSGP_UNIT_PERCENT, 10, 1000);
 #endif
         else if (IS_SELECTED_SCROLL(index++))
+            menu.add_menu(menu_t(lcd_menu_print_limits, 0));
+        else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_print_tune_retraction, 0));
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING_P(led_brightness_level, MSGP_MATERIAL_FLOW, MSGP_UNIT_PERCENT, 0, 100);
+            LCD_EDIT_SETTING_P(led_brightness_level, PSTR("Brightness"), MSGP_UNIT_PERCENT, 0, 100);
         else if ((ui_mode & UI_MODE_EXPERT) && card.sdprinting && card.pause && IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(NULL, lcd_menu_expert_extrude, lcd_extrude_quit_menu, 0)); // Move material
         else if ((ui_mode & UI_MODE_EXPERT) && IS_SELECTED_SCROLL(index++))
@@ -1242,7 +1244,7 @@ static void lcd_retraction_details(uint8_t nr)
     if(nr == item++)
         float_to_string2(retract_length, buffer, MSGP_UNIT_MM);
     else if(nr == item++)
-        int_to_string(retract_feedrate / 60 + 0.5, buffer, MSGP_UNIT_MM_PER_SECOND2);
+        int_to_string(retract_feedrate / 60 + 0.5, buffer, MSGP_UNIT_SPEED2);
     else if(nr == item++)
         float_to_string2(end_of_print_retraction, buffer, MSGP_UNIT_MM);
 #if EXTRUDERS > 1
@@ -1274,7 +1276,7 @@ static void lcd_menu_print_tune_retraction()
         else if (IS_SELECTED_SCROLL(item++))
             LCD_EDIT_SETTING_FLOAT001_P(retract_length, MSGP_RETRACT_LENGTH, MSGP_UNIT_MM, 0, 50);
         else if (IS_SELECTED_SCROLL(item++))
-            LCD_EDIT_SETTING_SPEED_P(retract_feedrate, MSGP_RETRACT_SPEED, MSGP_UNIT_MM_PER_SECOND2, 0, max_feedrate[E_AXIS] * 60);
+            LCD_EDIT_SETTING_SPEED_P(retract_feedrate, MSGP_RETRACT_SPEED, MSGP_UNIT_SPEED2, 0, max_feedrate[E_AXIS] * 60);
         else if (IS_SELECTED_SCROLL(item++))
             LCD_EDIT_SETTING_FLOAT001_P(end_of_print_retraction, PSTR("End of print retract"), MSGP_UNIT_MM, 0, 50);
 #if EXTRUDERS > 1
@@ -1283,9 +1285,114 @@ static void lcd_menu_print_tune_retraction()
 #endif
 #ifdef PREVENT_FILAMENT_GRIND
 		else if (IS_SELECTED_SCROLL(item++))
-			LCD_EDIT_SETTING_OFF_P(filament_grab_max, MSGP_FILAMENT_GRAB_COUNT, PSTR(""), 0, MAX_FILAMENT_MAX_GRAB);
+			LCD_EDIT_SETTING_P(filament_grab_max, MSGP_FILAMENT_GRAB_COUNT, PSTR(""), 0, MAX_FILAMENT_MAX_GRAB, LCD_SETTINGS_TYPE_OFF);
 		else if (IS_SELECTED_SCROLL(item++))
 			LCD_EDIT_SETTING_FLOAT001_P(retract_length_min, MSGP_RETRACT_LENGTH_MIN, MSGP_UNIT_MM, 0, retract_length);
+#endif
+    }
+    lcd_lib_update_screen();
+}
+
+static void lcd_limits_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
+{
+    char buffer[32] = {0};
+    uint8_t item = 0;
+    if (nr == item++)
+        strcpy_P(buffer, MSGP_ENTRY_RETURN);
+    else if (nr == item++)
+        strcpy_P(buffer, PSTR("max print speed"));
+    else if (nr == item++)
+        strcpy_P(buffer, PSTR("max travel speed"));
+#if EXTRUDERS > 1
+    else if (nr == item++)
+        strcpy_P(buffer, PSTR("max extrusion 1"));
+    else if (nr == item++)
+        strcpy_P(buffer, PSTR("max extrusion 2"));
+#else
+    else if (nr == item++)
+        strcpy_P(buffer, PSTR("max extrusion"));
+#endif
+    else
+        strcpy_P(buffer, MSGP_ENTRY_UNKNOWN);
+
+    lcd_draw_scroll_entry(offsetY, buffer, flags);
+}
+
+static void lcd_limits_details(uint8_t nr)
+{
+    char buffer[32] = {0};
+    calculate_speed();
+    //float max_feedrate_xy = min(max_feedrate[X_AXIS], max_feedrate[Y_AXIS]);
+    uint8_t item = 1;
+    if(nr == item++)
+        if (max_print_feedrate > 0)
+            int_to_string(max_print_feedrate, buffer, MSGP_UNIT_SPEED);
+        else
+            strcpy_P(buffer, MSGP_OFF_BY_0);
+    else if(nr == item++)
+        if (max_travel_feedrate > 0)
+            int_to_string(max_travel_feedrate, buffer, MSGP_UNIT_SPEED);
+        else
+            strcpy_P(buffer, MSGP_OFF_BY_0);
+    else if(nr == item++)
+    {
+        if (max_extrude_volume[0] > 0)
+            float_to_string2(max_extrude_volume[0], buffer, MSGP_UNIT_FLOW_VOLUME);
+        else
+            strcpy_P(buffer, MSGP_OFF_BY_0);
+        strcat_P (buffer, PSTR(" ("));
+        float_to_string2(e_smoothed_speed[0], buffer + strlen(buffer), PSTR(UNIT_FLOW ")"));
+    }
+#if EXTRUDERS > 1
+    else if(nr == item++)
+    {
+        if (max_extrude_volume[1] > 0)
+            float_to_string2(max_extrude_volume[1], buffer, MSGP_UNIT_FLOW_VOLUME);
+        else
+            strcpy_P(buffer, MSGP_OFF_BY_0);
+        strcat_P (buffer, PSTR(" ("));
+        float_to_string2(e_smoothed_speed[1], buffer + strlen(buffer), PSTR(UNIT_FLOW ")"));
+    }
+#endif
+    else
+        return;
+    lcd_lib_draw_string(5, BOTTOM_MENU_YPOS, buffer);
+}
+
+static void lcd_menu_print_limits()
+{
+    lcd_scroll_menu(PSTR("Limits"), 4 + (EXTRUDERS > 1 ? 1 : 0), lcd_limits_item, lcd_limits_details);
+    if (lcd_lib_button_pressed)
+    {
+        uint8_t item = 0;
+        float max_feedrate_xy = min(max_feedrate[X_AXIS], max_feedrate[Y_AXIS]);
+        float max_feedrate_e_volume;
+        if (IS_SELECTED_SCROLL(item++))
+            menu.return_to_previous();
+        else if (IS_SELECTED_SCROLL(item++))
+            LCD_EDIT_SETTING_FLOAT1_P(max_print_feedrate,  PSTR("max print speed"),  MSGP_UNIT_SPEED, 0, max_feedrate_xy, LCD_SETTINGS_TYPE_OFF);
+        else if (IS_SELECTED_SCROLL(item++))
+            LCD_EDIT_SETTING_FLOAT1_P(max_travel_feedrate, PSTR("max travel speed"), MSGP_UNIT_SPEED, 0, max_feedrate_xy, LCD_SETTINGS_TYPE_OFF);
+#if EXTRUDERS > 1
+        else if (IS_SELECTED_SCROLL(item++))
+        {
+            if (volume_to_filament_length[0] < 0.99) max_feedrate_e_volume = max_feedrate[E_AXIS] / volume_to_filament_length[0];
+            else                                     max_feedrate_e_volume = max_feedrate[E_AXIS] * DEFAULT_FILAMENT_AREA;
+            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[0], PSTR("max extr. volume 1"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume, LCD_SETTINGS_TYPE_OFF);
+        }
+        else if (IS_SELECTED_SCROLL(item++))
+        {
+            if (volume_to_filament_length[1] < 0.99) max_feedrate_e_volume = max_feedrate[E_AXIS] / volume_to_filament_length[1];
+            else                                     max_feedrate_e_volume = max_feedrate[E_AXIS] * DEFAULT_FILAMENT_AREA;
+            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[1], PSTR("max extr. volume 2"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume, LCD_SETTINGS_TYPE_OFF);
+        }
+#else
+        else if (IS_SELECTED_SCROLL(item++))
+        {
+            if (volume_to_filament_length[0] < 0.99) max_feedrate_e_volume = max_feedrate[E_AXIS] / volume_to_filament_length[0];
+            else                                     max_feedrate_e_volume = max_feedrate[E_AXIS] * DEFAULT_FILAMENT_AREA;
+            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[0], PSTR("max extr. volume"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume, LCD_SETTINGS_TYPE_OFF);
+        }
 #endif
     }
     lcd_lib_update_screen();

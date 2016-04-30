@@ -449,10 +449,10 @@ void LCDMenu::set_active(menuItemCallback_t getMenuItem, int8_t index)
 bool lcd_tune_byte(uint8_t &value, uint8_t _min, uint8_t _max)
 {
     int temp_value = int((float(value)*_max/255)+0.5);
-    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
+    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM != 0)
     {
         lcd_lib_tick();
-        temp_value += lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM;
+        temp_value += lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM;
         temp_value = constrain(temp_value, _min, _max);
         value = uint8_t((float(temp_value)*255/_max)+0.5);
         lcd_lib_encoder_pos = 0;
@@ -475,10 +475,10 @@ bool lcd_tune_speed(float &value, float _min, float _max)
 
 bool lcd_tune_value(int &value, int _min, int _max)
 {
-    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
+    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM != 0)
     {
         lcd_lib_tick();
-        value = constrain(value + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM), _min, _max);
+        value = constrain(value + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM), _min, _max);
         lcd_lib_encoder_pos = 0;
         return true;
     }

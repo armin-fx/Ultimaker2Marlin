@@ -320,12 +320,9 @@ void lcd_scroll_menu(const char* menuNameP, int8_t entryCount, scrollDrawCallbac
 
 void lcd_menu_edit_setting()
 {
-    if (lcd_lib_encoder_pos < lcd_setting_min)
-        lcd_lib_encoder_pos = lcd_setting_min;
-    if (lcd_lib_encoder_pos > lcd_setting_max)
-        lcd_lib_encoder_pos = lcd_setting_max;
+    cut_scope (lcd_lib_encoder_pos, lcd_setting_min, lcd_setting_max);
 
-    uint8_t lcd_setting_type_nr     = lcd_setting_type % LCD_SETTINGS_TYPE_OFF_OFFSET;
+    uint8_t lcd_setting_type_nr = lcd_setting_type & LCD_SETTINGS_TYPE_BITS;
 
     if       (lcd_setting_type_nr == 1)
         *(uint8_t*)lcd_setting_ptr = lcd_lib_encoder_pos;
@@ -347,7 +344,7 @@ void lcd_menu_edit_setting()
     lcd_basic_screen();
     lcd_lib_draw_string_centerP(20, lcd_setting_name);
     char buffer[20] = {0};
-    if(lcd_setting_type > LCD_SETTINGS_TYPE_OFF_OFFSET && lcd_lib_encoder_pos == 0)
+    if(LCD_SETTINGS_TYPE_IS_SET(lcd_setting_type, LCD_SETTINGS_TYPE_OFF) && lcd_lib_encoder_pos == 0)
     {
         strcpy_P(buffer, MSGP_OFF_BY_0);
     }
@@ -361,7 +358,7 @@ void lcd_menu_edit_setting()
     lcd_lib_draw_string_center(30, buffer);
 
     strcpy_P(buffer, PSTR("Prev: "));
-    if(lcd_setting_type > LCD_SETTINGS_TYPE_OFF_OFFSET && lcd_setting_start_value == 0)
+    if(LCD_SETTINGS_TYPE_IS_SET(lcd_setting_type, LCD_SETTINGS_TYPE_OFF) && lcd_setting_start_value == 0)
     {
         strcpy_P(buffer + 6, MSGP_OFF_BY_0);
     }

@@ -217,7 +217,7 @@ uint8_t Sd2CardExt::writeExtMask(uint8_t mio, uint8_t func,
   uint32_t arg =
       (((uint32_t)mio & 0x1) << 31) |
 	  (mio ? (((uint32_t)func & 0x7) << 28) : (((uint32_t)func & 0xF) << 27)) |
-	  (0x1 << 26) |
+	  ((uint32_t)0x1 << 26) |
 	  ((addr & 0x1FFFF) << 9) |
 	  mask;
 

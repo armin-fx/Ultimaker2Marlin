@@ -944,7 +944,7 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
             }
             lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 24, retractSpeedGfx);
             // lcd_lib_draw_stringP(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 24, PSTR("S"));
-            int_to_string(retract_feedrate / 60 + 0.5, buffer, MSGP_UNIT_MM_PER_SECOND);
+            int_to_string(retract_feedrate / 60 + 0.5, buffer, MSGP_UNIT_SPEED);
             LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                                   , 24
                                   , 7*LCD_CHAR_SPACING
@@ -981,7 +981,7 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
             }
 
             lcd_lib_draw_string_leftP(42, MSGP_XY_JERK);
-            int_to_string(max_xy_jerk, buffer, MSGP_UNIT_MM_PER_SECOND);
+            int_to_string(max_xy_jerk, buffer, MSGP_UNIT_SPEED);
             LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                                   , 42
                                   , 7*LCD_CHAR_SPACING
@@ -1089,7 +1089,7 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
     #else
                 strcpy_P(buffer, PSTR("Flow(1) "));
     #endif
-                float_to_string1(e_smoothed_speed[0], buffer+strlen(buffer), PSTR(UNIT_FLOW));
+                float_to_string1(e_smoothed_speed[0], buffer+strlen(buffer), MSGP_UNIT_FLOW_VOLUME);
                 lcd_lib_draw_string_left(5, buffer);
                 flags |= MENU_STATUSLINE;
             }
@@ -1110,7 +1110,7 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
             if (flags & (MENU_SELECTED | MENU_ACTIVE))
             {
                 strcpy_P(buffer, PSTR("Flow(2) "));
-                float_to_string1(e_smoothed_speed[1], buffer+strlen(buffer), PSTR(UNIT_FLOW));
+                float_to_string1(e_smoothed_speed[1], buffer+strlen(buffer), MSGP_UNIT_FLOW_VOLUME);
                 lcd_lib_draw_string_left(5, buffer);
                 flags |= MENU_STATUSLINE;
             }
@@ -1130,7 +1130,7 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
             if (flags & (MENU_SELECTED | MENU_ACTIVE))
             {
                 strcpy_P(buffer, PSTR("Speed "));
-                int_to_string(current_nominal_speed+0.5, buffer+strlen(buffer), PSTR(UNIT_SPEED));
+                int_to_string(current_nominal_speed+0.5, buffer+strlen(buffer), MSGP_UNIT_SPEED);
                 lcd_lib_draw_string_left(5, buffer);
                 flags |= MENU_STATUSLINE;
             }
@@ -1423,6 +1423,27 @@ static unsigned long predictTimeLeft()
     return (printTime >= totalTime) ? 1 : totalTime - printTime;
 }
 
+void calculate_speed()
+{
+    // calculate speeds
+    if (current_block!=NULL)
+    {
+
+        if ((current_block->steps_e > 0) && (current_block->step_event_count > 0) && (current_block->steps_x || current_block->steps_y))
+        {
+//                float block_time = current_block->millimeters / current_block->nominal_speed;
+//                float mm_e = current_block->steps_e / axis_steps_per_unit[E_AXIS];
+
+            // calculate live extrusion rate from e speed and filament area
+            float speed_e = current_block->steps_e * current_block->nominal_rate / axis_steps_per_unit[E_AXIS] / current_block->step_event_count;
+            float volume = (volume_to_filament_length[current_block->active_extruder] < 0.99) ? speed_e / volume_to_filament_length[current_block->active_extruder] : speed_e*DEFAULT_FILAMENT_AREA;
+
+            e_smoothed_speed[current_block->active_extruder] = (e_smoothed_speed[current_block->active_extruder]*LOW_PASS_SMOOTHING) + ( volume *(1.0-LOW_PASS_SMOOTHING));
+            current_nominal_speed = current_block->nominal_speed;
+        }
+    }
+}
+
 void lcd_menu_printing_tg()
 {
     if (card.pause)
@@ -1438,23 +1459,7 @@ void lcd_menu_printing_tg()
         lcd_basic_screen();
         lcd_lib_draw_hline(3, 124, 13);
 
-        // calculate speeds
-        if (current_block!=NULL)
-        {
-
-            if ((current_block->steps_e > 0) && (current_block->step_event_count > 0) && (current_block->steps_x || current_block->steps_y))
-            {
-    //                float block_time = current_block->millimeters / current_block->nominal_speed;
-    //                float mm_e = current_block->steps_e / axis_steps_per_unit[E_AXIS];
-
-                // calculate live extrusion rate from e speed and filament area
-                float speed_e = current_block->steps_e * current_block->nominal_rate / axis_steps_per_unit[E_AXIS] / current_block->step_event_count;
-                float volume = (volume_to_filament_length[current_block->active_extruder] < 0.99) ? speed_e / volume_to_filament_length[current_block->active_extruder] : speed_e*DEFAULT_FILAMENT_AREA;
-
-                e_smoothed_speed[current_block->active_extruder] = (e_smoothed_speed[current_block->active_extruder]*LOW_PASS_SMOOTHING) + ( volume *(1.0-LOW_PASS_SMOOTHING));
-                current_nominal_speed = current_block->nominal_speed;
-            }
-        }
+        calculate_speed();
 
 #if EXTRUDERS > 1
         char buffer[32] = {0};
@@ -2140,12 +2145,12 @@ static void lcd_move_axis(AxisEnum axis, float diff)
     }
     else
     {
-        if (lcd_lib_encoder_pos/ENCODER_TICKS_PER_SCROLL_MENU_ITEM < 0)
+        if (lcd_lib_encoder_pos/ENCODER_TICKS_PER_TUNE_VALUE_ITEM < 0)
         {
             --movingSpeed;
             lcd_lib_encoder_pos = 0;
         }
-        else if (lcd_lib_encoder_pos/ENCODER_TICKS_PER_SCROLL_MENU_ITEM > 0)
+        else if (lcd_lib_encoder_pos/ENCODER_TICKS_PER_TUNE_VALUE_ITEM > 0)
         {
             ++movingSpeed;
             lcd_lib_encoder_pos = 0;
@@ -2155,7 +2160,8 @@ static void lcd_move_axis(AxisEnum axis, float diff)
             movingSpeed = constrain(movingSpeed, -20, 20);
             if (abs(movingSpeed) < 6)
             {
-                movingSpeed = 6*((movingSpeed > 0) - (movingSpeed < 0));
+                if      (movingSpeed > 0) movingSpeed =  6;
+                else if (movingSpeed < 0) movingSpeed = -6;
             }
 
             uint8_t steps = min(abs(movingSpeed)*2, (BLOCK_BUFFER_SIZE - movesplanned()) >> 1);
@@ -2223,7 +2229,7 @@ FORCE_INLINE void lcd_home_y_axis() { enquecommand_P(PSTR("G28 Y0")); }
 static void drawMoveDetails()
 {
     char buffer[32] = {0};
-    int_to_string(abs(movingSpeed), buffer, PSTR(UNIT_SPEED));
+    int_to_string(abs(movingSpeed), buffer, MSGP_UNIT_SPEED);
     lcd_lib_draw_string_center(5, buffer);
     if (movingSpeed <= 0)
     {

@@ -248,6 +248,9 @@
   #endif
 #endif
 
+// default filament diameter
+#define DEFAULT_FILAMENT_DIAMETER 2.85
+#define DEFAULT_FILAMENT_AREA     ((DEFAULT_FILAMENT_DIAMETER) * (DEFAULT_FILAMENT_DIAMETER) * M_PI / 4)
 
 // extruder advance constant (s2/mm3)
 //
@@ -261,7 +264,7 @@
 #ifdef ADVANCE
   #define EXTRUDER_ADVANCE_K .0
 
-  #define D_FILAMENT 2.85
+  #define D_FILAMENT DEFAULT_FILAMENT_DIAMETER
   #define STEPS_MM_E 836
   #define EXTRUTION_AREA (0.25 * D_FILAMENT * D_FILAMENT * 3.14159)
   #define STEPS_PER_CUBIC_MM_E (axis_steps_per_unit[E_AXIS]/ EXTRUTION_AREA)

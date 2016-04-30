@@ -97,6 +97,10 @@ extern float max_e_jerk;
 extern float mintravelfeedrate;
 extern unsigned long axis_steps_per_sqr_second[NUM_AXIS];
 
+extern float max_print_feedrate;
+extern float max_travel_feedrate;
+extern float max_extrude_volume[EXTRUDERS];
+
 #ifdef AUTOTEMP
     extern bool autotemp_enabled;
     extern float autotemp_max;

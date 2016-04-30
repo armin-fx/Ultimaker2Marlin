@@ -966,7 +966,7 @@ static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 26, retractSpeedGfx);
-        int_to_string(retract_feedrate / 60 + 0.5, buffer, MSGP_UNIT_MM_PER_SECOND);
+        int_to_string(retract_feedrate / 60 + 0.5, buffer, MSGP_UNIT_SPEED);
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                               , 26
                               , 7*LCD_CHAR_SPACING
@@ -1513,7 +1513,7 @@ static void drawMaxSpeedSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_string_leftP(20, PSTR("X"));
-        int_to_string(max_feedrate[X_AXIS], buffer, PSTR(UNIT_SPEED));
+        int_to_string(max_feedrate[X_AXIS], buffer, MSGP_UNIT_SPEED);
         LCDMenu::drawMenuString(LCD_CHAR_MARGIN_LEFT+2*LCD_CHAR_SPACING
                               , 20
                               , 7*LCD_CHAR_SPACING
@@ -1531,7 +1531,7 @@ static void drawMaxSpeedSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_string_leftP(35, PSTR("Y"));
-        int_to_string(max_feedrate[Y_AXIS], buffer, PSTR(UNIT_SPEED));
+        int_to_string(max_feedrate[Y_AXIS], buffer, MSGP_UNIT_SPEED);
         LCDMenu::drawMenuString(LCD_CHAR_MARGIN_LEFT+2*LCD_CHAR_SPACING
                               , 35
                               , 7*LCD_CHAR_SPACING
@@ -1549,7 +1549,7 @@ static void drawMaxSpeedSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_stringP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-8*LCD_CHAR_SPACING, 20, PSTR("Z"));
-        int_to_string(max_feedrate[Z_AXIS], buffer, PSTR(UNIT_SPEED));
+        int_to_string(max_feedrate[Z_AXIS], buffer, MSGP_UNIT_SPEED);
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-6*LCD_CHAR_SPACING
                               , 20
                               , 6*LCD_CHAR_SPACING
@@ -1567,7 +1567,7 @@ static void drawMaxSpeedSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_stringP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-8*LCD_CHAR_SPACING, 35, PSTR("E"));
-        int_to_string(max_feedrate[E_AXIS], buffer, PSTR(UNIT_SPEED));
+        int_to_string(max_feedrate[E_AXIS], buffer, MSGP_UNIT_SPEED);
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-6*LCD_CHAR_SPACING
                               , 35
                               , 6*LCD_CHAR_SPACING
@@ -1710,7 +1710,7 @@ static void drawAccelerationSubmenu(uint8_t nr, uint8_t &flags)
         }
 
         lcd_lib_draw_string_leftP(35, MSGP_XY_JERK);
-        int_to_string(max_xy_jerk, buffer, MSGP_UNIT_MM_PER_SECOND);
+        int_to_string(max_xy_jerk, buffer, MSGP_UNIT_SPEED);
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                               , 35
                               , 7*LCD_CHAR_SPACING

@@ -185,8 +185,11 @@ bool IsStopped();
 uint8_t StoppedReason();
 
 void clear_command_queue();
-void enquecommand(const char *cmd); //put an ascii command at the end of the current buffer.
-void enquecommand_P(const char *cmd); //put an ascii command at the end of the current buffer, read from flash
+void enquecommand_run     (const char *cmd, bool isProgmem);
+inline void enquecommand  (const char *cmd) //put an ascii command at the end of the current buffer.
+{   enquecommand_run(cmd, false); }
+inline void enquecommand_P(const char *cmd) //put an ascii command at the end of the current buffer, read from flash
+{   enquecommand_run(cmd, true); }
 
 bool is_command_queued();
 uint8_t commands_queued();

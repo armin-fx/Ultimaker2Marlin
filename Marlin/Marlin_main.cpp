@@ -351,7 +351,7 @@ void filament_grab_update(float filament_lenght)
 void filament_grab_set_retract_lenght()
 {
     cut_scope (retract_length_min, 0, retract_length);
-	float value;
+    float value;
     for (int i=0; i<EXTRUDERS; ++i)
     {
         value = filament_grab_value[i] / retract_length;
@@ -402,16 +402,6 @@ void enquecommand_run(const char *cmd, bool isProgmem)
     bufindw %= BUFSIZE;
     ++buflen;
   }
-}
-
-void enquecommand(const char *cmd)
-{
-	enquecommand_run(cmd, false);
-}
-
-void enquecommand_P(const char *cmd)
-{
-	enquecommand_run(cmd, true);
 }
 
 bool is_command_queued()

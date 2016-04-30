@@ -290,7 +290,7 @@ static void move_head_to_front()
 {
     char buffer[32] = {0};
     homeHead();
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[0]), int(AXIS_CENTER_POS(X_AXIS)), int(min_pos[Y_AXIS])+5);
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_XY, int(homing_feedrate[0]), int(AXIS_CENTER_POS(X_AXIS)), int(min_pos[Y_AXIS])+5);
     enquecommand(buffer);
 }
 
@@ -437,13 +437,10 @@ void lcd_menu_maintenance_advanced()
 
 static void lcd_menu_maintenance_advanced_heatup()
 {
-    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
+    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM != 0)
     {
-        target_temperature[active_extruder] = int(target_temperature[active_extruder]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM);
-        if (target_temperature[active_extruder] < 0)
-            target_temperature[active_extruder] = 0;
-        if (target_temperature[active_extruder] > get_maxtemp(active_extruder) - 15)
-            target_temperature[active_extruder] = get_maxtemp(active_extruder) - 15;
+        target_temperature[active_extruder] = int(target_temperature[active_extruder]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM);
+        cut_scope (target_temperature[active_extruder], 0, get_maxtemp(active_extruder) - 15);
         lcd_lib_encoder_pos = 0;
     }
     if (lcd_lib_button_pressed)
@@ -462,7 +459,7 @@ static void lcd_menu_maintenance_advanced_heatup()
 
 static void lcd_menu_maintenance_extrude()
 {
-    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
+    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM != 0)
     {
         if (printing_state == PRINT_STATE_NORMAL && movesplanned() < 3)
         {
@@ -504,9 +501,9 @@ static void lcd_menu_maintenance_extrude()
 #if TEMP_SENSOR_BED != 0
 void lcd_menu_maintenance_advanced_bed_heatup()
 {
-    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
+    if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM != 0)
     {
-        target_temperature_bed = int(target_temperature_bed) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM);
+        target_temperature_bed = int(target_temperature_bed) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_TUNE_VALUE_ITEM);
         target_temperature_bed = constrain(target_temperature_bed, 0, BED_MAXTEMP - 15);
         lcd_lib_encoder_pos = 0;
     }

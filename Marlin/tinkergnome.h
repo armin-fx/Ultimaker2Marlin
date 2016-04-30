@@ -7,7 +7,6 @@
 // low pass filter constant, from 0.0 to 1.0 -- Higher numbers mean more smoothing, less responsiveness.
 // 0.0 would be completely disabled, 1.0 would ignore any changes
 #define LOW_PASS_SMOOTHING 0.90
-#define DEFAULT_FILAMENT_AREA 6.3793966
 
 extern float recover_height;
 extern float recover_position[NUM_AXIS];
@@ -31,7 +30,7 @@ void lcd_menu_recover_init();
 void lcd_menu_expert_recover();
 void reset_printing_state();
 void endofprint_retract_store();
-
+void calculate_speed();
 
 FORCE_INLINE void lcd_print_tune_nozzle0() { lcd_tune_value(target_temperature[0], 0, get_maxtemp(0) - 15); }
 #if EXTRUDERS > 1

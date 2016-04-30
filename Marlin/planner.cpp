@@ -78,6 +78,11 @@ float max_e_jerk;
 float mintravelfeedrate;
 unsigned long axis_steps_per_sqr_second[NUM_AXIS];
 
+// 0 = off
+float max_print_feedrate  = 0;
+float max_travel_feedrate = 0;
+float max_extrude_volume[EXTRUDERS] = ARRAY_BY_EXTRUDERS_FILL(0);
+
 // The current position of the tool in absolute steps
 long position[4];   //rescaled from extern when axis_steps_per_unit are changed by gcode
 static float previous_speed[4]; // Speed of previous path line segment
@@ -553,6 +558,8 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   target[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);
   target[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]*volume_to_filament_length[extruder]);
 
+  long old_delta_e = target[E_AXIS] - position[E_AXIS];
+
   #ifdef PREVENT_DANGEROUS_EXTRUDE
   if(target[E_AXIS]!=position[E_AXIS])
   {
@@ -666,13 +673,19 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
   }
 #endif // EXTRUDERS
 
-  if (block->steps_e == 0)
-  {
-    if(feed_rate<mintravelfeedrate) feed_rate=mintravelfeedrate;
+  // special limits of feedrate
+  if (old_delta_e == 0)
+  { // limit travel move
+    cut_min(feed_rate, mintravelfeedrate);
+    if (max_travel_feedrate > 0)
+        cut_max(feed_rate, max_travel_feedrate);
   }
-  else
-  {
-    if(feed_rate<minimumfeedrate) feed_rate=minimumfeedrate;
+  else if ((block->steps_x != 0) || (block->steps_y != 0)) // xy-move ?
+       if (old_delta_e > 0)                                // no retraction ?
+  { // limit printing move
+    cut_min(feed_rate, minimumfeedrate);
+    if (max_print_feedrate > 0)
+        cut_max(feed_rate, max_print_feedrate);
   }
 
   float delta_mm[4];
@@ -734,6 +747,19 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
     current_speed[i] = delta_mm[i] * inverse_second;
     if(fabs(current_speed[i]) > max_feedrate[i])
       speed_factor = min(speed_factor, max_feedrate[i] / fabs(current_speed[i]));
+  }
+  // Limit extrusion volume speed when printing
+  if (max_extrude_volume[extruder] > 0)               // maximum extrusion setting is on ?
+  if (delta_mm[E_AXIS] > 0)                           // extruder moved forward ? (no retraction ?)
+  if ((block->steps_x != 0) || (block->steps_y != 0)) // xy-axis is moved ? (no unretraction ?)
+  {
+    //delta_mm[E_AXIS] * (M_PI * (material[extruder].diameter / 2.0) * (material[extruder].diameter / 2.0));
+    float value;
+    if (volume_to_filament_length[extruder] < 0.99) value = delta_mm[E_AXIS] / volume_to_filament_length[extruder];
+    else                                            value = delta_mm[E_AXIS] * DEFAULT_FILAMENT_AREA;
+    value *= inverse_second;
+    if (value > max_extrude_volume[extruder])
+      speed_factor = min(speed_factor, max_extrude_volume[extruder] / value);
   }
 
   // Max segement time in us.
