@@ -1084,7 +1084,7 @@ static void lcd_menu_material_temperature_settings()
         {
             uint8_t index = SELECTED_SCROLL_MENU_ITEM() - 2;
             //menu.return_to_previous();
-            LCD_EDIT_SETTING_P(material[active_extruder].temperature[index], MSGP_TEMPERATURE, MSGP_UNIT_CELSIUS, 0, HEATER_0_MAXTEMP - 15, LCD_SETTINGS_TYPE_OFF);
+            LCD_EDIT_SETTING_P(material[active_extruder].temperature[index], MSGP_TEMPERATURE, MSGP_UNIT_CELSIUS, 0, HEATER_0_MAXTEMP - 15, LCD_SETTINGS_TYPE_OFF_BY_0);
         }
     }
     lcd_lib_update_screen();
@@ -1142,7 +1142,7 @@ static void lcd_menu_material_bed_temperature_settings()
         else if (IS_SELECTED_SCROLL(2))
         {
             //menu.return_to_previous();
-            LCD_EDIT_SETTING_P(material[active_extruder].bed_temperature_first_layer, MSGP_BUILDPLATE_TEMPERATURE_FIRST_LAYER, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15, LCD_SETTINGS_TYPE_OFF);
+            LCD_EDIT_SETTING_P(material[active_extruder].bed_temperature_first_layer, MSGP_BUILDPLATE_TEMPERATURE_FIRST_LAYER, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15, LCD_SETTINGS_TYPE_OFF_BY_0);
         }
     }
     lcd_lib_update_screen();

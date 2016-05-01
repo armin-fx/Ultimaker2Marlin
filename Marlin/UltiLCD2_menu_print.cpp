@@ -1173,16 +1173,16 @@ void lcd_menu_print_tune()
         else if (IS_SELECTED_SCROLL(index++))
             LCD_EDIT_SETTING_P(feedmultiply, PSTR("Print speed"), MSGP_UNIT_PERCENT, 10, 1000);
         else if (IS_SELECTED_SCROLL(index++))
-            menu.add_menu(menu_t(lcd_menu_print_tune_heatup_nozzle0, 0));
+            LCD_EDIT_SETTING_FUNCTION(lcd_menu_print_tune_heatup_nozzle0);
 #if EXTRUDERS > 1
         else if (IS_SELECTED_SCROLL(index++))
-            menu.add_menu(menu_t(lcd_menu_print_tune_heatup_nozzle1, 0));
+            LCD_EDIT_SETTING_FUNCTION(lcd_menu_print_tune_heatup_nozzle1);
 #endif
 #if TEMP_SENSOR_BED != 0
         else if (IS_SELECTED_SCROLL(index++))
-            menu.add_menu(menu_t(lcd_menu_maintenance_advanced_bed_heatup, 0));//Use the maintainance heatup menu, which shows the current temperature.
+            LCD_EDIT_SETTING_FUNCTION(lcd_menu_maintenance_advanced_bed_heatup);//Use the maintainance heatup menu, which shows the current temperature.
         else if (IS_SELECTED_SCROLL(index++))
-            LCD_EDIT_SETTING_P(target_temperature_bed_next, MSGP_BUILDPLATE_TEMPERATURE_NEXT, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15, LCD_SETTINGS_TYPE_OFF);
+            LCD_EDIT_SETTING_P(target_temperature_bed_next, MSGP_BUILDPLATE_TEMPERATURE_NEXT, MSGP_UNIT_CELSIUS, 0, BED_MAXTEMP - 15, LCD_SETTINGS_TYPE_OFF_BY_0);
 #endif
         else if (IS_SELECTED_SCROLL(index++))
             LCD_EDIT_SETTING_BYTE_PERCENT_P(fanSpeed, MSGP_FAN_SPEED, MSGP_UNIT_PERCENT, 0, 100);
@@ -1285,7 +1285,7 @@ static void lcd_menu_print_tune_retraction()
 #endif
 #ifdef PREVENT_FILAMENT_GRIND
 		else if (IS_SELECTED_SCROLL(item++))
-			LCD_EDIT_SETTING_P(filament_grab_max, MSGP_FILAMENT_GRAB_COUNT, PSTR(""), 0, MAX_FILAMENT_MAX_GRAB, LCD_SETTINGS_TYPE_OFF);
+			LCD_EDIT_SETTING_P(filament_grab_max, MSGP_FILAMENT_GRAB_COUNT, PSTR(""), 0, MAX_FILAMENT_MAX_GRAB, LCD_SETTINGS_TYPE_OFF_BY_0);
 		else if (IS_SELECTED_SCROLL(item++))
 			LCD_EDIT_SETTING_FLOAT001_P(retract_length_min, MSGP_RETRACT_LENGTH_MIN, MSGP_UNIT_MM, 0, retract_length);
 #endif
@@ -1359,6 +1359,9 @@ static void lcd_limits_details(uint8_t nr)
     lcd_lib_draw_string(5, BOTTOM_MENU_YPOS, buffer);
 }
 
+// maximum filament extrusion speed in mm3/s
+#define MAX_PRINT_EXTRUSION 50
+
 static void lcd_menu_print_limits()
 {
     lcd_scroll_menu(PSTR("Limits"), 4 + (EXTRUDERS > 1 ? 1 : 0), lcd_limits_item, lcd_limits_details);
@@ -1370,28 +1373,36 @@ static void lcd_menu_print_limits()
         if (IS_SELECTED_SCROLL(item++))
             menu.return_to_previous();
         else if (IS_SELECTED_SCROLL(item++))
-            LCD_EDIT_SETTING_FLOAT1_P(max_print_feedrate,  PSTR("max print speed"),  MSGP_UNIT_SPEED, 0, max_feedrate_xy, LCD_SETTINGS_TYPE_OFF);
+            LCD_EDIT_SETTING_FLOAT1_P(max_print_feedrate,  PSTR("max print speed"),  MSGP_UNIT_SPEED, 0, max_feedrate_xy,
+                                      LCD_SETTINGS_TYPE_OFF_BY_0 | LCD_SETTINGS_TYPE_OFF_ON_MAX);
         else if (IS_SELECTED_SCROLL(item++))
-            LCD_EDIT_SETTING_FLOAT1_P(max_travel_feedrate, PSTR("max travel speed"), MSGP_UNIT_SPEED, 0, max_feedrate_xy, LCD_SETTINGS_TYPE_OFF);
+            LCD_EDIT_SETTING_FLOAT1_P(max_travel_feedrate, PSTR("max travel speed"), MSGP_UNIT_SPEED, 0, max_feedrate_xy,
+                                      LCD_SETTINGS_TYPE_OFF_BY_0 | LCD_SETTINGS_TYPE_OFF_ON_MAX);
 #if EXTRUDERS > 1
         else if (IS_SELECTED_SCROLL(item++))
         {
             if (volume_to_filament_length[0] < 0.99) max_feedrate_e_volume = max_feedrate[E_AXIS] / volume_to_filament_length[0];
             else                                     max_feedrate_e_volume = max_feedrate[E_AXIS] * DEFAULT_FILAMENT_AREA;
-            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[0], PSTR("max extr. volume 1"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume, LCD_SETTINGS_TYPE_OFF);
+            cut_max(max_feedrate_e_volume, MAX_PRINT_EXTRUSION);
+            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[0], PSTR("max extr. volume 1"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume,
+                                         LCD_SETTINGS_TYPE_OFF_BY_0 | LCD_SETTINGS_TYPE_OFF_ON_MAX);
         }
         else if (IS_SELECTED_SCROLL(item++))
         {
             if (volume_to_filament_length[1] < 0.99) max_feedrate_e_volume = max_feedrate[E_AXIS] / volume_to_filament_length[1];
             else                                     max_feedrate_e_volume = max_feedrate[E_AXIS] * DEFAULT_FILAMENT_AREA;
-            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[1], PSTR("max extr. volume 2"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume, LCD_SETTINGS_TYPE_OFF);
+            cut_max(max_feedrate_e_volume, MAX_PRINT_EXTRUSION);
+            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[1], PSTR("max extr. volume 2"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume,
+                                         LCD_SETTINGS_TYPE_OFF_BY_0 | LCD_SETTINGS_TYPE_OFF_ON_MAX);
         }
 #else
         else if (IS_SELECTED_SCROLL(item++))
         {
             if (volume_to_filament_length[0] < 0.99) max_feedrate_e_volume = max_feedrate[E_AXIS] / volume_to_filament_length[0];
             else                                     max_feedrate_e_volume = max_feedrate[E_AXIS] * DEFAULT_FILAMENT_AREA;
-            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[0], PSTR("max extr. volume"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume, LCD_SETTINGS_TYPE_OFF);
+            cut_max(max_feedrate_e_volume, MAX_PRINT_EXTRUSION);
+            LCD_EDIT_SETTING_FLOAT001_P (max_extrude_volume[0], PSTR("max extr. volume"), MSGP_UNIT_FLOW_VOLUME, 0, max_feedrate_e_volume,
+                                         LCD_SETTINGS_TYPE_OFF_BY_0 | LCD_SETTINGS_TYPE_OFF_ON_MAX);
         }
 #endif
     }

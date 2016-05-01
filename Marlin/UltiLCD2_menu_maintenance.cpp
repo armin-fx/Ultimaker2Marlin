@@ -881,7 +881,7 @@ static void lcd_menu_preferences()
         else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_sleeptimer));
         else if (IS_SELECTED_SCROLL(index++))
-            menu.add_menu(menu_t(lcd_menu_screen_contrast, 0, 4));
+            LCD_EDIT_SETTING_FUNCTION(lcd_menu_screen_contrast);
         else if (IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_heatercheck, MAIN_MENU_ITEM_POS(1)));
         else if (IS_SELECTED_SCROLL(index++))
