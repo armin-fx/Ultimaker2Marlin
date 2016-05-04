@@ -58,6 +58,11 @@ fi
 
 # USE_CHANGE_TEMPERATURE
 
+if [ ! -d "resources/firmware" ]; then
+    mkdir resources
+    mkdir resources/firmware
+fi
+
 $MAKE -j 3 HARDWARE_MOTHERBOARD=72 ARDUINO_INSTALL_DIR=${ARDUINO_PATH} ARDUINO_VERSION=${ARDUINO_VERSION} BUILD_DIR=_Ultimaker2 clean
 sleep 2
 mkdir _Ultimaker2

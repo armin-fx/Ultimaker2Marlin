@@ -81,7 +81,7 @@ void LCD_EDIT_SETTING_BYTE_PERCENT_P(T& _setting, const char* _name, const char*
     lcd_setting_postfix = _postfix;
     lcd_setting_ptr = &_setting;
     lcd_setting_type = 5 | type;
-    lcd_setting_start_value = lcd_setting_encoder_value = int(_setting) * (100 / 255);
+    lcd_setting_start_value = lcd_setting_encoder_value = int(_setting) * 100 / 255;
     lcd_setting_min = _min;
     lcd_setting_max = _max;
 }
@@ -93,7 +93,7 @@ void LCD_EDIT_SETTING_FLOAT001_P(T& _setting, const char* _name, const char* _po
     lcd_setting_postfix = _postfix;
     lcd_setting_ptr = &_setting;
     lcd_setting_type = 3 | type;
-    lcd_setting_start_value = lcd_setting_encoder_value = ((_setting) * 100.0 + 0.5);
+    lcd_setting_start_value = lcd_setting_encoder_value = (_setting) * 100.0 + 0.5;
     lcd_setting_min = (_min) * 100;
     lcd_setting_max = (_max) * 100;
 }
@@ -105,7 +105,7 @@ void LCD_EDIT_SETTING_FLOAT1_P(T& _setting, const char* _name, const char* _post
     lcd_setting_postfix = _postfix;
     lcd_setting_ptr = &(_setting);
     lcd_setting_type = 8 | type;
-    lcd_setting_start_value = lcd_setting_encoder_value = ((_setting) + 0.5);
+    lcd_setting_start_value = lcd_setting_encoder_value = (_setting) + 0.5;
     lcd_setting_min = (_min) + 0.5;
     lcd_setting_max = (_max) + 0.5;
 }
@@ -115,7 +115,7 @@ void LCD_EDIT_SETTING_FLOAT1_P(T& _setting, const char* _name, const char* _post
             lcd_setting_postfix = PSTR("00" _postfix); \
             lcd_setting_ptr = &(_setting); \
             lcd_setting_type = 7; \
-            lcd_setting_start_value = lcd_setting_encoder_value = ((_setting) / 100 + 0.5); \
+            lcd_setting_start_value = lcd_setting_encoder_value = (_setting) / 100 + 0.5; \
             lcd_setting_min = (_min) / 100 + 0.5; \
             lcd_setting_max = (_max) / 100 + 0.5; \
         } while(0)
@@ -125,7 +125,7 @@ void LCD_EDIT_SETTING_FLOAT1_P(T& _setting, const char* _name, const char* _post
             lcd_setting_postfix = _postfix; \
             lcd_setting_ptr = &(_setting); \
             lcd_setting_type = 6; \
-            lcd_setting_start_value = lcd_setting_encoder_value = ((_setting) / 60 + 0.5); \
+            lcd_setting_start_value = lcd_setting_encoder_value = (_setting) / 60 + 0.5; \
             lcd_setting_min = (_min) / 60 + 0.5; \
             lcd_setting_max = (_max) / 60 + 0.5; \
         } while(0)

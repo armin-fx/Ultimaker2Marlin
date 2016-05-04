@@ -7,6 +7,7 @@
   #include "UltiLCD2_hi_lib.h"
 #endif
 #include "UltiLCD2_menu_utils.h"
+#include "UltiLCD2_text.h"
 
 void filament_sensor_init()
 {
