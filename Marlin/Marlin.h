@@ -237,8 +237,12 @@ extern float retract_length, retract_feedrate, retract_zlift;
 #ifdef PREVENT_FILAMENT_GRIND
 extern float retract_length_min;
 extern float retract_length_current[EXTRUDERS];
-extern float   filament_grab_value[EXTRUDERS];
-extern uint8_t filament_grab_max;
+extern float    filament_grab_value[EXTRUDERS];
+#if MAX_FILAMENT_MAX_GRAB < 256
+extern uint8_t  filament_grab_max;
+#else
+extern uint16_t filament_grab_max;
+#endif
 inline bool is_prevent_filament_grind()  {return filament_grab_max != 0;}
 #define RETRACT_LENGTH_CURRENT retract_length_current[active_extruder]
 #define IS_PREVENT_FILAMENT_GRIND true

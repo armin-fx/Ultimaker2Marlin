@@ -209,8 +209,12 @@ bool position_error;
 #ifdef PREVENT_FILAMENT_GRIND
   float retract_length_min=DEFAULT_RETRACT_LENGHT_MIN;
   float retract_length_current[EXTRUDERS] = ARRAY_BY_EXTRUDERS_FILL(DEFAULT_RETRACT_LENGHT);
-  float   filament_grab_value [EXTRUDERS] = ARRAY_BY_EXTRUDERS_FILL(0);
-  uint8_t filament_grab_max=DEFAULT_FILAMENT_MAX_GRAB;
+  float    filament_grab_value [EXTRUDERS] = ARRAY_BY_EXTRUDERS_FILL(0);
+#if MAX_FILAMENT_MAX_GRAB < 256
+  uint8_t  filament_grab_max=DEFAULT_FILAMENT_MAX_GRAB;
+#else
+  uint16_t filament_grab_max=DEFAULT_FILAMENT_MAX_GRAB;
+#endif
 #endif
 #if EXTRUDERS > 1
   float extruder_swap_retract_length=16.0;
@@ -343,11 +347,13 @@ void filament_grab_update(float filament_lenght)
 	}
 }
 
-#define FILAMENT_GRAB_VALUE_BEGIN 0.37
+#define FILAMENT_GRAB_VALUE_BEGIN  0.37
+#define FILAMENT_GRAB_RETRACT_LENGHT_MIN_INFLUENCE 0.5
 
-// Hold current retract length on custom retract length until (FILAMENT_GRAB_VALUE_BEGIN * filament_grab_max).
-// Then reduce linear the retract length to 0 - this could hold the maximum filament grab value.
-// The retract length will set up to retract_length_min if it is lower.
+// Hold current retract length on custom retract length until value has reached FILAMENT_GRAB_VALUE_BEGIN.
+// value = 1 say filament was grab per feeder (statistic) the adjusted filament_grab_max.
+// Then reduce linear the retract length down - this could hold the maximum filament grab value.
+// The retract length don't get lower then retract_length_min.
 void filament_grab_set_retract_lenght()
 {
     cut_scope (retract_length_min, 0, retract_length);
@@ -361,9 +367,11 @@ void filament_grab_set_retract_lenght()
         {
             value -= FILAMENT_GRAB_VALUE_BEGIN;
             value *= 1.0/(1.0-FILAMENT_GRAB_VALUE_BEGIN);
-        //  retract_length_current[i] = retract_length * (1.0 - value) + retract_length_min * (value);   // beautiful way
-        //  retract_length_current[i] = retract_length * (1.0 - value);                                  // exact way
-            retract_length_current[i] = retract_length * (1.0 - value) + retract_length_min/2 * (value); // compromise way
+          #ifndef FILAMENT_GRAB_RETRACT_LENGHT_MIN_INFLUENCE
+            retract_length_current[i] = retract_length * (1.0 - value);
+          #else
+            retract_length_current[i] = retract_length * (1.0 - value) + retract_length_min * (value) * FILAMENT_GRAB_RETRACT_LENGHT_MIN_INFLUENCE;
+          #endif
             cut_min (retract_length_current[i], retract_length_min);
         }
         else

@@ -336,9 +336,10 @@ const int8_t dropsegments=5; //everything with less than this number of steps wi
 #define PREVENT_FILAMENT_GRIND
 // try to grab filament by feeder below this count
 #define DEFAULT_FILAMENT_MAX_GRAB 25
-#define MAX_FILAMENT_MAX_GRAB     200
+#define MAX_FILAMENT_MAX_GRAB     250
 // default minimum filament retract lenght when prevent filament grind
 #define DEFAULT_RETRACT_LENGHT_MIN 2.0
+
 // default filament retract lenght
 #define DEFAULT_RETRACT_LENGHT     4.5
 #define DEFAULT_RETRACT_FEEDRATE   (25 * 60)
