@@ -534,7 +534,7 @@ static void lcd_menu_advanced_stats()
 {
     lcd_info_screen(NULL, lcd_change_to_previous_menu, MSGP_MENU_RETURN);
     lcd_lib_draw_string_centerP(10, PSTR("Machine on for:"));
-    char buffer[21] = {0};
+    char buffer[24] = {0};
     char* c = int_to_string(lifetime_minutes / 60, buffer, PSTR(":"));
     if (lifetime_minutes % 60 < 10)
         *c++ = '0';
