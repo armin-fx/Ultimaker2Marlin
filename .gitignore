@@ -13,8 +13,15 @@ Marlin/Visual Micro/Upload.vmps.xml
 Marlin/Visual Micro/.Marlin.vsarduino.h
 Marlin/Visual Micro/Compile.vmps.xml
 Marlin/Visual Micro/Configuration.Debug.vmps.xml
+Marlin/applet
 Marlin/_Ultimaker2Dual
 Marlin/_Ultimaker2
+Marlin/_Ultimaker2plus
+Marlin/_Ultimaker2extendedDual
+Marlin/_Ultimaker2extended
+Marlin/_Ultimaker2extendedplus
+Marlin/_Ultimaker2go
+Marlin/_Ultimaker2go-HBK
 *.bak
 *.patch
 .bin
