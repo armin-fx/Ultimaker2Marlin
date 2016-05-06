@@ -107,5 +107,18 @@ const char MSGP_ENTRY_SWITCH[]  PROGMEM = {">"};
 const char MSGP_CMD_COMMENT_ULTIGCODE[] PROGMEM = {";FLAVOR:UltiGCode"};
 const char MSGP_CMD_MOVE_FAST_TO_XY[]   PROGMEM = {"G1 F12000 X%i Y%i"};
 const char MSGP_CMD_MOVE_TO_XY[]        PROGMEM = {"G1 F%i X%i Y%i"};
+const char MSGP_CMD_MOVE_TO_XYZ[]       PROGMEM = {"G1 F%i Z%i X%i Y%i"};
+const char MSGP_CMD_HOME_ALL[] PROGMEM = {"G28"};
+const char MSGP_CMD_HOME_X[]   PROGMEM = {"G28 X"};
+const char MSGP_CMD_HOME_Y[]   PROGMEM = {"G28 Y"};
+const char MSGP_CMD_HOME_XY[]  PROGMEM = {"G28 X Y"};
+const char MSGP_CMD_HOME_Z[]   PROGMEM = {"G28 Z"};
+
+//const char MSGP_MATERIAL_[] PROGMEM = {""};
+const char MSGP_MATERIAL_PLA[]  PROGMEM = {"PLA"};
+const char MSGP_MATERIAL_ABS[]  PROGMEM = {"ABS"};
+const char MSGP_MATERIAL_CPE[]  PROGMEM = {"CPE"};
+const char MSGP_MATERIAL_UPET[] PROGMEM = {"UPET"};
+
 
 #endif

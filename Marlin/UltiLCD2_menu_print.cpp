@@ -575,10 +575,11 @@ void lcd_menu_print_select()
 #if TEMP_SENSOR_BED != 0
                         target_temperature_bed = 0;
                         CheckFirstLayerInit();
+                        
+                        uint8_t count_first_layer = 0;
 #endif
                         fanSpeedPercent = 0;
 
-                        uint8_t count_first_layer = 0;
                         for(uint8_t e=0; e<EXTRUDERS; ++e)
                         {
 //                            SERIAL_ECHOPGM("MATERIAL_");
@@ -614,7 +615,9 @@ void lcd_menu_print_select()
                             extrudemultiply[e] = material[e].flow;
                         }
 
+#if TEMP_SENSOR_BED != 0
                         if (count_first_layer == 0) CheckFirstLayerOff();
+#endif
 
                         if (printing_state == PRINT_STATE_RECOVER)
                         {

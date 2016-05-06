@@ -115,6 +115,7 @@ FORCE_INLINE void setTargetHotend(const float &celsius, uint8_t extruder) {
     target_temperature[extruder] = HEATER_0_MAXTEMP - 15;
 }
 
+#if TEMP_SENSOR_BED != 0
 FORCE_INLINE void setTargetBed(const float &celsius) {
   target_temperature_bed = celsius;
 #ifdef BED_MAXTEMP
@@ -122,6 +123,7 @@ FORCE_INLINE void setTargetBed(const float &celsius) {
     target_temperature_bed = BED_MAXTEMP - 15;
 #endif
 }
+#endif // TEMP_SENSOR_BED
 
 FORCE_INLINE bool isHeatingHotend(uint8_t extruder){
   return target_temperature[extruder] > current_temperature[extruder];

@@ -51,6 +51,7 @@ struct materialSettingsEEPROM : materialSettings
 
 extern struct materialSettings material[EXTRUDERS];
 
+#if TEMP_SENSOR_BED != 0
 FORCE_INLINE int16_t get_bed_temperature_first_layer (struct materialSettings _material)
 {
 	if (_material.bed_temperature_first_layer == 0)
@@ -58,6 +59,7 @@ FORCE_INLINE int16_t get_bed_temperature_first_layer (struct materialSettings _m
 	else
 		return _material.bed_temperature_first_layer;
 }
+#endif
 
 #define FILAMENT_FAST_STEPS  26500
 #define FILAMENT_LONG_ACCELERATION_STEPS    7200

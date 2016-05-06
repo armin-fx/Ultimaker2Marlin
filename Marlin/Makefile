@@ -36,6 +36,9 @@
 # Note that all settings are set with ?=, this means you can override them
 # from the commandline with "make HARDWARE_MOTHERBOARD=71" for example
 
+# $(call space-to-question,file-name)
+space-to-question = $(subst $(empty) $(empty),?,$1)
+
 # This defined the board you are compiling for (see Configuration.h for the options)
 HARDWARE_MOTHERBOARD ?= 72
 
@@ -185,7 +188,7 @@ endif
 HARDWARE_SRC  = $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/avr/cores/arduino
 HARDWARE_SRC += $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/cores/arduino
 
-TARGET = $(notdir $(CURDIR))
+TARGET = $(notdir $(call space-to-question,$(CURDIR)))
 
 # VPATH tells make to look into these directory for source files,
 # there is no need to specify explicit pathnames as long as the

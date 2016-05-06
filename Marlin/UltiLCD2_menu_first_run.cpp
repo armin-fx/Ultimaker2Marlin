@@ -61,9 +61,9 @@ void lcd_menu_first_run_init()
 static void homeAndParkHeadForCenterAdjustment2()
 {
     add_homeing[Z_AXIS] = 0;
-    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
+    enquecommand_P(MSGP_CMD_HOME_ALL);
     char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_XYZ, int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
     enquecommand(buffer);
     menu.return_to_previous(false);
 }
@@ -102,7 +102,7 @@ static void homeAndParkHeadForCenterAdjustment()
 {
     homeHead();
     char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_XYZ, int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
     enquecommand(buffer);
 }
 

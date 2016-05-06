@@ -1736,9 +1736,9 @@ void lcd_prepare_buildplate_adjust()
 {
     Config_RetrieveSettings();
     add_homeing[Z_AXIS] = 0;
-    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
+    enquecommand_P(MSGP_CMD_HOME_ALL);
     char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, AXIS_CENTER_POS(X_AXIS), AXIS_CENTER_POS(Y_AXIS));
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_XYZ, int(homing_feedrate[0]), 35, AXIS_CENTER_POS(X_AXIS), AXIS_CENTER_POS(Y_AXIS));
     enquecommand(buffer);
     enquecommand_P(PSTR("M84 X0 Y0"));
 }
@@ -2223,8 +2223,8 @@ static void lcd_position_z_axis()
     plan_move(Z_AXIS);
 }
 
-FORCE_INLINE void lcd_home_x_axis() { enquecommand_P(PSTR("G28 X0")); }
-FORCE_INLINE void lcd_home_y_axis() { enquecommand_P(PSTR("G28 Y0")); }
+FORCE_INLINE void lcd_home_x_axis() { enquecommand_P(MSGP_CMD_HOME_X); }
+FORCE_INLINE void lcd_home_y_axis() { enquecommand_P(MSGP_CMD_HOME_Y); }
 
 static void drawMoveDetails()
 {
@@ -3086,7 +3086,7 @@ void recover_start_print(const char *cmd)
     // move to heatup position
     homeAll();
     char buffer[32] = {0};
-    sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, int(min_pos[X_AXIS])+5, int(min_pos[Y_AXIS])+5);
+    sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, max(int(min_pos[X_AXIS]),0)+5, max(int(min_pos[Y_AXIS]),0)+5);
     enquecommand(buffer);
 
     menu.return_to_main();
