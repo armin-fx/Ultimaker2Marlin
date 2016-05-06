@@ -230,6 +230,14 @@ extern bool position_error;
 extern unsigned char fanSpeedSoftPwm;
 #endif
 
+#define SETTING_VALUE_OFF 0
+#define SETTING_IS_OFF(value)  ((value) == SETTING_VALUE_OFF)
+#define SETTING_IS_ON(value)   ((value) != SETTING_VALUE_OFF)
+#define SETTING_SET_OFF(value) ((value)  = SETTING_VALUE_OFF)
+#define SETTING_U_IS_OFF(value)  ((value) <= SETTING_VALUE_OFF)
+#define SETTING_U_IS_ON(value)   ((value)  > SETTING_VALUE_OFF)
+#define SETTING_U_SET_OFF(value) ((value)  = SETTING_VALUE_OFF)
+
 #ifdef FWRETRACT
 extern bool autoretract_enabled;
 extern bool retracted[EXTRUDERS];

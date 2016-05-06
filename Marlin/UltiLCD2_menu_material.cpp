@@ -507,24 +507,24 @@ static void lcd_menu_material_export()
     for(uint8_t n=0; n<count; ++n)
     {
         char buffer[32] = {0};
-        strcpy_2_P(buffer, MSGP_STORE_ENTRY_MATERIAL, MSGP_NEWLINE);
+        strcpy_2P(buffer, MSGP_STORE_ENTRY_MATERIAL, MSGP_NEWLINE);
         card.write_string(buffer);
 
-        strcpy_2_P(buffer, MSGP_STORE_NAME, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_NAME, MSGP_EQUAL);
         char* ptr = buffer + strlen(buffer);
         eeprom_read_block(ptr, EEPROM_MATERIAL_NAME_OFFSET(n), MATERIAL_NAME_SIZE);
         ptr[MATERIAL_NAME_SIZE] = '\0';
         strcat_P(buffer, MSGP_NEWLINE);
         card.write_string(buffer);
 
-        strcpy_2_P(buffer, MSGP_STORE_TEMPERATURE, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_TEMPERATURE, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         int_to_string(eeprom_read_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
         for(uint8_t nozzle=0; nozzle<MATERIAL_TEMPERATURE_COUNT; ++nozzle)
         {
-            strcpy_2_P(buffer, MSGP_STORE_TEMPERATURE, MSGP_UNDERLINE);
+            strcpy_2P(buffer, MSGP_STORE_TEMPERATURE, MSGP_UNDERLINE);
             ptr = float_to_string2(nozzleIndexToNozzleSize(nozzle), buffer + strlen(buffer), MSGP_EQUAL);
             if (eeprom_read_word(EEPROM_MATERIAL_EXTRA_TEMPERATURE_OFFSET(n, nozzle)) != 0)
             {
@@ -538,39 +538,39 @@ static void lcd_menu_material_export()
         }
 
 #if TEMP_SENSOR_BED != 0
-        strcpy_2_P(buffer, MSGP_STORE_TEMPERATURE_BED, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_TEMPERATURE_BED, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
-        strcpy_2_P(buffer, MSGP_STORE_TEMPERATURE_BED_FIRST_LAYER, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_TEMPERATURE_BED_FIRST_LAYER, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         int_to_string(eeprom_read_word(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 #endif
 
-        strcpy_2_P(buffer, MSGP_STORE_FAN_SPEED, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_FAN_SPEED, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         int_to_string(eeprom_read_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
-        strcpy_2_P(buffer, MSGP_STORE_FLOW, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_FLOW, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         int_to_string(eeprom_read_word(EEPROM_MATERIAL_FLOW_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
-        strcpy_2_P(buffer, MSGP_STORE_DIAMETER, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_DIAMETER, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         float_to_string2(eeprom_read_float(EEPROM_MATERIAL_DIAMETER_OFFSET(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
 #ifdef USE_CHANGE_TEMPERATURE
-        strcpy_2_P(buffer, MSGP_STORE_CHANGE_TEMPERATURE, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_CHANGE_TEMPERATURE, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         float_to_string2(eeprom_read_word(EEPROM_MATERIAL_CHANGE_TEMPERATURE(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
 
-        strcpy_2_P(buffer, MSGP_STORE_CHANGE_WAIT, MSGP_EQUAL);
+        strcpy_2P(buffer, MSGP_STORE_CHANGE_WAIT, MSGP_EQUAL);
         ptr = buffer + strlen(buffer);
         float_to_string2(eeprom_read_byte(EEPROM_MATERIAL_CHANGE_WAIT_TIME(n)), ptr, MSGP_NEWLINE);
         card.write_string(buffer);
@@ -741,7 +741,7 @@ static void lcd_menu_material_import()
                 for(uint8_t nozzle=0; nozzle<MATERIAL_TEMPERATURE_COUNT; ++nozzle)
                 {
                     char buffer2[32];
-                    strcpy_2_P(buffer2, MSGP_STORE_TEMPERATURE, MSGP_UNDERLINE);
+                    strcpy_2P(buffer2, MSGP_STORE_TEMPERATURE, MSGP_UNDERLINE);
                     char* ptr = buffer2 + strlen(buffer2);
                     float_to_string2(nozzleIndexToNozzleSize(nozzle), ptr);
                     if (strcmp(buffer, buffer2) == 0)
