@@ -1,8 +1,11 @@
-* Download the latest version from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>
-* Description <a href="http://umforum.ultimaker.com/index.php?/topic/10474-tinker-firmware/">en français</a>
+This fork base on: Ultimaker -> Tinkergnome -> armin-fx
 
 
-### Changelist for this fork:
+* Download the latest version (TinkerGnome) from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>
+* Description (TinkerGnome) <a href="http://umforum.ultimaker.com/index.php?/topic/10474-tinker-firmware/">en français</a>
+
+
+### Changelist for this fork (TinkerGnome):
 
 * new branch geek_mode
 * (re-)activated PID-controlling for the printbed temperature
@@ -13,6 +16,20 @@
 
 For more information follow the appropriate discussion on the [Ultimaker forum](http://umforum.ultimaker.com/index.php?/topic/6436-more-information-during-print/page-2#entry84729)
 
+
+### Changelist for this fork (armin-fx):
+
+* The firmware retraction length will reduced automatic when needed to prevent filament grind.
+  Try to keep below a maximum filament grab count. Can set of with: maximum grab count = 0.
+  Minimum retraction length can be adjusted.
+* First layer buildplate temperature settings can be adjusted. So, Object stick better on buildplate.
+  Can set off (value = 0).
+* Temperature for different nozzle size can set to default temperature (value = 0).
+* Limits in tune-menu when printing
+    maximum and minimum printing speed in m/s
+    maximum and minimum travel speed in m/s
+    maximum extrusion speed in m³/s
+* Long file names on the SD card scroll when highlighted (and when printing).
 
 
 ==========================
@@ -250,14 +267,16 @@ Copy the Marlin firmware
    https://github.com/ErikZalm/Marlin/tree/Marlin_v1
    (Use the download button)
 
-Start the arduino IDE.
+Start the Arduino IDE.
 Select Tools -> Board -> Arduino Mega 2560    or your microcontroller
 Select the correct serial port in Tools ->Serial Port
-Open Marlin.pde
+Open Marlin.ino
 
-Click the Verify/Compile button
+Click the Verify/Compile button (create Ultimaker 2 version)
 
 Click the Upload button
+(preferably use the provided package.sh script and upload the generated firmware via Cura)
+(package_all.sh create the complete Ultimaker 2 family)
 If all goes well the firmware is uploading
 
 That's ok.  Enjoy Silky Smooth Printing.
