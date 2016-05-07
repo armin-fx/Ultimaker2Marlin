@@ -1,4 +1,5 @@
 #include <avr/pgmspace.h>
+#include <float.h>
 
 #include "Configuration.h"
 #ifdef ENABLE_ULTILCD2
@@ -11,6 +12,7 @@
 #include "UltiLCD2_hi_lib.h"
 #include "UltiLCD2_menu_material.h"
 #include "UltiLCD2_menu_maintenance.h"
+#include "UltiLCD2_menu_main.h"
 #include "UltiLCD2_menu_first_run.h"
 #include "UltiLCD2_menu_print.h"
 #include "UltiLCD2_menu_utils.h"
@@ -60,7 +62,7 @@ void lcd_menu_first_run_init()
 
 static void homeAndParkHeadForCenterAdjustment2()
 {
-    add_homeing[Z_AXIS] = 0;
+    add_homeing[Z_AXIS] = FLT_MIN;
     enquecommand_P(MSGP_CMD_HOME_ALL);
     char buffer[32] = {0};
     sprintf_P(buffer, MSGP_CMD_MOVE_TO_XYZ, int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
@@ -287,20 +289,13 @@ static void storeBedLeveling()
     }
 }
 
-static void lcd_menu_first_run_bed_level_done()
-{
-    // menu.return_to_previous();
-    storeBedLeveling();
-    lcd_material_reset_defaults();
-}
-
 static void lcd_menu_first_run_bed_level_paper_right()
 {
     LED_GLOW
 
     SELECT_MAIN_MENU_ITEM(0);
     if (IS_FIRST_RUN_DONE())
-        lcd_info_screen(lcd_menu_first_run_material_select_1, lcd_menu_first_run_bed_level_done, MSGP_MENU_CONTINUE);
+        lcd_info_screen(lcd_change_to_previous_menu, storeBedLeveling, MSGP_MENU_DONE);
     else
         lcd_info_screen(lcd_menu_first_run_material_load, storeBedLeveling, MSGP_MENU_CONTINUE);
     DRAW_PROGRESS_NR_IF_NOT_DONE(10);

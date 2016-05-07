@@ -79,6 +79,7 @@ const char MSGP_MENU_CONTINUE[]    PROGMEM = {"CONTINUE"};
 const char MSGP_MENU_CANCEL[]      PROGMEM = {"CANCEL"};
 const char MSGP_MENU_ABORT[]       PROGMEM = {"ABORT"};
 const char MSGP_MENU_STORE[]       PROGMEM = {"STORE"};
+const char MSGP_MENU_DONE[]        PROGMEM = {"DONE"};
 const char MSGP_MENU_YES[]         PROGMEM = {"YES"};
 const char MSGP_MENU_NO[]          PROGMEM = {"NO"};
 const char MSGP_MENU_PRIMARY[]     PROGMEM = {"PRIMARY"};
