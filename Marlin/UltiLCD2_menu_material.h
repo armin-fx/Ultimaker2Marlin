@@ -6,15 +6,20 @@ EEPROM structure:
                     Location      Size
 Total:              0x0000-0x1000
 Settings:           0x0064-0x00E0 0x7C? (careful with this one)
+PartitionBase:      0x03FC-0x03FE 0x03
 FirstRunDone:       0x0400-0x0400 0x01
 Tinker settings     0x0401-
-Tinker2 settings    0x0500-
 RuntimeStats:       0x0700-0x071C 0x1C
 Materials:          0x0800-0x09B1 (8+16)*18+1=0x1B1
-FirstLayerBedTemp:  0x09C0-0x09E4 (18*2)     =0x024
 ExtraTemperatures:  0x0a00-0x0C40 (16*18*2)  =0x240
 MaterialChangeTemp: 0x0D00-0x0D24 (18*2)     =0x024
 MaterialChangeWait: 0x0D30-0x0D42 (18)       =0x012
+
+moveable EEPROM places (preferred location):
+                    Location      Size
+PartitionVector:    0x0480
+armin_fx settings:  0x0500-
+FirstLayerBedTemp:  0x09C0-0x09E4 (18*2)     =0x024
 */
 
 //Introducing extra set of material temperatures, one for each possible nozzle.
@@ -71,7 +76,6 @@ FORCE_INLINE int16_t get_bed_temperature_first_layer (struct materialSettings _m
 #define FILAMENT_LONG_MOVE_JERK       1
 
 #define EEPROM_MATERIAL_SETTINGS_OFFSET 0x800
-#define EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_OFFSET 0x9C0
 #define EEPROM_MATERIAL_EXTRA_TEMPERATURES_OFFSET 0xa00
 #define EEPROM_MATERIAL_CHANGE_TEMPERATURE_OFFSET 0xD00
 #define EEPROM_MATERIAL_CHANGE_WAIT_TIME_OFFSET   0xD30
@@ -86,9 +90,18 @@ FORCE_INLINE int16_t get_bed_temperature_first_layer (struct materialSettings _m
 #define EEPROM_MATERIAL_FLOW_OFFSET(n)            ((uint16_t*)(EEPROM_MATERIAL_SETTINGS_OFFSET + 1 + EEPROM_MATERIAL_SETTINGS_SIZE * uint16_t(n) + MATERIAL_NAME_SIZE + 5))
 #define EEPROM_MATERIAL_DIAMETER_OFFSET(n)        ((float*)(EEPROM_MATERIAL_SETTINGS_OFFSET + 1 + EEPROM_MATERIAL_SETTINGS_SIZE * uint16_t(n) + MATERIAL_NAME_SIZE + 7))
 
-#define EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(n) ((uint16_t*)(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_OFFSET + uint16_t(n) * 2))
 #define EEPROM_MATERIAL_CHANGE_TEMPERATURE(n)     ((uint16_t*)(EEPROM_MATERIAL_CHANGE_TEMPERATURE_OFFSET + uint16_t(n) * 2))
 #define EEPROM_MATERIAL_CHANGE_WAIT_TIME(n)       ((uint8_t*)(EEPROM_MATERIAL_CHANGE_WAIT_TIME_OFFSET + uint16_t(n)))
+
+// In EEPROM moveable addresses:
+
+// bed temperature first layer vector
+#define EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER 1
+#define EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_ADDRESS_PREFERRED 0x9C0
+#define EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED   (((EEPROM_MATERIAL_SETTINGS_MAX_COUNT) + 2) * 2)
+//
+#define EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(n) ((uint16_t*)(eeprom_partition.get_address(EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER, 2 * uint16_t(n))))
+
 
 void lcd_menu_material_main();
 bool lcd_material_verify_material_settings();

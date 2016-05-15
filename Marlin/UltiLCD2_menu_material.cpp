@@ -1259,7 +1259,7 @@ void lcd_material_reset_defaults()
     eeprom_update_block(buffer, EEPROM_MATERIAL_NAME_OFFSET(nr), 4);
     eeprom_update_word(EEPROM_MATERIAL_TEMPERATURE_OFFSET(nr), 250);
     eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_OFFSET(nr), 90);
-    eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(nr), 100);
+    eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(nr), 110);
     eeprom_update_byte(EEPROM_MATERIAL_FAN_SPEED_OFFSET(nr), 100);
     eeprom_update_word(EEPROM_MATERIAL_FLOW_OFFSET(nr), 107);
     eeprom_update_float(EEPROM_MATERIAL_DIAMETER_OFFSET(nr), DEFAULT_FILAMENT_DIAMETER);

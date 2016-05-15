@@ -65,7 +65,7 @@ static void homeAndParkHeadForCenterAdjustment2()
     add_homeing[Z_AXIS] = FLT_MIN;
     enquecommand_P(MSGP_CMD_HOME_ALL);
     char buffer[32] = {0};
-    sprintf_P(buffer, MSGP_CMD_MOVE_TO_XYZ, int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_ZXY, int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
     enquecommand(buffer);
     menu.return_to_previous(false);
 }
@@ -104,7 +104,7 @@ static void homeAndParkHeadForCenterAdjustment()
 {
     homeHead();
     char buffer[32] = {0};
-    sprintf_P(buffer, MSGP_CMD_MOVE_TO_XYZ, int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_ZXY, int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
     enquecommand(buffer);
 }
 

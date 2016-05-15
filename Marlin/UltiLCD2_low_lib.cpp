@@ -1057,4 +1057,44 @@ char* float_to_string2(float f, char* temp_buffer, const char* p_postfix, const 
     return c;
 }
 
+inline char hex_char (uint8_t value)
+{
+    if (value < 10) return value + '0';
+    else            return value + 'A' - 10;
+}
+
+char* hex8_to_string(uint8_t i, char* temp_buffer, const char* p_postfix)
+{
+    temp_buffer[1] = hex_char( i & 0x0F);
+    temp_buffer[0] = hex_char((i & 0xF0) >> 4);
+    if (p_postfix)
+    {
+        strcpy_P(temp_buffer+2, p_postfix);
+        return temp_buffer+2 + strlen_P(p_postfix);
+    }
+    else
+    {
+        temp_buffer[2] = '\0';
+        return temp_buffer+2;
+    }
+}
+
+char* hex16_to_string(uint16_t i, char* temp_buffer, const char* p_postfix)
+{
+    temp_buffer[3] = hex_char( i & 0x000F);
+    temp_buffer[2] = hex_char((i & 0x00F0) >> 4);
+    temp_buffer[1] = hex_char((i & 0x0F00) >> 8);
+    temp_buffer[0] = hex_char((i & 0xF000) >>12);
+    if (p_postfix)
+    {
+        strcpy_P(temp_buffer+4, p_postfix);
+        return temp_buffer+4 + strlen_P(p_postfix);
+    }
+    else
+    {
+        temp_buffer[4] = '\0';
+        return temp_buffer+4;
+    }
+}
+
 #endif//ENABLE_ULTILCD2

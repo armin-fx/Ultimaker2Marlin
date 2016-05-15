@@ -18,6 +18,7 @@
 #include "UltiLCD2_menu_material.h"
 #include "UltiLCD2_menu_maintenance.h"
 #include "UltiLCD2_text.h"
+#include "UltiLCD2_debug.h"
 
 #include "tinkergnome.h"
 
@@ -222,12 +223,32 @@ void tinkergnome_init()
     {
         SET_EXPERT_VERSION(EXPERT_VERSION);
     }
-
-    armin_fx_init();
 }
 
 void armin_fx_init()
 {
+    // initialize eeprom partition base address
+    if (! check_eeprom_base_address((void*)EEPROM_BASE_ADDRESS))
+    {
+        write_eeprom_base_address((void*)EEPROM_BASE_ADDRESS, (void*)EEPROM_PARTITION_ADDRESS_PREFERRED);
+    }
+    // initialize eeprom partition
+    if (! eeprom_partition.is_valid())
+    {
+        eeprom_partition.set_address(
+                   EEPROM_PARTITION_EXPERT_2_NUMBER,
+            (void*)EEPROM_PARTITION_EXPERT_2_ADDRESS_PREFERRED,
+                   EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED
+            );
+        eeprom_partition.set_address(
+                   EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER,
+            (void*)EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_ADDRESS_PREFERRED,
+                   EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED
+            );
+        eeprom_partition.set_table_size (2);
+    }
+    // TODO check eeprom partition with black list
+
     uint16_t version_2 = GET_EXPERT_VERSION_2()+1;
 
     if (version_2 > 0)
@@ -1606,6 +1627,16 @@ static void lcd_expert_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     {
         strcpy_P(buffer+1, PSTR("Disable steppers"));
     }
+#ifdef DEBUG_MODE
+    else if (nr == 5)
+    {
+        strcpy_P(buffer+1, PSTR("Debug: View EEPROM"));
+    }
+    else if (nr == 6)
+    {
+        strcpy_P(buffer+1, PSTR("Debug: View RAM"));
+    }
+#endif
     else
     {
         strcpy_P(buffer+1, MSGP_ENTRY_UNKNOWN);
@@ -1738,7 +1769,7 @@ void lcd_prepare_buildplate_adjust()
     add_homeing[Z_AXIS] = 0;
     enquecommand_P(MSGP_CMD_HOME_ALL);
     char buffer[32] = {0};
-    sprintf_P(buffer, MSGP_CMD_MOVE_TO_XYZ, int(homing_feedrate[0]), 35, AXIS_CENTER_POS(X_AXIS), AXIS_CENTER_POS(Y_AXIS));
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_ZXY, int(homing_feedrate[0]), 35, AXIS_CENTER_POS(X_AXIS), AXIS_CENTER_POS(Y_AXIS));
     enquecommand(buffer);
     enquecommand_P(PSTR("M84 X0 Y0"));
 }
@@ -2007,12 +2038,15 @@ void lcd_menu_expert_recover()
     }
 
     lcd_lib_update_screen();
-
 }
 
 void lcd_menu_maintenance_expert()
 {
+#ifndef DEBUG_MODE
     lcd_scroll_menu(PSTR("Expert functions"), 5, lcd_expert_item, NULL);
+#else
+    lcd_scroll_menu(PSTR("Expert functions"), 7, lcd_expert_item, NULL);
+#endif
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(1))
@@ -2042,6 +2076,16 @@ void lcd_menu_maintenance_expert()
             enquecommand_P(PSTR("M84"));
             lcd_lib_keyclick();
         }
+#ifdef DEBUG_MODE
+        else if (IS_SELECTED_SCROLL(5))
+        {
+             menu.add_menu(menu_t(lcd_menu_debug_eeprom, MAIN_MENU_ITEM_POS(0), 8));
+        }
+        else if (IS_SELECTED_SCROLL(6))
+        {
+             menu.add_menu(menu_t(lcd_menu_debug_ram, MAIN_MENU_ITEM_POS(0), 8));
+        }
+#endif
         else
         {
             menu.return_to_previous();

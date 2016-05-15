@@ -50,6 +50,8 @@ extern uint8_t led_glow_dir;
 char* int_to_string(int i, char* temp_buffer, const char* p_postfix = NULL);
 char* int_to_time_string(unsigned long i, char* temp_buffer);
 char* float_to_string2(float f, char* temp_buffer, const char* p_postfix = NULL, const bool bForceSign = false);
+char* hex8_to_string (uint8_t  i, char* temp_buffer, const char* p_postfix = NULL);
+char* hex16_to_string(uint16_t i, char* temp_buffer, const char* p_postfix = NULL);
 
 // display constants
 #define LCD_GFX_WIDTH 128
