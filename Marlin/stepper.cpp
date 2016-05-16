@@ -102,6 +102,8 @@ static bool check_endstops = true;
 volatile long count_position[NUM_AXIS] = { 0, 0, 0, 0};
 volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1};
 
+const char MSGP_STEPPER_TOO_HIGH[] PROGMEM = {MSG_STEPPER_TOO_HIGH};
+
 //===========================================================================
 //=============================functions         ============================
 //===========================================================================
@@ -272,7 +274,7 @@ void step_wait(){
 }
 
 
-FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {
+inline unsigned short calc_timer(unsigned short step_rate) {
   unsigned short timer;
   if(step_rate > MAX_STEP_FREQUENCY) step_rate = MAX_STEP_FREQUENCY;
 
@@ -303,7 +305,11 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {
     timer = (unsigned short)pgm_read_word_near(table_address);
     timer -= (((unsigned short)pgm_read_word_near(table_address+2) * (unsigned char)(step_rate & 0x0007))>>3);
   }
-  if(timer < 100) { timer = 100; MYSERIAL.print(MSG_STEPPER_TOO_HIGH); MYSERIAL.println(step_rate); }//(20kHz this should never happen)
+  if(timer < 100) { //(20kHz this should never happen)
+    timer = 100;
+    serialprintPGM(MSGP_STEPPER_TOO_HIGH);
+    MYSERIAL.println(step_rate);
+  }
   return timer;
 }
 

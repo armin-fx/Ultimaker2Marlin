@@ -73,7 +73,7 @@ static void lcd_print_tune_xyjerk();
 static void lcd_position_z_axis();
 
 #define EXPERT_VERSION 6
-#define EXPERT_VERSION_2 0
+#define EXPERT_VERSION_2 1
 
 void tinkergnome_init()
 {
@@ -225,33 +225,13 @@ void tinkergnome_init()
     }
 }
 
-void armin_fx_init()
+void armin_fx_init_expert_2()
 {
-    // initialize eeprom partition base address
-    if (! check_eeprom_base_address((void*)EEPROM_BASE_ADDRESS))
-    {
-        write_eeprom_base_address((void*)EEPROM_BASE_ADDRESS, (void*)EEPROM_PARTITION_ADDRESS_PREFERRED);
-    }
-    // initialize eeprom partition
-    if (! eeprom_partition.is_valid())
-    {
-        eeprom_partition.set_address(
-                   EEPROM_PARTITION_EXPERT_2_NUMBER,
-            (void*)EEPROM_PARTITION_EXPERT_2_ADDRESS_PREFERRED,
-                   EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED
-            );
-        eeprom_partition.set_address(
-                   EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER,
-            (void*)EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_ADDRESS_PREFERRED,
-                   EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED
-            );
-        eeprom_partition.set_table_size (2);
-    }
-    // TODO check eeprom partition with black list
+    uint16_t version = GET_EXPERT_VERSION_2();
+    if (get_hash8_16 (version) != GET_EXPERT_VERSION_2_HASH())
+        version = 0; // reset all settings
 
-    uint16_t version_2 = GET_EXPERT_VERSION_2()+1;
-
-    if (version_2 > 0)
+    if (version >= 1)
     {
 #ifdef PREVENT_FILAMENT_GRIND
         retract_length_min = GET_RETRACT_LENGTH_MIN();
@@ -268,10 +248,55 @@ void armin_fx_init()
         SET_FILAMENT_GRAB_MAX (filament_grab_max);
     }
 
-    if (version_2 < EXPERT_VERSION_2+1)
+    if (version <= EXPERT_VERSION_2)
     {
         SET_EXPERT_VERSION_2(EXPERT_VERSION_2);
+        SET_EXPERT_VERSION_2_HASH(get_hash8_16(EXPERT_VERSION_2));
     }
+}
+
+void reset_partition_list()
+{
+    eeprom_partition.set_address(
+                EEPROM_PARTITION_EXPERT_2_NUMBER,
+        (void*) EEPROM_PARTITION_EXPERT_2_ADDRESS_PREFERRED,
+                EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED
+        );
+    eeprom_partition.set_address(
+                EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER,
+        (void*) EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_ADDRESS_PREFERRED,
+                EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED
+        );
+    eeprom_partition.set_table_size (2);
+}
+
+void armin_fx_init()
+{
+    // initialize eeprom partition base address
+    if (! check_eeprom_base_address((void*)EEPROM_BASE_ADDRESS))
+    {
+        write_eeprom_base_address((void*)EEPROM_BASE_ADDRESS, (void*)EEPROM_PARTITION_ADDRESS_PREFERRED);
+    }
+    // initialize eeprom partition
+    if (! eeprom_partition.is_valid())
+    {
+        reset_partition_list();
+    }
+    // TODO check eeprom partition with black list
+    
+    // check partition size with preferred size
+    // TODO resize partition to preferred size
+    if (eeprom_partition.get_size(EEPROM_PARTITION_EXPERT_2_NUMBER) <= EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED)
+    {
+        reset_partition_list();
+    }
+    if (eeprom_partition.get_size(EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER) <= EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED)
+    {
+        reset_partition_list();
+    }
+
+    // initialize partitions
+    armin_fx_init_expert_2();
 }
 
 void menu_printing_init()
@@ -583,7 +608,7 @@ static const menu_t & get_babystep_menuoption(uint8_t nr, menu_t &opt)
 static void drawBabystepSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // RETURN
@@ -728,7 +753,7 @@ static void lcd_menu_babystepping()
 static void drawHeatupSubmenu (uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32]; buffer[0] = '\0';
 
     if (nr == index++)
     {
@@ -844,7 +869,7 @@ static void drawHeatupSubmenu (uint8_t nr, uint8_t &flags)
 static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32]; buffer[0] = '\0';
     if (printing_page == 1) // second page
     {
         if (nr == index++)
@@ -1483,13 +1508,13 @@ void lcd_menu_printing_tg()
         calculate_speed();
 
 #if EXTRUDERS > 1
-        char buffer[32] = {0};
+        char buffer[32]; buffer[0] = '\0';
 #endif // EXTRUDERS
         if (printing_page == 0)
         {
             uint8_t progress = IS_SD_PRINTING ? card.getFilePos() / ((card.getFileSize() + 123) / 124) : 0;
 #if EXTRUDERS < 2
-            char buffer[32] = {0};
+            char buffer[32]; buffer[0] = '\0';
 #endif // EXTRUDERS
             switch(printing_state)
             {
@@ -1606,7 +1631,7 @@ void lcd_menu_printing_tg()
 
 static void lcd_expert_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[20] = {' '};
+    char buffer[20]; buffer[0] = ' ';
     if (nr == 0)
     {
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
@@ -1635,6 +1660,10 @@ static void lcd_expert_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     else if (nr == 6)
     {
         strcpy_P(buffer+1, PSTR("Debug: View RAM"));
+    }
+    else if (nr == 7)
+    {
+        strcpy_P(buffer+1, PSTR("Debug: Find list"));
     }
 #endif
     else
@@ -1731,7 +1760,7 @@ static void drawSimpleBuildplateSubmenu(uint8_t nr, uint8_t &flags)
     else if (nr == index++)
     {
         // z position
-        char buffer[32] = {0};
+        char buffer[32];
         lcd_lib_draw_stringP(LCD_CHAR_MARGIN_LEFT+5*LCD_CHAR_SPACING, 40, PSTR("Z"));
         float_to_string2(st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS], buffer, MSGP_UNIT_MM);
         LCDMenu::drawMenuString(LCD_CHAR_MARGIN_LEFT+7*LCD_CHAR_SPACING
@@ -1768,7 +1797,7 @@ void lcd_prepare_buildplate_adjust()
     Config_RetrieveSettings();
     add_homeing[Z_AXIS] = 0;
     enquecommand_P(MSGP_CMD_HOME_ALL);
-    char buffer[32] = {0};
+    char buffer[32];
     sprintf_P(buffer, MSGP_CMD_MOVE_TO_ZXY, int(homing_feedrate[0]), 35, AXIS_CENTER_POS(X_AXIS), AXIS_CENTER_POS(Y_AXIS));
     enquecommand(buffer);
     enquecommand_P(PSTR("M84 X0 Y0"));
@@ -1793,7 +1822,7 @@ void lcd_menu_simple_buildplate_init()
     lcd_lib_draw_string_centerP(17, PSTR("nozzle touches"));
     lcd_lib_draw_string_centerP(26, PSTR("the buildplate"));
 
-    char buffer[32] = {0};
+    char buffer[32];
     lcd_lib_draw_stringP(LCD_CHAR_MARGIN_LEFT+5*LCD_CHAR_SPACING, 40, PSTR("Z"));
     float_to_string2(zPos, buffer, MSGP_UNIT_MM);
     LCDMenu::drawMenuString(LCD_CHAR_MARGIN_LEFT+7*LCD_CHAR_SPACING
@@ -1887,7 +1916,7 @@ static const menu_t & get_recoverfile_menuoption(uint8_t nr, menu_t &opt)
 
 static void lcd_menu_recover_file()
 {
-    char buffer[32] = {0};
+    char buffer[32];
     LED_GLOW
     // analogWrite(LED_PIN, (led_glow << 1) * int(led_brightness_level) / 100);
 
@@ -1962,7 +1991,7 @@ static const menu_t & get_recover_menuoption(uint8_t nr, menu_t &opt)
 static void drawRecoverSubmenu (uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         if (flags & MENU_SELECTED)
@@ -2045,7 +2074,7 @@ void lcd_menu_maintenance_expert()
 #ifndef DEBUG_MODE
     lcd_scroll_menu(PSTR("Expert functions"), 5, lcd_expert_item, NULL);
 #else
-    lcd_scroll_menu(PSTR("Expert functions"), 7, lcd_expert_item, NULL);
+    lcd_scroll_menu(PSTR("Expert functions"), 8, lcd_expert_item, NULL);
 #endif
     if (lcd_lib_button_pressed)
     {
@@ -2079,11 +2108,15 @@ void lcd_menu_maintenance_expert()
 #ifdef DEBUG_MODE
         else if (IS_SELECTED_SCROLL(5))
         {
-             menu.add_menu(menu_t(lcd_menu_debug_eeprom, MAIN_MENU_ITEM_POS(0), 8));
+             menu.add_menu(menu_t(lcd_menu_debug_eeprom, 0, 8));
         }
         else if (IS_SELECTED_SCROLL(6))
         {
-             menu.add_menu(menu_t(lcd_menu_debug_ram, MAIN_MENU_ITEM_POS(0), 8));
+             menu.add_menu(menu_t(lcd_menu_debug_ram, 0, 8));
+        }
+        else if (IS_SELECTED_SCROLL(7))
+        {
+             menu.add_menu(menu_t(debug_ram_find_var, lcd_menu_debug_ram, NULL, 0, 8));
         }
 #endif
         else
@@ -2272,7 +2305,7 @@ FORCE_INLINE void lcd_home_y_axis() { enquecommand_P(MSGP_CMD_HOME_Y); }
 
 static void drawMoveDetails()
 {
-    char buffer[32] = {0};
+    char buffer[32];
     int_to_string(abs(movingSpeed), buffer, MSGP_UNIT_SPEED);
     lcd_lib_draw_string_center(5, buffer);
     if (movingSpeed <= 0)
@@ -2350,7 +2383,7 @@ static const menu_t & get_move_menuoption(uint8_t nr, menu_t &opt)
 static void drawMoveSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Home all axis
@@ -2606,7 +2639,7 @@ void manage_led_timeout()
             if (!(sleep_state & SLEEP_LED_DIMMED))
             {
                 // dim LED
-                analogWrite(LED_PIN, 255 * min(led_sleep_brightness, led_brightness_level) / 100);
+                analogWrite(LED_PIN, min(led_sleep_brightness, 255 * int(led_brightness_level) / 100));
                 sleep_state ^= SLEEP_LED_DIMMED;
             }
         }
@@ -2672,7 +2705,7 @@ static void lcd_extrude_headtofront()
 {
     lcd_lib_keyclick();
     // move to center front
-    char buffer[32] = {0};
+    char buffer[32];
     sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, int(AXIS_CENTER_POS(X_AXIS)), int(min_pos[Y_AXIS])+5);
 
     homeHead();
@@ -2939,7 +2972,7 @@ static const menu_t & get_extrude_menuoption(uint8_t nr, menu_t &opt)
 static void drawExtrudeSubmenu (uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (card.sdprinting) ++nr;
 
     if (nr == index++)
@@ -3107,7 +3140,7 @@ void lcd_menu_expert_extrude()
     {
         lcd_lib_draw_stringP(LCD_CHAR_MARGIN_LEFT, 5, PSTR("Move material"));
 #if EXTRUDERS > 1
-    char buffer[8] = {0};
+    char buffer[8];
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
     lcd_lib_draw_string(LCD_CHAR_MARGIN_LEFT+(14*LCD_CHAR_SPACING), 5, buffer);
@@ -3129,7 +3162,7 @@ void recover_start_print(const char *cmd)
 
     // move to heatup position
     homeAll();
-    char buffer[32] = {0};
+    char buffer[32];
     sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, max(int(min_pos[X_AXIS]),0)+5, max(int(min_pos[Y_AXIS]),0)+5);
     enquecommand(buffer);
 

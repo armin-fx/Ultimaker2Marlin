@@ -358,7 +358,7 @@ static const menu_t & get_preheat_menuoption(uint8_t nr, menu_t &opt)
 static void drawPreheatSubmenu (uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32]; buffer[0] = '\0';
 
     if (nr == index++)
     {
@@ -581,7 +581,7 @@ static void lcd_main_preheat()
     lcd_basic_screen();
     lcd_lib_draw_hline(3, 124, 13);
 
-    char buffer[32] = {0};
+    char buffer[32];
 #if TEMP_SENSOR_BED != 0
     if ((!PREHEAT_FLAG(0)) | (current_temperature_bed > target_temperature_bed - 10))
     {

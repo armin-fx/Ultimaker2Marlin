@@ -57,7 +57,7 @@ void abortPrint()
         // retract
         enquecommand_P(PSTR("G10"));
 
-        char buffer[32] = {0};
+        char buffer[32];
         // set up the end of print retraction
         sprintf_P(buffer, PSTR("G92 E%i"), int((end_of_print_retraction / volume_to_filament_length[active_extruder])+0.5f));
         enquecommand(buffer);
@@ -261,7 +261,7 @@ void getFilenameFromNr(char* buffer, uint8_t nr)
 
 static void lcd_sd_menu_filename_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[LONG_FILENAME_LENGTH] = {0};
+    char buffer[LONG_FILENAME_LENGTH];
     memset(buffer, '\0', sizeof(buffer));
     if (nr == 0)
     {
@@ -632,7 +632,7 @@ void lcd_menu_print_select()
                             active_extruder = 0;
                         #endif // EXTRUDERS
                             // move to heatup position
-                            char buffer[32] = {0};
+                            char buffer[32];
                             sprintf_P(buffer, MSGP_CMD_MOVE_FAST_TO_XY, max(int(min_pos[X_AXIS]), 0)+5, max(int(min_pos[Y_AXIS]), 0)+5);
                             homeAll();
                             enquecommand(buffer);
@@ -785,7 +785,7 @@ static void lcd_menu_print_printing()
     {
         lcd_question_screen(lcd_menu_print_tune, NULL, MSGP_MENU_TUNE, lcd_menu_print_pause, lcd_select_first_submenu, PSTR("PAUSE"));
         uint8_t progress = card.getFilePos() / ((card.getFileSize() + 123) / 124);
-        char buffer[32] = {0};
+        char buffer[32];
         switch(printing_state)
         {
         default:
@@ -939,7 +939,7 @@ void lcd_menu_print_ready()
     lcd_lib_draw_hline(3, 124, 13);
     // lcd_lib_draw_string_scroll_left(5, card.longFilename);
 
-    char buffer[32] = {0};
+    char buffer[32]; buffer[0] = '\0';
     unsigned long t=(stoptime-starttime)/1000;
 
     char *c = buffer;
@@ -1004,7 +1004,7 @@ void lcd_menu_print_ready()
 static void tune_item_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
     uint8_t index = 0;
-    char buffer[32] = {0};
+    char buffer[32];
     if (index++ == nr)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
 //    else if (index++ == nr)
@@ -1057,7 +1057,7 @@ static void tune_item_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
 static void tune_item_details_callback(uint8_t nr)
 {
-    char buffer[32] = {0};
+    char buffer[32]; buffer[0] = '\0';
     if (nr == 1)
         int_to_string(feedmultiply, buffer, MSGP_UNIT_PERCENT);
     else if (nr == 2)
@@ -1120,7 +1120,7 @@ void lcd_menu_print_tune_heatup_nozzle0()
     lcd_lib_draw_string_centerP(20, PSTR("Nozzle temperature"));
 #endif
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
-    char buffer[16] = {0};
+    char buffer[16];
     int_to_string(int(dsp_temperature[0]), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature[0]), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
@@ -1142,7 +1142,7 @@ void lcd_menu_print_tune_heatup_nozzle1()
     lcd_lib_clear();
     lcd_lib_draw_string_centerP(20, PSTR("Nozzle 2 temperature"));
     lcd_lib_draw_string_centerP(BOTTOM_MENU_YPOS, MSGP_CLICK_TO_RETURN);
-    char buffer[16] = {0};
+    char buffer[16];
     int_to_string(int(dsp_temperature[1]), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature[1]), buffer+strlen(buffer), MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(30, buffer);
@@ -1214,7 +1214,7 @@ void lcd_menu_print_tune()
 
 static void lcd_retraction_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[32] = {0};
+    char buffer[32];
     uint8_t item = 0;
     if (nr == item++)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
@@ -1242,7 +1242,7 @@ static void lcd_retraction_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
 static void lcd_retraction_details(uint8_t nr)
 {
-    char buffer[32] = {0};
+    char buffer[32];
     uint8_t item = 1;
     if(nr == item++)
         float_to_string2(retract_length, buffer, MSGP_UNIT_MM);
@@ -1298,7 +1298,7 @@ static void lcd_menu_print_tune_retraction()
 
 static void lcd_limits_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[32] = {0};
+    char buffer[32];
     uint8_t item = 0;
     if (nr == item++)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
@@ -1327,7 +1327,7 @@ static void lcd_limits_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
 static void lcd_limits_details(uint8_t nr)
 {
-    char buffer[32] = {0};
+    char buffer[32]; buffer[0] = '\0';
     calculate_speed();
     //float max_feedrate_xy = min(max_feedrate[X_AXIS], max_feedrate[Y_AXIS]);
     uint8_t item = 1;
@@ -1444,7 +1444,7 @@ void lcd_print_pause()
             zdiff = 2;
         }
 
-        char buffer[32] = {0};
+        char buffer[32];
         #if (EXTRUDERS > 1)
             uint16_t x = max(5, int(min_pos[X_AXIS]) + 5 + extruder_offset[X_AXIS][active_extruder]);
         #else

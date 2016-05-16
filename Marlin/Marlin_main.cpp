@@ -56,6 +56,10 @@
 #include <SPI.h>
 #endif
 
+#ifdef DEBUG_MODE
+#include "UltiLCD2_debug.h"
+#endif
+
 #define VERSION_STRING  "1.0.0"
 
 // look here for descriptions of gcodes: http://linuxcnc.org/handbook/gcode/g-code.html
@@ -491,6 +495,9 @@ void setup()
 {
   setup_killpin();
   setup_powerhold();
+#if defined(DEBUG_MODE) && defined(DEBUG_VAR_SIZE)
+  debug_init();
+#endif
   MYSERIAL.begin(BAUDRATE);
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;

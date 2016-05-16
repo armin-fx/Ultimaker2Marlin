@@ -119,7 +119,7 @@ static const menu_t & get_sleeptimer_menuoption(uint8_t nr, menu_t &opt)
 static void drawSleepTimerSubmenu (uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
 
     if (nr == index++)
     {
@@ -371,7 +371,7 @@ static const menu_t & get_axislimit_menuoption(uint8_t nr, menu_t &opt)
 static void drawAxisLimitSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -586,7 +586,7 @@ static const menu_t & get_steps_menuoption(uint8_t nr, menu_t &opt)
 static void drawStepsSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -900,7 +900,7 @@ static const menu_t & get_retract_menuoption(uint8_t nr, menu_t &opt)
 static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -1056,7 +1056,7 @@ static const menu_t & get_retract_menuoption_page2(uint8_t nr, menu_t &opt)
 static void drawRetractSubmenu_page2(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -1239,7 +1239,7 @@ static const menu_t & get_current_menuoption(uint8_t nr, menu_t &opt)
 static void drawCurrentSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -1466,7 +1466,7 @@ static const menu_t & get_maxspeed_menuoption(uint8_t nr, menu_t &opt)
 static void drawMaxSpeedSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -1644,7 +1644,7 @@ static const menu_t & get_acceleration_menuoption(uint8_t nr, menu_t &opt)
 static void drawAccelerationSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -1925,7 +1925,7 @@ static const menu_t & get_heatercheck_menuoption(uint8_t nr, menu_t &opt)
 static void drawHeatercheckSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -2084,7 +2084,7 @@ static void lcd_menu_autotune_info()
         lcd_basic_screen();
         lcd_lib_draw_hline(3, 124, 13);
 
-        char buffer[32] = {0};
+        char buffer[32];
 
         lcd_lib_draw_string_leftP(5, PSTR("PID tuning"));
 
@@ -2200,7 +2200,7 @@ static const menu_t & get_autotune_menuoption(uint8_t nr, menu_t &opt)
 static void drawAutotuneSubmenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Start
@@ -2299,7 +2299,7 @@ static void lcd_menu_autotune_params()
     {
         lcd_lib_draw_string_leftP(17, MSGP_EXTRUDER);
 #if (EXTRUDERS > 1)
-        char buffer[3] = {0};
+        char buffer[3];
         int_to_string(lcd_cache[1], buffer, NULL);
         lcd_lib_draw_string(LCD_CHAR_MARGIN_LEFT + 9*LCD_CHAR_SPACING, 17, buffer);
 #endif
@@ -2482,7 +2482,7 @@ static const menu_t & get_temp_e1_menuoption(uint8_t nr, menu_t &opt)
 static void drawTempExtr1Submenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -2696,7 +2696,7 @@ static const menu_t & get_temp_e2_menuoption(uint8_t nr, menu_t &opt)
 static void drawTempExtr2Submenu(uint8_t nr, uint8_t &flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -2943,7 +2943,7 @@ static void drawTempBedSubmenu(uint8_t nr, uint8_t &flags)
     {
         ++nr;
     }
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
     {
         // Store
@@ -3108,7 +3108,7 @@ static void lcd_menu_tempcontrol_bed()
 static void lcd_tempcontrol_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
     uint8_t index(0);
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == index++)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == index++)

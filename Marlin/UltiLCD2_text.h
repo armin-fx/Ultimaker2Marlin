@@ -88,6 +88,7 @@ const char MSGP_MENU_AUTO[]        PROGMEM = {"AUTO"};
 const char MSGP_MENU_BUILDPLATE[]  PROGMEM = {"BUILD-|PLATE"};
 
 //const char MSGP_STORE_[] PROGMEM = {""};
+const char MSGP_STORE_FILENAME[] PROGMEM = {"MATERIAL.TXT"};
 const char MSGP_STORE_ENTRY_MATERIAL[]              PROGMEM = {"[material]"};
 const char MSGP_STORE_NAME[]                        PROGMEM = {"name"};
 const char MSGP_STORE_TEMPERATURE[]                 PROGMEM = {"temperature"};

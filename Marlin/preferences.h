@@ -62,25 +62,28 @@ static eeprom_partition_t <EEPROM_BASE_ADDRESS> eeprom_partition;
 
 // partition vector with addresses for other vectors
 #define EEPROM_PARTITION_ADDRESS_PREFERRED 0x480
-#define EEPROM_PARTITION_ENTRIES          2
+#define EEPROM_PARTITION_ENTRIES           2
 #define EEPROM_PARTITION_SIZE_PREFERRED   GET_EEPROM_PARTITION_SIZE_WHEN(EEPROM_ADDRESS_PARTITION_ENTRIES)
 
 // armin-fx settings vector
 #define EEPROM_PARTITION_EXPERT_2_NUMBER 0
 #define EEPROM_PARTITION_EXPERT_2_ADDRESS_PREFERRED 0x500
-#define EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED   8
+#define EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED    9
 //
-#define EEPROM_EXPERT_VERSION_2_OFFSET 0x00  // 2 Byte
-#define EEPROM_RETRACT_LENGTH_MIN      0x02  // 4 Byte
-#define EEPROM_FILAMENT_GRAB_MAX       0x06  // 2 Byte
-#define EEPROM_RESERVED_2              0x08  // next position
+#define EEPROM_EXPERT_VERSION_2_OFFSET      0x00  // 2 Byte
+#define EEPROM_EXPERT_VERSION_2_HASH_OFFSET 0x02  // 1 Byte
+#define EEPROM_RETRACT_LENGTH_MIN           0x03  // 4 Byte
+#define EEPROM_FILAMENT_GRAB_MAX            0x07  // 2 Byte
+#define EEPROM_RESERVED_2                   0x09  // next position
 //
-#define GET_EXPERT_VERSION_2()       ( eeprom_partition.  read_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_EXPERT_VERSION_2_OFFSET))
-#define SET_EXPERT_VERSION_2(n)   do { eeprom_partition.update_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_EXPERT_VERSION_2_OFFSET, n); } while(0)
-#define GET_RETRACT_LENGTH_MIN()     ( eeprom_partition.  read_float(EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_RETRACT_LENGTH_MIN))
-#define SET_RETRACT_LENGTH_MIN(n) do { eeprom_partition.update_float(EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_RETRACT_LENGTH_MIN, n); } while(0)
-#define GET_FILAMENT_GRAB_MAX()      ( eeprom_partition.  read_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_FILAMENT_GRAB_MAX))
-#define SET_FILAMENT_GRAB_MAX(n)  do { eeprom_partition.update_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_FILAMENT_GRAB_MAX, n); } while(0)
+#define GET_EXPERT_VERSION_2()          ( eeprom_partition.  read_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_EXPERT_VERSION_2_OFFSET) + 1)
+#define SET_EXPERT_VERSION_2(n)      do { eeprom_partition.update_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_EXPERT_VERSION_2_OFFSET, (n) - 1); } while(0)
+#define GET_EXPERT_VERSION_2_HASH()     ( eeprom_partition.  read_byte (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_EXPERT_VERSION_2_HASH_OFFSET))
+#define SET_EXPERT_VERSION_2_HASH(n) do { eeprom_partition.update_byte (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_EXPERT_VERSION_2_HASH_OFFSET, n); } while(0)
+#define GET_RETRACT_LENGTH_MIN()        ( eeprom_partition.  read_float(EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_RETRACT_LENGTH_MIN))
+#define SET_RETRACT_LENGTH_MIN(n)    do { eeprom_partition.update_float(EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_RETRACT_LENGTH_MIN, n); } while(0)
+#define GET_FILAMENT_GRAB_MAX()         ( eeprom_partition.  read_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_FILAMENT_GRAB_MAX))
+#define SET_FILAMENT_GRAB_MAX(n)     do { eeprom_partition.update_word (EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_FILAMENT_GRAB_MAX, n); } while(0)
 
 // UI Mode
 #define UI_MODE_STANDARD  0

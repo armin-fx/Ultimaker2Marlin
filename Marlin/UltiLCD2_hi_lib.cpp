@@ -382,7 +382,7 @@ void lcd_menu_edit_setting()
 
     lcd_basic_screen();
     lcd_lib_draw_string_centerP(20, lcd_setting_name);
-    char buffer[20] = {0};
+    char buffer[20]; buffer[0] = '\0';
     if ((  LCD_SETTINGS_TYPE_IS_SET(lcd_setting_type, LCD_SETTINGS_TYPE_OFF_BY_0) && lcd_setting_encoder_value == 0) ||
         (! LCD_SETTINGS_TYPE_IS_SET(lcd_setting_type, LCD_SETTINGS_TYPE_OFF_BY_0) && LCD_SETTINGS_TYPE_IS_SET(lcd_setting_type, LCD_SETTINGS_TYPE_OFF_ON_MAX) && lcd_setting_encoder_value == lcd_setting_max) )
     {
@@ -439,7 +439,7 @@ static void lcd_menu_material_reheat()
     lcd_lib_clear();
     lcd_lib_draw_string_centerP(10, PSTR("Heating printhead"));
 
-    char buffer[16] = {0};
+    char buffer[16];
     char *c = int_to_string(int(dsp_temperature[active_extruder]), buffer, MSGP_UNIT_CELSIUS_FROM);
     int_to_string(int(target_temperature[active_extruder]), c, MSGP_UNIT_CELSIUS);
     lcd_lib_draw_string_center(24, buffer);

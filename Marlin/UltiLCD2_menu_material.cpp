@@ -52,7 +52,7 @@ void lcd_material_change_init(bool printing)
     {
         minProgress = 0;
         // move head to front
-        char buffer[32] = {0};
+        char buffer[32];
         homeHead();
         sprintf_P(buffer, MSGP_CMD_MOVE_TO_XY, int(homing_feedrate[0]), int(AXIS_CENTER_POS(X_AXIS)), int(min_pos[Y_AXIS])+5);
         enquecommand(buffer);
@@ -102,7 +102,7 @@ void lcd_menu_change_material_preheat()
     if (temp < 0) temp = 0;
 
     // draw menu
-    char buffer[8] = {0};
+    char buffer[8];
     uint8_t progress = uint8_t(temp * 125 / target);
     if (progress < minProgress)
         progress = minProgress;
@@ -179,7 +179,7 @@ static void lcd_menu_change_material_remove()
     lcd_info_screen(lcd_change_to_previous_menu, cancelMaterialInsert);
 #if EXTRUDERS > 1
     lcd_lib_draw_stringP(3, 10, MSGP_EXTRUDER);
-    char buffer[8] = {0};
+    char buffer[8];
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
     lcd_lib_draw_string(3+(9*LCD_CHAR_SPACING), 10, buffer);
@@ -230,7 +230,7 @@ static void lcd_menu_change_material_remove_wait_user()
     lcd_question_screen(NULL, lcd_menu_change_material_remove_wait_user_ready, MSGP_MENU_READY, lcd_change_to_material_main, cancelMaterialInsert, MSGP_MENU_CANCEL);
 #if EXTRUDERS > 1
     lcd_lib_draw_stringP(3, 10, MSGP_EXTRUDER);
-    char buffer[8] = {0};
+    char buffer[8];
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
     lcd_lib_draw_string(3+(9*LCD_CHAR_SPACING), 10, buffer);
@@ -267,7 +267,7 @@ void lcd_menu_insert_material_preheat()
     lcd_info_screen(lcd_change_to_previous_menu, cancelMaterialInsert);
 #if EXTRUDERS > 1
     lcd_lib_draw_stringP(3, 10, PSTR("Heating nozzle"));
-    char buffer[8] = {0};
+    char buffer[8];
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
     lcd_lib_draw_string(3+(15*LCD_CHAR_SPACING), 10, buffer);
@@ -296,7 +296,7 @@ static void lcd_menu_change_material_insert_wait_user()
 #if EXTRUDERS > 1
     lcd_lib_draw_stringP(3, 10, PSTR("Insert new material"));
     lcd_lib_draw_stringP(3, 20, PSTR("for extruder"));
-    char buffer[8] = {0};
+    char buffer[8];
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
     lcd_lib_draw_string(3+(13*LCD_CHAR_SPACING), 20, buffer);
@@ -346,7 +346,7 @@ static void lcd_menu_change_material_insert_forward()
     lcd_info_screen(lcd_change_to_previous_menu, cancelMaterialInsert);
 #if EXTRUDERS > 1
     lcd_lib_draw_stringP(3, 10, MSGP_EXTRUDER);
-    char buffer[8] = {0};
+    char buffer[8];
     strcpy_P(buffer, PSTR("("));
     int_to_string(active_extruder+1, buffer+1, PSTR(")"));
     lcd_lib_draw_string(3+(9*LCD_CHAR_SPACING), 10, buffer);
@@ -406,7 +406,7 @@ static void lcd_menu_change_material_insert()
 #if EXTRUDERS > 1
         lcd_lib_draw_stringP(3, 20, PSTR("Wait till material"));
         lcd_lib_draw_stringP(3, 30, PSTR("comes out nozzle"));
-        char buffer[8] = {0};
+        char buffer[8];
         strcpy_P(buffer, PSTR("("));
         int_to_string(active_extruder+1, buffer+1, PSTR(")"));
         lcd_lib_draw_string(3+(17*LCD_CHAR_SPACING), 30, buffer);
@@ -439,7 +439,7 @@ static void lcd_menu_change_material_select_material_callback(uint8_t nr, uint8_
 
 static void lcd_menu_change_material_select_material_details_callback(uint8_t nr)
 {
-    char buffer[32] = {0};
+    char buffer[32]; buffer[0] = '\0';
     char* c = buffer;
 
     if (led_glow_dir)
@@ -490,6 +490,8 @@ static void lcd_menu_material_export_done()
 
 static void lcd_menu_material_export()
 {
+    char buffer[32];
+    
     if (!card.sdInserted)
     {
         lcd_menu_no_sdcard();
@@ -502,11 +504,11 @@ static void lcd_menu_material_export()
     }
 
     card.setroot();
-    card.openFile("MATERIAL.TXT", false);
+    strcpy_P(buffer, MSGP_STORE_FILENAME);
+    card.openFile(buffer, false);
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
     for(uint8_t n=0; n<count; ++n)
     {
-        char buffer[32] = {0};
         strcpy_2P(buffer, MSGP_STORE_ENTRY_MATERIAL, MSGP_NEWLINE);
         card.write_string(buffer);
 
@@ -659,6 +661,8 @@ void materialSettingsEEPROM_store (materialSettingsEEPROM &m, uint8_t nr)
 
 static void lcd_menu_material_import()
 {
+    char buffer[32];
+
     if (!card.sdInserted)
     {
         lcd_menu_no_sdcard();
@@ -671,7 +675,8 @@ static void lcd_menu_material_import()
     }
 
     card.setroot();
-    card.openFile("MATERIAL.TXT", true);
+    strcpy_P(buffer, MSGP_STORE_FILENAME);
+    card.openFile(buffer, true);
     if (!card.isFileOpen())
     {
         lcd_info_screen(NULL, lcd_change_to_previous_menu);
@@ -681,10 +686,8 @@ static void lcd_menu_material_import()
         return;
     }
 
-    char buffer[32] = {0};
     uint8_t count = 0xFF;
     materialSettingsEEPROM materialEEPROM;
-
     while(card.fgets(buffer, sizeof(buffer)) > 0)
     {
         buffer[sizeof(buffer)-1] = '\0';
@@ -772,7 +775,7 @@ static void lcd_menu_material_import()
 static void lcd_material_select_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == 0)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == count + 1)
@@ -799,7 +802,7 @@ static void lcd_material_select_details_callback(uint8_t nr)
     }
     else if (nr <= count)
     {
-        char buffer[32] = {0};
+        char buffer[32]; buffer[0] = '\0';
         char* c = buffer;
         nr -= 1;
 
@@ -878,7 +881,7 @@ static void lcd_menu_material_selected()
 
 static void lcd_material_settings_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == 0)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == 1)
@@ -1025,7 +1028,7 @@ static void lcd_menu_material_settings()
 
 static void lcd_material_temperature_settings_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[21] = {0};
+    char buffer[21];
     if (nr == 0)
     {
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
@@ -1045,7 +1048,7 @@ static void lcd_material_temperature_settings_callback(uint8_t nr, uint8_t offse
 
 static void lcd_material_settings_temperature_details_callback(uint8_t nr)
 {
-    char buffer[21] = {0};
+    char buffer[21];
     if (nr == 1)
     {
         int_to_string(material[active_extruder].temperature_default, buffer, MSGP_UNIT_CELSIUS);
@@ -1094,7 +1097,7 @@ static void lcd_menu_material_temperature_settings()
 
 static void lcd_material_bed_temperature_settings_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[21] = {0};
+    char buffer[21];
     if (nr == 0)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr == 1)
@@ -1109,7 +1112,7 @@ static void lcd_material_bed_temperature_settings_callback(uint8_t nr, uint8_t o
 
 static void lcd_material_settings_bed_temperature_details_callback(uint8_t nr)
 {
-    char buffer[10] = {0};
+    char buffer[10];
     if (nr == 1)
     {
         int_to_string(material[active_extruder].bed_temperature, buffer, MSGP_UNIT_CELSIUS);
@@ -1154,7 +1157,7 @@ static void lcd_menu_material_bed_temperature_settings()
 static void lcd_menu_material_settings_store_callback(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
-    char buffer[32] = {0};
+    char buffer[32];
     if (nr == 0)
         strcpy_P(buffer, MSGP_ENTRY_RETURN);
     else if (nr > count)
@@ -1184,7 +1187,8 @@ static void lcd_menu_material_settings_store()
             uint8_t idx = SELECTED_SCROLL_MENU_ITEM() - 1;
             if (idx == count)
             {
-                char buffer[9] = "CUSTOM";
+                char buffer[9];
+                strcpy_P(buffer, PSTR("CUSTOM"));
                 int_to_string(idx - 1, buffer + 6);
                 eeprom_update_block(buffer, EEPROM_MATERIAL_NAME_OFFSET(idx), MATERIAL_NAME_SIZE);
                 eeprom_update_byte(EEPROM_MATERIAL_COUNT_OFFSET(), idx + 1);
@@ -1228,7 +1232,7 @@ void lcd_material_reset_CPE (char* buffer, uint8_t nr)
 void lcd_material_reset_defaults()
 {
     //Fill in the defaults
-    char buffer[MATERIAL_NAME_SIZE+1] = {0};
+    char buffer[MATERIAL_NAME_SIZE+1];
     int8_t nr = -1;
 
 #ifndef NO_MATERIAL_PLA
@@ -1397,7 +1401,7 @@ bool lcd_material_verify_material_settings()
 #ifndef NO_MATERIAL_CPE
     bool hasCPE = false;
 #endif // NO_MATERIAL_CPE
-    char buffer[MATERIAL_NAME_SIZE+1] = {0};
+    char buffer[MATERIAL_NAME_SIZE+1];
 
     uint8_t cnt = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
     if (cnt < 2 || cnt > EEPROM_MATERIAL_SETTINGS_MAX_COUNT)

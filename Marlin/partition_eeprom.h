@@ -3,6 +3,8 @@
 
 #include <inttypes.h>
 
+#include "limiter.h"
+
 // TODO later implementation will regard a black list of addresses
 //      then it will move the eeprom partition around the black list when needed
 
@@ -34,6 +36,8 @@ void write_eeprom_base_address (void* base, void* partition);
 template <const uint16_t eeprom_base_address>
 class eeprom_partition_t
 {
+private:
+    bool is_no_overlap (uint16_t table_address, uint8_t  table_size);
 public:
     // return true if partition list in good state
     bool is_valid ();
@@ -80,10 +84,38 @@ bool eeprom_partition_t<eeprom_base_address>::is_valid ()
 {
     uint16_t table_address = (uint16_t) get_table_address();
     uint8_t  table_size    =            get_table_size ();
+    // check hash value
     if (get_hash8_16 (table_size) != eeprom_read_byte ((uint8_t*) (table_address + 1))) return false;
+    // check partition range is in EEPROM range
     for (uint8_t i = 0; i < table_size; ++i)
     {
         if ((uint16_t) get_address(i) + get_size(i) >= E2END) return false;
+    }
+    // check partition entries don't overlap
+    if (! is_no_overlap(table_address, table_size)) return false;
+    //
+    return true;
+}
+
+template <const uint16_t eeprom_base_address>
+bool eeprom_partition_t<eeprom_base_address>::is_no_overlap (uint16_t table_address, uint8_t  table_size)
+{
+    if (table_size < 2) return true;
+    
+    uint8_t i, k;
+    uint16_t partA_address, partB_address;
+    uint16_t partA_size,    partB_size;
+    for (i = 0; i<table_size-1; ++i)
+    {
+        for (k=i+1; k < table_size; ++k)
+        {
+            partA_address = (uint16_t) get_address (i);
+            partA_size    =            get_size    (i);
+            partB_address = (uint16_t) get_address (k);
+            partB_size    =            get_size    (k);
+            if (is_cut_scope (partA_address, partB_address, partB_address+partB_size)) return false;
+            if (is_cut_scope (partB_address, partA_address, partA_address+partA_size)) return false;
+        }
     }
     return true;
 }

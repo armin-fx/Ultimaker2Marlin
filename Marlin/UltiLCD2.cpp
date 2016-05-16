@@ -93,7 +93,7 @@ void lcd_update()
 
     if (IsStopped())
     {
-		char buffer[24] = {0};
+		char buffer[24];
 		strcpy_P(buffer, PSTR("ultimaker.com/"));
         lcd_lib_clear();
         lcd_lib_draw_string_centerP(10, PSTR("ERROR - STOPPED"));

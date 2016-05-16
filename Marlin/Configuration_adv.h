@@ -358,7 +358,10 @@ const int8_t dropsegments=5; //everything with less than this number of steps wi
   #endif
 #endif
 
+#ifndef RELEASE
 #define DEBUG_MODE
+#define DEBUG_VAR_SIZE 32
+#endif
 
 //===========================================================================
 //=============================  Define Defines  ============================
