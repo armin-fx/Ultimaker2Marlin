@@ -139,7 +139,7 @@ inline T get_cut_max (T& value, V1 max1, V2 max2)  {return get_cut_max (value, (
 // check, return true if is in limit
 
 template <class T> inline
-bool is_cut_scope (T& value, T min, T max)
+bool is_cut_scope (T value, T min, T max)
 {
 	if      (value < min) return false;
 	else if (value > max) return false;
@@ -147,20 +147,20 @@ bool is_cut_scope (T& value, T min, T max)
 }
 
 template <class T> inline
-bool is_cut_inside (T& value, T var1, T var2)
+bool is_cut_inside (T value, T var1, T var2)
 {
 	if (var1 < var2) return is_cut_scope (value, var1, var2);
 	else             return is_cut_scope (value, var2, var1);
 }
 
 template <class T> inline
-bool is_cut_min (T& value, T min)
+bool is_cut_min (T value, T min)
 {
 	if (value < min) return false;
 	return true;
 }
 template <class T> inline
-bool is_cut_min (T& value, T min1, T min2)
+bool is_cut_min (T value, T min1, T min2)
 {
 	if (min1 > min2)
 	{
@@ -176,13 +176,13 @@ bool is_cut_min (T& value, T min1, T min2)
 }
 
 template <class T> inline
-bool is_cut_max (T& value, T max)
+bool is_cut_max (T value, T max)
 {
 	if (value > max) return false;
 	return true;
 }
 template <class T> inline
-bool is_cut_max (T& value, T max1, T max2)
+bool is_cut_max (T value, T max1, T max2)
 {
 	if (max1 < max2)
 	{
@@ -199,20 +199,20 @@ bool is_cut_max (T& value, T max1, T max2)
 
 // templates for different types
 template <class T, class V1, class V2>
-inline bool is_cut_scope (T& value, V1 min, V2 max)  {return is_cut_scope (value, (T) min, (T) max);}
+inline bool is_cut_scope (T value, V1 min, V2 max)  {return is_cut_scope (value, (T) min, (T) max);}
 
 template <class T, class V1, class V2>
-inline bool is_cut_inside (T& value, V1 var1, V2 var2)  {return is_cut_inside (value, (T) var1, (T) var2);}
-
-template <class T, class V1>
-inline bool is_cut_min (T& value, V1 min)  {return is_cut_min (value, (T) min);}
-template <class T, class V1, class V2>
-inline bool is_cut_min (T& value, V1 min1, V2 min2)  {return is_cut_min (value, (T) min1, (T) min2);}
+inline bool is_cut_inside (T value, V1 var1, V2 var2)  {return is_cut_inside (value, (T) var1, (T) var2);}
 
 template <class T, class V1>
-inline bool is_cut_max (T& value, V1 max)  {return is_cut_max (value, (T) max);}
+inline bool is_cut_min (T value, V1 min)  {return is_cut_min (value, (T) min);}
 template <class T, class V1, class V2>
-inline bool is_cut_max (T& value, V1 max1, V2 max2)  {return is_cut_max (value, (T) max1, (T) max2);}
+inline bool is_cut_min (T value, V1 min1, V2 min2)  {return is_cut_min (value, (T) min1, (T) min2);}
+
+template <class T, class V1>
+inline bool is_cut_max (T value, V1 max)  {return is_cut_max (value, (T) max);}
+template <class T, class V1, class V2>
+inline bool is_cut_max (T value, V1 max1, V2 max2)  {return is_cut_max (value, (T) max1, (T) max2);}
 
 // cut value direct to limit, return true if it was limit
 

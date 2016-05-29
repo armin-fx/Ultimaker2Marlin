@@ -89,7 +89,8 @@ static void lcd_advanced_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
 static void lcd_advanced_details(uint8_t nr)
 {
-    char buffer[32]; buffer[0] = '\0';
+    char buffer[32];
+    buffer[0] = '\0';
     if (!(ui_mode & UI_MODE_EXPERT) && (nr > 8+BED_MENU_OFFSET+2*EXTRUDERS))
         ++nr;
 
@@ -180,7 +181,8 @@ static void lcd_preferences_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
 static void lcd_preferences_details(uint8_t nr)
 {
-    char buffer[32]; buffer[0] = '\0';
+    char buffer[32];
+    buffer[0] = '\0';
 
     if (nr == 1)
     {
@@ -578,6 +580,7 @@ static void doFactoryReset()
     eeprom_update_byte((uint8_t*)102, 0);
     eeprom_update_byte((uint8_t*)EEPROM_FIRST_RUN_DONE_OFFSET, 0);
     eeprom_update_word((uint16_t*)EEPROM_EXPERT_VERSION_OFFSET, 0xFFFF);
+    scratch_eeprom_base_address((void*)EEPROM_BASE_ADDRESS);
     eeprom_update_byte(EEPROM_MATERIAL_COUNT_OFFSET(), 0);
     doMachineRestart();
 }
@@ -715,7 +718,8 @@ static void lcd_menu_maintenance_led()
 
 static void lcd_uimode_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[20]; buffer[0] = ' ';
+    char buffer[20];
+    buffer[0] = ' ';
 
     if (nr == 0)
     {
@@ -747,7 +751,9 @@ static void lcd_uimode_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
 static void lcd_clicksound_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[20]; buffer[0] = ' ';
+    char buffer[20];
+    buffer[0] = ' ';
+
     if (nr == 0)
     {
         strcpy_P(buffer, MSGP_ENTRY_RETURN);

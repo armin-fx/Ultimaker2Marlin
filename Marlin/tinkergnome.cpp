@@ -73,7 +73,7 @@ static void lcd_print_tune_xyjerk();
 static void lcd_position_z_axis();
 
 #define EXPERT_VERSION 6
-#define EXPERT_VERSION_2 1
+#define EXPERT_2_VERSION 1
 
 void tinkergnome_init()
 {
@@ -225,10 +225,94 @@ void tinkergnome_init()
     }
 }
 
-void armin_fx_init_expert_2()
+void clear_bed_temperature_first_layer()
 {
-    uint16_t version = GET_EXPERT_VERSION_2();
-    if (get_hash8_16 (version) != GET_EXPERT_VERSION_2_HASH())
+    for (int n = 0; n < EEPROM_MATERIAL_SETTINGS_REAL_COUNT; ++n)
+    {
+        eeprom_update_word(EEPROM_MATERIAL_BED_TEMPERATURE_FIRST_LAYER(n), 0);
+    }
+}
+
+bool add_partition_expert_2 ()
+{
+    return eeprom_partition.append(
+                EEPROM_PARTITION_EXPERT_2_NUMBER,
+                EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED,
+        (void*) EEPROM_PARTITION_EXPERT_2_ADDRESS_PREFERRED
+        );
+}
+
+bool add_partition_bed_temperature_first_layer()
+{
+    return eeprom_partition.append(
+                EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER,
+                EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED,
+        (void*) EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_ADDRESS_PREFERRED
+        );
+    clear_bed_temperature_first_layer();
+}
+
+void reset_partition_list()
+{
+    eeprom_partition.clear();
+    add_partition_expert_2 ();
+    add_partition_bed_temperature_first_layer();
+}
+
+void eeprom_partition_init ()
+{
+    // initialize eeprom partition base address
+    if (! check_eeprom_base_address((void*)EEPROM_BASE_ADDRESS))
+    {
+        // no correkt entry? -> reset all settings
+        write_eeprom_base_address((void*)EEPROM_BASE_ADDRESS, (void*)EEPROM_PARTITION_ADDRESS_PREFERRED);
+        reset_partition_list();
+        SET_EXPERT_2_VERSION(0);
+    }
+    // initialize eeprom partition list
+    if (! eeprom_partition.is_valid())
+    {
+        reset_partition_list(); return;
+    }
+    // TODO check eeprom partition list with black list
+
+    // create not existing eeprom partitions
+    bool good;
+    if (! eeprom_partition.exist_type(EEPROM_PARTITION_EXPERT_2_NUMBER))
+    {
+        good = add_partition_expert_2 ();
+        if (! good) { reset_partition_list(); return; }
+    }
+    if (! eeprom_partition.exist_type(EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER))
+    {
+        good = add_partition_bed_temperature_first_layer ();
+        if (! good) { reset_partition_list(); return; }
+    }
+
+    // check partition size with preferred size
+    // TODO resize partition to preferred size
+    if (eeprom_partition.get_size_type(EEPROM_PARTITION_EXPERT_2_NUMBER) < EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED)
+    {
+        good = eeprom_partition.resize_type(EEPROM_PARTITION_EXPERT_2_NUMBER, EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED);
+        if (! good) { reset_partition_list(); return; }
+    }
+    if (eeprom_partition.get_size_type(EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER) < EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED)
+    {
+        good = eeprom_partition.resize_type(EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER, EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED);
+        if (! good) { reset_partition_list(); return; }
+    }
+}
+
+void armin_fx_init()
+{
+    eeprom_partition_init();
+    armin_fx_init_settings();
+}
+
+void armin_fx_init_settings()
+{
+    uint16_t version = GET_EXPERT_2_VERSION();
+    if (get_hash8_16 (version) != GET_EXPERT_2_VERSION_HASH())
         version = 0; // reset all settings
 
     if (version >= 1)
@@ -246,57 +330,15 @@ void armin_fx_init_expert_2()
 #endif
         SET_RETRACT_LENGTH_MIN(retract_length_min);
         SET_FILAMENT_GRAB_MAX (filament_grab_max);
+
+        clear_bed_temperature_first_layer();
     }
 
-    if (version <= EXPERT_VERSION_2)
+    if (version <= EXPERT_2_VERSION)
     {
-        SET_EXPERT_VERSION_2(EXPERT_VERSION_2);
-        SET_EXPERT_VERSION_2_HASH(get_hash8_16(EXPERT_VERSION_2));
+        SET_EXPERT_2_VERSION(EXPERT_2_VERSION);
+        SET_EXPERT_2_VERSION_HASH(get_hash8_16(EXPERT_2_VERSION));
     }
-}
-
-void reset_partition_list()
-{
-    eeprom_partition.set_address(
-                EEPROM_PARTITION_EXPERT_2_NUMBER,
-        (void*) EEPROM_PARTITION_EXPERT_2_ADDRESS_PREFERRED,
-                EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED
-        );
-    eeprom_partition.set_address(
-                EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER,
-        (void*) EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_ADDRESS_PREFERRED,
-                EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED
-        );
-    eeprom_partition.set_table_size (2);
-}
-
-void armin_fx_init()
-{
-    // initialize eeprom partition base address
-    if (! check_eeprom_base_address((void*)EEPROM_BASE_ADDRESS))
-    {
-        write_eeprom_base_address((void*)EEPROM_BASE_ADDRESS, (void*)EEPROM_PARTITION_ADDRESS_PREFERRED);
-    }
-    // initialize eeprom partition
-    if (! eeprom_partition.is_valid())
-    {
-        reset_partition_list();
-    }
-    // TODO check eeprom partition with black list
-    
-    // check partition size with preferred size
-    // TODO resize partition to preferred size
-    if (eeprom_partition.get_size(EEPROM_PARTITION_EXPERT_2_NUMBER) <= EEPROM_PARTITION_EXPERT_2_SIZE_PREFERRED)
-    {
-        reset_partition_list();
-    }
-    if (eeprom_partition.get_size(EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_NUMBER) <= EEPROM_PARTITION_MATERIAL_BED_TEMPERATURE_FIRST_LAYER_SIZE_PREFERRED)
-    {
-        reset_partition_list();
-    }
-
-    // initialize partitions
-    armin_fx_init_expert_2();
 }
 
 void menu_printing_init()
@@ -1631,7 +1673,8 @@ void lcd_menu_printing_tg()
 
 static void lcd_expert_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[20]; buffer[0] = ' ';
+    char buffer[20];
+    buffer[0] = ' ';
     if (nr == 0)
     {
         strcpy_P(buffer, MSGP_ENTRY_RETURN);

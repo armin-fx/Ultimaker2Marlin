@@ -6,6 +6,7 @@
 #include <avr/eeprom.h>
 
 #include "partition_eeprom.h"
+#include "limiter.h"
 
 
 uint16_t xorshift16 (uint16_t value)
@@ -36,9 +37,35 @@ void copy_eeprom (void* target, void* source, uint16_t size)
     for (uint16_t i = 0; i < size; ++i)
     {
         eeprom_update_byte((uint8_t*)target, eeprom_read_byte((const uint8_t*)source));
-        target = (void*) ((uint16_t)target + 1);
-        source = (void*) ((uint16_t)source + 1);
+        target = (void*) ((size_t)target + 1);
+        source = (void*) ((size_t)source + 1);
     }
+}
+
+void move_eeprom (void* target, void* source, uint16_t size)
+{
+    if ((size_t)target <= (size_t)source)
+    {
+        copy_eeprom (target, source, size);
+    }
+    else
+    {
+        target = (void*) ((size_t)target + size - 1);
+        source = (void*) ((size_t)source + size - 1);
+        for (uint16_t i = 0; i < size; ++i)
+        {
+            eeprom_update_byte((uint8_t*)target, eeprom_read_byte((const uint8_t*)source));
+            target = (void*) ((size_t)target - 1);
+            source = (void*) ((size_t)source - 1);
+        }
+    }
+}
+
+bool is_address_overlap (void *address_A, size_t size_A, void *address_B, size_t size_B)
+{
+    if (is_cut_scope ((size_t)address_A, (size_t)address_B, (size_t)address_B + size_B)) return true;
+    if (is_cut_scope ((size_t)address_B, (size_t)address_A, (size_t)address_A + size_A)) return true;
+    return false;
 }
 
 bool check_eeprom_base_address (void* base)
@@ -51,10 +78,10 @@ bool check_eeprom_base_address (void* base)
     return true;
 }
 
-void write_eeprom_base_address (void* base, void* partition)
+void write_eeprom_base_tripel (void* base, uint16_t partition, uint8_t hash)
 {
-    eeprom_update_word ((uint16_t*)((uint16_t)base),                 (uint16_t) partition);
-    eeprom_update_byte ((uint8_t*) ((uint16_t)base+2), get_hash8_16 ((uint16_t) partition));
+    eeprom_update_word ((uint16_t*)((uint16_t)base),   partition);
+    eeprom_update_byte ((uint8_t*) ((uint16_t)base+2), hash);
 }
 
 #endif // PARTITION_EEPROM_CPP
