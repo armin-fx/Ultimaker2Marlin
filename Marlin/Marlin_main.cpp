@@ -229,6 +229,9 @@ bool position_error;
 
 uint8_t printing_state;
 
+bool pauseRequested = false;
+bool primed         = false;
+
 //===========================================================================
 //=============================private variables=============================
 //===========================================================================
@@ -289,6 +292,7 @@ static void get_arc_coordinates(const char *cmd);
 static bool setTargetedHotend(const char *cmd, int code);
 static void prepare_arc_move(char isclockwise);
 static void prepare_move(const char *cmd);
+static bool prepare_print_pause();
 static void get_command();
 static void FlushSerialRequestResend();
 static void ClearToSend();
@@ -619,8 +623,54 @@ static bool code_seen(const char *cmd, char code)
   return (strchr_pointer != NULL);  //Return True if a character was found
 }
 
+static bool prepare_print_pause()
+{
+    if (buflen >= BUFSIZE) return false;
+    if (!card.pause)
+    {
+        card.pause = true;
+        recover_height = current_position[Z_AXIS];
+
+        // move z up according to the current height - but minimum to z=70mm (above the gantry height)
+        uint16_t zdiff = 0;
+        if (current_position[Z_AXIS] < 70)
+            zdiff = max(70 - floor(current_position[Z_AXIS]), 20);
+        else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 60)
+        {
+            zdiff = 20;
+        }
+        else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 30)
+        {
+            zdiff = 2;
+        }
+
+        #if (EXTRUDERS > 1)
+            uint16_t x = max(5, int(min_pos[X_AXIS]) + 5 + extruder_offset[X_AXIS][active_extruder]);
+        #else
+            uint8_t x = max(int(min_pos[X_AXIS]), 0) + 5;
+        #endif
+        uint8_t y = max(int(min_pos[Y_AXIS]), 0) + 5;
+
+        // prepend pause command
+        --bufindr;
+        bufindr %= BUFSIZE;
+        ++buflen;
+        serialCmd &= ~(1 << bufindr);
+        sprintf_P(&(cmdbuffer[bufindr][0]), PSTR("M601 X%u Y%u Z%u L%u"), x, y, zdiff, uint8_t(end_of_print_retraction));
+
+        primed = false;
+    }
+    return true;
+}
+
 static void get_command()
 {
+  if(pauseRequested)
+  {
+    pauseRequested = ! prepare_print_pause();
+    return;
+  }
+
   while( MYSERIAL.available() > 0  && buflen < BUFSIZE) {
     serial_char = MYSERIAL.read();
     if(serial_char == '\n' ||

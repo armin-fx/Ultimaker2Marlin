@@ -95,7 +95,8 @@ void debug_ram_find_var()
 
 #ifdef DEBUG_VAR_SIZE
 
-uint16_t debug_var_end = 0;
+uint16_t debug_var_end   = 0;
+uint16_t debug_var_count = 0;
 char     debug_var[DEBUG_STRING_SIZE + DEBUG_VAR_SIZE];
 
 void debug_init()
@@ -103,7 +104,8 @@ void debug_init()
     strcpy_P (debug_var, MSGP_DEBUG_STRING);
     for (int i = DEBUG_STRING_SIZE; i < DEBUG_STRING_SIZE + DEBUG_VAR_SIZE; ++i)
         debug_var[i] = '\0';
-    debug_var_end = 0;
+    debug_var_end   = 0;
+    debug_var_count = 0;
 }
 
 inline bool debug_is_in_space (size_t size)
@@ -112,28 +114,36 @@ inline bool debug_is_in_space (size_t size)
     return true;
 }
 
-void debug_add_byte(uint8_t var)
+template <typename T>
+void debug_add_value (T var)
 {
+    if (debug_var_count < DEBUG_VAR_BEGIN)
+    {
+        debug_var_count += sizeof(var);
+        return;
+    }
     if (debug_is_in_space(sizeof(var)))
     {
         *((typeof(var)*) (debug_var + DEBUG_STRING_SIZE + debug_var_end)) = var;
         debug_var_end += sizeof(var);
     }
 }
-void debug_add_word(uint16_t var)
+
+void debug_add_string(char* str)
 {
-    if (debug_is_in_space(sizeof(var)))
+    do
     {
-        *((typeof(var)*) (debug_var + DEBUG_STRING_SIZE + debug_var_end)) = var;
-        debug_var_end += sizeof(var);
+        debug_add_byte (*str);
     }
+    while (*(str++) != '\0');
 }
-void debug_add_float(float var)
+
+void debug_add_block (void* ptr, size_t size)
 {
-    if (debug_is_in_space(sizeof(var)))
+    char* str = (char*) ptr;
+    while (size-- > 0);
     {
-        *((typeof(var)*) (debug_var + DEBUG_STRING_SIZE + debug_var_end)) = var;
-        debug_var_end += sizeof(var);
+        debug_add_byte (*(str++));
     }
 }
 

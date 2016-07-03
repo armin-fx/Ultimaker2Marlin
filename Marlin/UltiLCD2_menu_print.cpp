@@ -32,7 +32,7 @@ static void lcd_menu_print_material_warning();
 static void lcd_menu_print_tune_retraction();
 static void lcd_menu_print_limits();
 
-static bool primed = false;
+//static bool primed = false;
 //static bool pauseRequested = false;
 
 void lcd_clear_cache()
@@ -99,7 +99,7 @@ void abortPrint()
     stoptime=millis();
     lifetime_stats_print_end();
     card.pause = false;
-//    pauseRequested = false;
+    pauseRequested = false;
     printing_state  = PRINT_STATE_NORMAL;
     if (led_mode == LED_MODE_WHILE_PRINTING)
         analogWrite(LED_PIN, 0);
@@ -195,6 +195,15 @@ void doStartPrint()
         }
 #endif
     }
+
+    /*
+    // cut off primed filament line
+    enquecommand_P(PSTR("G10"));
+    char buffer[32];
+    sprintf_P(buffer, MSGP_CMD_MOVE_TO_ZXY, int(5000), int(5), int((min_pos[X_AXIS]+max_pos[X_AXIS])/2), max(int(min_pos[Y_AXIS]), 0)+5);
+    enquecommand(buffer);
+    enquecommand_P(PSTR("G11"));
+    */
 
     if (printing_state == PRINT_STATE_START)
     {
@@ -1426,38 +1435,7 @@ static void lcd_menu_print_limits()
 
 void lcd_print_pause()
 {
-    if (!card.pause)
-    {
-        card.pause = true;
-        recover_height = current_position[Z_AXIS];
-
-        // move z up according to the current height - but minimum to z=70mm (above the gantry height)
-        uint16_t zdiff = 0;
-        if (current_position[Z_AXIS] < 70)
-            zdiff = max(70 - floor(current_position[Z_AXIS]), 20);
-        else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 60)
-        {
-            zdiff = 20;
-        }
-        else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 30)
-        {
-            zdiff = 2;
-        }
-
-        char buffer[32];
-        #if (EXTRUDERS > 1)
-            uint16_t x = max(5, int(min_pos[X_AXIS]) + 5 + extruder_offset[X_AXIS][active_extruder]);
-        #else
-            uint8_t x = max(int(min_pos[X_AXIS]), 0) + 5;
-        #endif
-        uint8_t y = max(int(min_pos[Y_AXIS]), 0) + 5;
-
-        sprintf_P(buffer, PSTR("M601 X%u Y%u Z%u L%u"), x, y, zdiff, uint8_t(end_of_print_retraction));
-        process_command(buffer);
-
-        primed = false;
-
-    }
+    if (! card.pause) pauseRequested = true;
 }
 
 void lcd_print_tune()
@@ -1476,6 +1454,7 @@ static void lcd_print_resume()
 {
     menu.return_to_previous();
     card.pause = false;
+    pauseRequested = false;
     if (LCD_DETAIL_CACHE_MATERIAL(active_extruder))
         primed = true;
 

@@ -284,6 +284,9 @@ extern uint8_t printing_state;
 #define PRINT_STATE_RECOVER     6
 #define PRINT_STATE_START       7
 
+extern bool pauseRequested;
+extern bool primed;
+
 // Handling multiple extruders pins
 extern uint8_t active_extruder;
 extern uint8_t tmp_extruder;

@@ -164,7 +164,7 @@ template <const uint16_t eeprom_base_address>
 bool eeprom_partition_t<eeprom_base_address>::is_no_overlap (uint16_t table_address, uint8_t  table_size)
 {
     if (table_size < 2) return true;
-    
+
     uint8_t i, k;
     for (i = 0; i<table_size-1; ++i)
     {

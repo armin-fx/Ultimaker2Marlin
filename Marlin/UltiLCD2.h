@@ -5,6 +5,9 @@
 
 #ifdef ENABLE_ULTILCD2
 #include "UltiLCD2_low_lib.h"
+#ifdef DEBUG_MODE
+#include "UltiLCD2_debug.h"
+#endif
 
 void lcd_init();
 void lcd_update();
