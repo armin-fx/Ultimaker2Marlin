@@ -19,14 +19,24 @@ void debug_ram_find_var();
 
 #ifdef DEBUG_VAR_SIZE
 
+#ifndef DEBUG_VAR_BEGIN
+#define DEBUG_VAR_BEGIN 0
+#endif // DEBUG_VAR_BEGIN
+
 extern uint16_t debug_var_end;
+extern uint16_t debug_var_count;
 extern char     debug_var[DEBUG_STRING_SIZE + DEBUG_VAR_SIZE];
 
 void debug_init();
 
-void debug_add_byte (uint8_t  var);
-void debug_add_word (uint16_t var);
-void debug_add_float(float    var);
+template <typename T>
+void debug_add_value (T var);
+
+inline void debug_add_byte  (uint8_t  var) { debug_add_value (var); }
+inline void debug_add_word  (uint16_t var) { debug_add_value (var); }
+inline void debug_add_float (float    var) { debug_add_value (var); }
+       void debug_add_string(char*    str);
+       void debug_add_block (void*    ptr, size_t size);
 
 #endif // DEBUG_VAR_SIZE
 

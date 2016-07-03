@@ -41,7 +41,7 @@ uint8_t sleep_state = 0x0;
 
 float recover_height = 0.0f;
 float recover_position[NUM_AXIS] = { 0.0f, 0.0f, 0.0f, 0.0f };
-int recover_temperature[EXTRUDERS] = { 0 };
+int recover_temperature[EXTRUDERS] = ARRAY_BY_EXTRUDERS_FILL(0);
 
 // these are used to maintain a simple low-pass filter on the speeds - thanks norpchen
 float e_smoothed_speed[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0.0f, 0.0f, 0.0f);
