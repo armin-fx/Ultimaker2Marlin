@@ -1402,6 +1402,7 @@ void process_command(const char *strCmd)
         {
           idle();
         }
+        plan_set_e_position(current_position[E_AXIS]);
         serial_action_P(MSGP_RESUME);
     }
     break;
@@ -1854,6 +1855,7 @@ void process_command(const char *strCmd)
           }
         }
       }
+      plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
       break;
     case 115: // M115
       SERIAL_PROTOCOLPGM(MSG_M115_REPORT);
@@ -2126,17 +2128,19 @@ void process_command(const char *strCmd)
       break;
     #endif // NUM_SERVOS > 0
 
-    #if LARGE_FLASH == true && ( BEEPER > 0 || defined(ULTRALCD) )
+    #if LARGE_FLASH == true && ( BEEPER > 0 || defined(ULTRALCD) || defined(ENABLE_ULTILCD2) )
     case 300: // M300
     {
-      int beepS = code_seen(strCmd, 'S') ? code_value() : 110;
-      int beepP = code_seen(strCmd, 'P') ? code_value() : 1000;
+      unsigned int beepS = code_seen(strCmd, 'S') ? code_value() : 110;  //frequency Hz
+      unsigned int beepP = code_seen(strCmd, 'P') ? code_value() : 1000; //duration ms
       if (beepS > 0)
       {
         #if BEEPER > 0
-          tone(BEEPER, beepS);
-          delay(beepP);
-          noTone(BEEPER);
+          // don't use tone libs that might mess with our timers
+          uint32_t notch = 500000 / beepS;
+          if(beepP > 4000) beepP = 4000; // prevent watchdog from tripping
+          uint32_t loops = ((((uint32_t) beepP) * 500) / notch);
+          for(uint32_t _i=0;_i<loops;_i++) { WRITE(BEEPER, HIGH); delayMicroseconds(notch); WRITE(BEEPER, LOW); delayMicroseconds(notch); }
         #elif defined(ULTRALCD)
           lcd_buzz(beepS, beepP);
         #endif
@@ -2426,17 +2430,14 @@ void process_command(const char *strCmd)
         serial_action_P(MSGP_PAUSE);
 
         st_synchronize();
-        float target[4];
-        float lastpos[4];
-        target[X_AXIS]=current_position[X_AXIS];
-        target[Y_AXIS]=current_position[Y_AXIS];
-        target[Z_AXIS]=current_position[Z_AXIS];
-        target[E_AXIS]=current_position[E_AXIS];
-        lastpos[X_AXIS]=current_position[X_AXIS];
-        lastpos[Y_AXIS]=current_position[Y_AXIS];
-        lastpos[Z_AXIS]=current_position[Z_AXIS];
-        lastpos[E_AXIS]=current_position[E_AXIS];
+        float target[NUM_AXIS];
+        float lastpos[NUM_AXIS];
+        // preserve current position
+        memcpy(lastpos, current_position, sizeof(lastpos));
+        memcpy(target, current_position, sizeof(target));
+        recover_height = lastpos[Z_AXIS];
 
+        // retract
         target[E_AXIS] -= retract_length/volume_to_filament_length[active_extruder];
         plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
 
@@ -2458,16 +2459,15 @@ void process_command(const char *strCmd)
         }
         plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
 
+        // additional retract
         if(code_seen(strCmd, 'L'))
         {
           target[E_AXIS] -= code_value()/volume_to_filament_length[active_extruder];
         }
         plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
 
-        current_position[X_AXIS] = target[X_AXIS];
-        current_position[Y_AXIS] = target[Y_AXIS];
-        current_position[Z_AXIS] = target[Z_AXIS];
-        current_position[E_AXIS] = target[E_AXIS];
+        memcpy(current_position, target, sizeof(current_position));
+
         //finish moves
         st_synchronize();
         //disable extruder steppers so filament can be removed
@@ -2494,10 +2494,8 @@ void process_command(const char *strCmd)
             plan_buffer_line(lastpos[X_AXIS], lastpos[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder); //move xy back
             plan_buffer_line(lastpos[X_AXIS], lastpos[Y_AXIS], lastpos[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder); //move z back
             plan_buffer_line(lastpos[X_AXIS], lastpos[Y_AXIS], lastpos[Z_AXIS], lastpos[E_AXIS], retract_feedrate/60, active_extruder); //final untretract
-            current_position[X_AXIS] = lastpos[X_AXIS];
-            current_position[Y_AXIS] = lastpos[Y_AXIS];
-            current_position[Z_AXIS] = lastpos[Z_AXIS];
-            current_position[E_AXIS] = lastpos[E_AXIS];
+            memcpy(current_position, lastpos, sizeof(current_position));
+            memcpy(destination, current_position, sizeof(destination));
         }
         serial_action_P(MSGP_RESUME);
     }

@@ -908,10 +908,6 @@ static void lcd_menu_print_material_warning()
 
 void lcd_menu_print_abort()
 {
-//    if (pauseRequested)
-//    {
-//        lcd_print_pause();
-//    }
     LED_GLOW
     lcd_question_screen(lcd_menu_print_ready, userAbortPrint, MSGP_MENU_YES, NULL, lcd_change_to_previous_menu, MSGP_MENU_NO);
 
@@ -1153,10 +1149,6 @@ void lcd_menu_print_tune_heatup_nozzle1()
 
 void lcd_menu_print_tune()
 {
-//    if (pauseRequested)
-//    {
-//        lcd_print_pause();
-//    }
     uint8_t len = 6 + 2*BED_MENU_OFFSET + 2*EXTRUDERS;
     if (ui_mode & UI_MODE_EXPERT)
     {
@@ -1429,7 +1421,6 @@ void lcd_print_pause()
     if (!card.pause)
     {
         card.pause = true;
-        recover_height = current_position[Z_AXIS];
 
         // move z up according to the current height - but minimum to z=70mm (above the gantry height)
         uint16_t zdiff = 0;
@@ -1644,7 +1635,7 @@ static void drawResumeSubmenu(uint8_t nr, uint8_t &flags)
                                 , LCD_LINE_HEIGHT
                                 , 52
                                 , LCD_LINE_HEIGHT*4
-                                , PSTR("RESUME|")
+                                , movesplanned() ? PSTR("Pausing...|") : PSTR("RESUME|")
                                 , ALIGN_CENTER
                                 , flags);
         if (flags & MENU_SELECTED)
