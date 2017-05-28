@@ -1,5 +1,5 @@
 // Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
-// Licence: GPL
+// License: GPL
 
 #ifndef MARLIN_H
 #define MARLIN_H
@@ -97,12 +97,9 @@ FORCE_INLINE void serialprintPGM(const char *str)
   }
 }
 
-
-// void get_command();
-void process_command(const char *strCmd);
+void process_command(const char *strCmd, bool sendAck);
 void process_command_P(const char *strCmd);
 
-void manage_inactivity();
 void idle(); // the standard idle routine calls manage_inactivity()
 
 #if defined(X_ENABLE_PIN) && X_ENABLE_PIN > -1
@@ -185,14 +182,10 @@ bool IsStopped();
 uint8_t StoppedReason();
 
 void clear_command_queue();
-void enquecommand_run     (const char *cmd, bool isProgmem);
-inline void enquecommand  (const char *cmd) //put an ascii command at the end of the current buffer.
-{   enquecommand_run(cmd, false); }
-inline void enquecommand_P(const char *cmd) //put an ascii command at the end of the current buffer, read from flash
-{   enquecommand_run(cmd, true); }
-
-bool is_command_queued();
+void enquecommand  (const char *cmd); //put an ascii command at the end of the current buffer.
+void enquecommand_P(const char *cmd); //put an ascii command at the end of the current buffer, read from flash
 uint8_t commands_queued();
+void cmd_synchronize();
 void clamp_to_software_endstops(float target[3]);
 
 #ifdef PREVENT_FILAMENT_GRIND
@@ -229,6 +222,8 @@ extern bool position_error;
 #ifdef FAN_SOFT_PWM
 extern unsigned char fanSpeedSoftPwm;
 #endif
+
+#define INIT_SAFE = {0}
 
 #define SETTING_VALUE_OFF 0
 #define SETTING_IS_OFF(value)  ((value) == SETTING_VALUE_OFF)
@@ -283,6 +278,7 @@ extern uint8_t printing_state;
 #define PRINT_STATE_HOMING      5
 #define PRINT_STATE_RECOVER     6
 #define PRINT_STATE_START       7
+#define PRINT_STATE_ABORT       255
 
 // Handling multiple extruders pins
 extern uint8_t active_extruder;

@@ -6,11 +6,11 @@
 #include "UltiLCD2_gfx.h"
 #include "UltiLCD2_menu_utils.h"
 
-#ifndef eeprom_read_float
 //Arduino IDE compatibility, lacks the eeprom_read_float function
+#pragma weak eeprom_read_float
 float eeprom_read_float(const float* addr);
+#pragma weak eeprom_update_float
 void eeprom_update_float(const float* addr, float f);
-#endif
 
 void lcd_tripple_menu(const char* left, const char* right, const char* bottom);
 void lcd_basic_screen();
@@ -32,7 +32,7 @@ void lcd_select_nozzle(menuFunc_t callbackOnSelect = 0, menuFunc_t callbackOnAbo
 #endif // EXTRUDERS
 
 extern uint8_t heater_timeout;
-extern int backup_temperature[EXTRUDERS];
+extern uint16_t backup_temperature[EXTRUDERS];
 
 extern const char* lcd_setting_name;
 extern const char* lcd_setting_postfix;
@@ -45,6 +45,20 @@ extern int16_t lcd_setting_encoder_value;
 
 extern menuFunc_t postMenuCheck;
 extern uint8_t minProgress;
+
+extern uint16_t lineEntryPos;
+extern int8_t   lineEntryWait;
+
+void line_entry_pos_update (uint16_t maxStep, uint8_t lineEntryStep = LINE_ENTRY_STEP);
+inline void line_entry_pos_reset () { lineEntryPos = lineEntryWait = 0; }
+//
+char* line_entry_scroll_string_transform (char* str, uint8_t lineEntryStep = LINE_ENTRY_STEP);
+void  line_entry_scroll_string_restore   (char* str);
+void  line_entry_fixed_string_transform  (char* str);
+void  line_entry_fixed_string_restore    (char* str);
+//
+void lcd_lib_draw_string_scroll_center (uint8_t y, char* str, uint8_t step = LINE_ENTRY_STEP_SOFT);
+void lcd_lib_draw_string_scroll_left   (uint8_t y, char* str, uint8_t step = LINE_ENTRY_STEP_SOFT);
 
 // setting is set off if value = 0
 #define LCD_SETTINGS_TYPE_OFF_BY_0   (1<<7)
@@ -135,28 +149,6 @@ void LCD_EDIT_SETTING_FLOAT1_P(T& _setting, const char* _name, const char* _post
 #define LCD_EDIT_SETTING_FLOAT001(_setting, _name, _postfix, _min, _max)     LCD_EDIT_SETTING_FLOAT001_P    (_setting, PSTR(_name), PSTR(_postfix), _min, _max)
 #define LCD_EDIT_SETTING_FLOAT1(_setting, _name, _postfix, _min, _max)       LCD_EDIT_SETTING_FLOAT1_P      (_setting, PSTR(_name), PSTR(_postfix), _min, _max)
 #define LCD_EDIT_SETTING_SPEED(_setting, _name, _postfix, _min, _max)        LCD_EDIT_SETTING_SPEED_P       (_setting, PSTR(_name), PSTR(_postfix), _min, _max)
-
-extern uint16_t lineEntryPos;
-extern int8_t   lineEntryWait;
-#define LINE_ENTRY_STEP      2
-#define LINE_ENTRY_STEP_SOFT 1
-#define LINE_ENTRY_WAIT_END 24
-#define LINE_ENTRY_GFX_LENGHT  (LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-LCD_CHAR_MARGIN_LEFT)
-#define LINE_ENTRY_TEXT_LENGHT (LINE_ENTRY_GFX_LENGHT / LCD_CHAR_SPACING)
-#define LINE_ENTRY_TEXT_OFFSET() ((lineEntryPos%LCD_CHAR_SPACING == 0) ? 0 : -1)
-#define LINE_ENTRY_TEXT_BEGIN()  ((lineEntryPos + LCD_CHAR_SPACING-1) / LCD_CHAR_SPACING)
-#define LINE_ENTRY_GFX_BEGIN()   (LCD_CHAR_SPACING-1 - (lineEntryPos + LCD_CHAR_SPACING-1) % LCD_CHAR_SPACING)
-#define LINE_ENTRY_MAX_STEP(text_length) ((text_length) * LCD_CHAR_SPACING)
-void line_entry_pos_update (uint16_t maxStep, uint8_t lineEntryStep = LINE_ENTRY_STEP);
-inline void line_entry_pos_reset () { lineEntryPos = lineEntryWait = 0; }
-//
-char* line_entry_scroll_string_transform (char* str, uint8_t lineEntryStep = LINE_ENTRY_STEP);
-void  line_entry_scroll_string_restore   (char* str);
-void  line_entry_fixed_string_transform  (char* str);
-void  line_entry_fixed_string_restore    (char* str);
-//
-void lcd_lib_draw_string_scroll_center (uint8_t y, char* str, uint8_t step = LINE_ENTRY_STEP_SOFT);
-void lcd_lib_draw_string_scroll_left   (uint8_t y, char* str, uint8_t step = LINE_ENTRY_STEP_SOFT);
 
 //If we have a heated bed, then the heated bed menu entries have a size of 1, else they have a size of 0.
 #if TEMP_SENSOR_BED != 0

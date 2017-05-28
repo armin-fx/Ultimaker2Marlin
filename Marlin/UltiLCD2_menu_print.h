@@ -33,14 +33,11 @@ extern uint8_t lcd_cache[LCD_CACHE_SIZE];
 
 extern unsigned long predictedTime;
 
-void getFilenameFromNr(char* buffer, uint8_t nr);
-
 void lcd_menu_print_select();
 void lcd_clear_cache();
 
-void abortPrint();
+void abortPrint(bool bQuickstop);
 
-//bool isPauseRequested();
 void lcd_print_pause();
 void lcd_print_tune();
 void lcd_print_abort();

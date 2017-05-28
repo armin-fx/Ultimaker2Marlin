@@ -40,39 +40,35 @@
 			<Add option="-DFILAMENT_SENSOR_PIN=-1" />
 			<Add option="-DBABYSTEPPING" />
 			<Add option="-DTEMP_SENSOR_BED=20" />
-			<Add option="-DHEATER_0_MAXTEMP=325" />
-			<Add option="-DHEATER_1_MAXTEMP=325" />
-			<Add option="-DHEATER_2_MAXTEMP=325" />
-			<Add option="-DUSE_CHANGE_TEMPERATURE" />
+			<Add option="-DHEATER_0_MAXTEMP=315" />
+			<Add option="-DHEATER_1_MAXTEMP=315" />
+			<Add option="-DHEATER_2_MAXTEMP=315" />
 			<Add directory="arduino_sim" />
 			<Add directory="avr_sim" />
-			<Add directory="../../SDL-1.2.15/include" />
+			<Add directory="D:/GitRepo/SDL-1.2.15/include" />
 		</Compiler>
 		<Linker>
 			<Add library="SDLmain" />
 			<Add library="SDL" />
-			<Add directory="../../SDL-1.2.15/lib" />
+			<Add directory="D:/GitRepo/SDL-1.2.15/lib" />
 		</Linker>
 		<Unit filename="../Marlin/Configuration.h" />
 		<Unit filename="../Marlin/ConfigurationStore.cpp" />
 		<Unit filename="../Marlin/ConfigurationStore.h" />
 		<Unit filename="../Marlin/Configuration_adv.h" />
-		<Unit filename="../Marlin/FatStructs.h" />
 		<Unit filename="../Marlin/Marlin.h" />
 		<Unit filename="../Marlin/MarlinSerial.cpp" />
 		<Unit filename="../Marlin/MarlinSerial.h" />
 		<Unit filename="../Marlin/Marlin_main.cpp" />
-		<Unit filename="../Marlin/SPI.cpp" />
-		<Unit filename="../Marlin/SPI.h" />
 		<Unit filename="../Marlin/Sd2Card.cpp" />
 		<Unit filename="../Marlin/Sd2Card.h" />
-		<Unit filename="../Marlin/Sd2CardExt.cpp" />
-		<Unit filename="../Marlin/Sd2CardExt.h" />
 		<Unit filename="../Marlin/Sd2PinMap.h" />
-		<Unit filename="../Marlin/SdFat.h" />
+		<Unit filename="../Marlin/SdBaseFile.cpp" />
+		<Unit filename="../Marlin/SdBaseFile.h" />
+		<Unit filename="../Marlin/SdFatConfig.h" />
+		<Unit filename="../Marlin/SdFatStructs.h" />
 		<Unit filename="../Marlin/SdFile.cpp" />
-		<Unit filename="../Marlin/SdFileExt.cpp" />
-		<Unit filename="../Marlin/SdFileExt.h" />
+		<Unit filename="../Marlin/SdFile.h" />
 		<Unit filename="../Marlin/SdInfo.h" />
 		<Unit filename="../Marlin/SdVolume.cpp" />
 		<Unit filename="../Marlin/UltiLCD2.cpp" />
@@ -115,6 +111,8 @@
 		<Unit filename="../Marlin/pins.h" />
 		<Unit filename="../Marlin/planner.cpp" />
 		<Unit filename="../Marlin/planner.h" />
+		<Unit filename="../Marlin/powerbudget.cpp" />
+		<Unit filename="../Marlin/powerbudget.h" />
 		<Unit filename="../Marlin/preferences.h" />
 		<Unit filename="../Marlin/speed_lookuptable.h" />
 		<Unit filename="../Marlin/stepper.cpp" />
@@ -177,7 +175,6 @@
 		<Unit filename="component/base.cpp" />
 		<Unit filename="component/base.h" />
 		<Unit filename="component/delegate.h" />
-		<Unit filename="component/display_HD44780.cpp" />
 		<Unit filename="component/display_HD44780.h" />
 		<Unit filename="component/display_SSD1309.cpp" />
 		<Unit filename="component/display_SSD1309.h" />

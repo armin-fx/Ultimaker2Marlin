@@ -28,16 +28,16 @@
 #endif
 
 // public functions
-void tp_init();  //initialise the heating
+void tp_init();  //initialize the heating
 void manage_heater(); //it is critical that this is called periodically.
 
 // low level conversion routines
 // do not use these routines and variables outside of temperature.cpp
-extern int target_temperature[EXTRUDERS];
+extern uint16_t target_temperature[EXTRUDERS];
 extern float current_temperature[EXTRUDERS];
 #if TEMP_SENSOR_BED != 0
-extern int target_temperature_bed;
-extern int target_temperature_bed_next;
+extern uint16_t target_temperature_bed;
+extern uint16_t target_temperature_bed_next;
 extern float current_temperature_bed;
 extern float first_layer_z_trigger;
 #define FIRST_LAYER_Z_OFFSET 0.025
@@ -61,7 +61,7 @@ extern float first_layer_z_trigger;
   extern float bedKp,bedKi,bedKd;
 #endif
 
-#if ENABLED(BABYSTEPPING)
+#if defined(BABYSTEPPING)
   extern volatile int babystepsTodo[3];
 #endif
 
@@ -91,7 +91,7 @@ FORCE_INLINE bool isCoolingBed() {
 }
 
 FORCE_INLINE bool isCheckFirstLayer() {
-	return target_temperature_bed_next != 0;
+    return target_temperature_bed_next != 0;
 }
 
 FORCE_INLINE void CheckFirstLayerOff() {
@@ -103,27 +103,25 @@ FORCE_INLINE void CheckFirstLayerInit() {
     target_temperature_bed_next = 0;
     first_layer_z_trigger       = 10000;
 }
+
+#ifdef BED_MAXTEMP
+void setTargetBed(const uint16_t &celsius);
+#else
+FORCE_INLINE void setTargetBed(const float &celsius)
+{
+  target_temperature_bed = celsius;
+}
+#endif
+
 #endif // TEMP_SENSOR_BED
 
 FORCE_INLINE float degTargetHotend(uint8_t extruder) {
   return target_temperature[extruder];
 }
 
-FORCE_INLINE void setTargetHotend(const float &celsius, uint8_t extruder) {
-  target_temperature[extruder] = celsius;
-  if (target_temperature[extruder] >= HEATER_0_MAXTEMP - 15)
-    target_temperature[extruder] = HEATER_0_MAXTEMP - 15;
-}
+void setTargetHotend(const uint16_t &celsius, uint8_t extruder);
 
-#if TEMP_SENSOR_BED != 0
-FORCE_INLINE void setTargetBed(const float &celsius) {
-  target_temperature_bed = celsius;
-#ifdef BED_MAXTEMP
-  if (target_temperature_bed > BED_MAXTEMP - 15)
-    target_temperature_bed = BED_MAXTEMP - 15;
-#endif
-}
-#endif // TEMP_SENSOR_BED
+void cooldownHotend(uint8_t extruder);
 
 FORCE_INLINE bool isHeatingHotend(uint8_t extruder){
   return target_temperature[extruder] > current_temperature[extruder];
