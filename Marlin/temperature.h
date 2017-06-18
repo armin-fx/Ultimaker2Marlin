@@ -33,11 +33,11 @@ void manage_heater(); //it is critical that this is called periodically.
 
 // low level conversion routines
 // do not use these routines and variables outside of temperature.cpp
-extern uint16_t target_temperature[EXTRUDERS];
+extern int16_t target_temperature[EXTRUDERS];
 extern float current_temperature[EXTRUDERS];
 #if TEMP_SENSOR_BED != 0
-extern uint16_t target_temperature_bed;
-extern uint16_t target_temperature_bed_next;
+extern int16_t target_temperature_bed;
+extern int16_t target_temperature_bed_next;
 extern float current_temperature_bed;
 extern float first_layer_z_trigger;
 #define FIRST_LAYER_Z_OFFSET 0.025

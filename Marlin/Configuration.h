@@ -197,7 +197,9 @@
 // PID settings:
 // Comment the following line to disable PID and enable bang-bang.
 #define PIDTEMP
+#ifndef BANG_MAX
 #define BANG_MAX 255 // limits current to nozzle while in bang-bang mode; 255=full current
+#endif
 #define PID_MAX BANG_MAX // limits current to nozzle while PID is active (see PID_FUNCTIONAL_RANGE below); 255=full current
 #ifdef PIDTEMP
   //#define PID_DEBUG // Sends debug data to the serial port.
@@ -341,6 +343,8 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 
 #ifdef UM2PLUS
 #define DEFAULT_AXIS_DIR 0xFD
+#elif defined(UM2GO)
+#define DEFAULT_AXIS_DIR 0x1D
 #else
 #define DEFAULT_AXIS_DIR 0x15
 #endif

@@ -36,9 +36,6 @@
 # Note that all settings are set with ?=, this means you can override them
 # from the commandline with "make HARDWARE_MOTHERBOARD=71" for example
 
-# $(call space-to-question,file-name)
-space-to-question = $(subst $(empty) $(empty),?,$1)
-
 # This defined the board you are compiling for (see Configuration.h for the options)
 HARDWARE_MOTHERBOARD ?= 72
 
@@ -172,6 +169,9 @@ endif
 # Set to 16Mhz if not yet set.
 F_CPU ?= 16000000
 
+# $(call space-to-question,file-name)
+space-to-question = $(subst $(empty) $(empty),?,$1)
+
 # Arduino containd the main source code for the Arduino
 # Libraries, the "hardware variant" are for boards
 # that derives from that, and their source are present in
@@ -212,7 +212,7 @@ else
 HARDWARE_SUB_VARIANT ?= standard
 VPATH += $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/variants/$(HARDWARE_SUB_VARIANT)
 endif
-SRC = wiring.c hooks.c \
+SRC = wiring.c \
 	wiring_analog.c wiring_digital.c \
 	wiring_pulse.c \
 	wiring_shift.c WInterrupts.c

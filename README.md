@@ -29,7 +29,6 @@ For more information follow the appropriate discussion on the [Ultimaker forum](
     maximum and minimum printing speed in m/s
     maximum and minimum travel speed in m/s
     maximum extrusion speed in m³/s
-* Long file names on the SD card scroll when highlighted (and when printing).
 
 
 ==========================

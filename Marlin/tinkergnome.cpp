@@ -1469,7 +1469,7 @@ void lcd_menu_print_heatup_tg()
     }
     if (!(flags & MENU_STATUSLINE))
     {
-        lcd_lib_draw_string_scroll_left(5, card.currentLongFileName());
+        lcd_lib_draw_string_scroll_left(5, const_cast<char*> (card.currentLongFileName())); // TODO Not safe
     }
 
     lcd_lib_update_screen();
@@ -1621,7 +1621,7 @@ void lcd_menu_printing_tg()
                 lcd_lib_encoder_pos = ENCODER_NO_SELECTION;
                 menu.reset_submenu();
                 // lcd_lib_draw_string_left(5, PSTR("Paused..."));
-                lcd_lib_draw_string_scroll_left(5, card.currentLongFileName());
+                lcd_lib_draw_string_scroll_left(5, const_cast<char*> (card.currentLongFileName())); // TODO Not safe
                 lcd_lib_draw_gfx(54, 15, hourglassGfx);
                 if (!blocks_queued())
                 {
@@ -1693,7 +1693,7 @@ void lcd_menu_printing_tg()
             }
             else if (card.isFileOpen())
             {
-                lcd_lib_draw_string_scroll_left(5, card.currentLongFileName());
+                lcd_lib_draw_string_scroll_left(5, const_cast<char*> (card.currentLongFileName())); // TODO Not safe
             }
         }
         lcd_lib_update_screen();
@@ -2010,7 +2010,7 @@ static void lcd_menu_recover_file()
     }
     if (!(flags & MENU_STATUSLINE))
     {
-        lcd_lib_draw_string_scroll_left(5, card.currentLongFileName());
+        lcd_lib_draw_string_scroll_left(5, const_cast<char*> (card.currentLongFileName())); // TODO Not safe
     }
 
     lcd_lib_update_screen();
@@ -2270,7 +2270,7 @@ static void stopMove()
     lcd_lib_encoder_pos = 0;
     movingSpeed = 0;
     delayMove = true;
-    for (uint8_t i=0; i<NUM_AXIS; ++i)
+    for (uint8_t i=0; i<3; ++i)
     {
         TARGET_POS(i) = current_position[i] = constrain(st_get_position(i)/axis_steps_per_unit[i], min_pos[i], max_pos[i]);
     }

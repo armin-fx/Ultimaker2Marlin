@@ -103,6 +103,7 @@ void lcd_menu_change_material_preheat()
     if (temp < 0) temp = 0;
 
     // draw menu
+#if (EXTRUDERS > 1)
     char buffer[8] INIT_SAFE;
 #endif
     uint8_t progress = uint8_t(temp * 125 / target);
@@ -400,9 +401,9 @@ static void materialInsertReady()
     // retract material
     current_position[E_AXIS] = 0.0f;
     plan_set_e_position(current_position[E_AXIS], active_extruder, true);
-    if (retracted)
+    if (retracted[active_extruder])
     {
-        current_position[E_AXIS] -= retract_recover_length;
+        current_position[E_AXIS] -= retract_recover_length[active_extruder];
     }
     else
     {

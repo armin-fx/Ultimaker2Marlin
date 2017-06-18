@@ -746,7 +746,7 @@ void lcd_menu_print_heatup()
 
     lcd_lib_draw_string_centerP      (10, PSTR("Heating up..."));
     lcd_lib_draw_string_centerP      (20, PSTR("Preparing to print:"));
-    lcd_lib_draw_string_scroll_center(30, card.currentLongFileName());
+    lcd_lib_draw_string_scroll_center(30, const_cast<char*> (card.currentLongFileName())); // TODO Not safe
 
     lcd_progressbar(progress);
 
@@ -782,7 +782,7 @@ static void lcd_menu_print_printing()
         {
         default:
             lcd_lib_draw_string_centerP      (20, PSTR("Printing:"));
-            lcd_lib_draw_string_scroll_center(30, card.currentLongFileName());
+            lcd_lib_draw_string_scroll_center(30, const_cast<char*> (card.currentLongFileName())); // TODO Not safe
             break;
         case PRINT_STATE_HEATING:
             lcd_lib_draw_string_centerP(20, PSTR("Heating"));
@@ -887,7 +887,7 @@ static void lcd_cancel_material_warning()
 static void lcd_menu_print_material_warning()
 {
 //    lcd_question_screen((ui_mode & UI_MODE_EXPERT) ? lcd_menu_print_heatup_tg : lcd_menu_print_heatup, NULL, MSGP_MENU_CONTINUE, lcd_menu_print_select, lcd_cancel_material_warning, MSGP_MENU_CANCEL);
-    lcd_question_screen(NULL, lcd_change_to_previous_menu, MSGP_MENU_CONTINUE, NULL, lcd_cancel_material_warning, MSGP_MENU_CANCEL));
+    lcd_question_screen(NULL, lcd_change_to_previous_menu, MSGP_MENU_CONTINUE, NULL, lcd_cancel_material_warning, MSGP_MENU_CANCEL);
 
     lcd_lib_draw_string_centerP(10, PSTR("This file is created"));
     lcd_lib_draw_string_centerP(20, PSTR("for a different"));
@@ -1013,7 +1013,7 @@ void lcd_menu_print_ready()
         {
             LED_GLOW
         }
-        lcd_lib_draw_string_scroll_center(16, card.currentLongFileName());
+        lcd_lib_draw_string_scroll_center(16, const_cast<char*> (card.currentLongFileName())); // TODO Not safe
         lcd_lib_draw_string_centerP      (40, PSTR("Print finished"));
     }
     lcd_lib_update_screen();

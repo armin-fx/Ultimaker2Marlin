@@ -2636,10 +2636,10 @@ void process_command(const char *strCmd, bool sendAck)
 
         //retract
         //Set the recover length to whatever distance we retracted so we recover properly.
-        retract_recover_length = retract_length/volume_to_filament_length[active_extruder];
-        target[E_AXIS] -= retract_recover_length;
+        retract_recover_length[active_extruder] = retract_length/volume_to_filament_length[active_extruder];
+        target[E_AXIS] -= retract_recover_length[active_extruder];
         plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
-        retracted=true;
+        retracted[active_extruder]=true;
 
         //lift Z
         if(code_seen(strCmd, 'Z'))
@@ -2665,7 +2665,7 @@ void process_command(const char *strCmd, bool sendAck)
         if(bAddRetract)
         {
           addRetractLength = code_value()/volume_to_filament_length[active_extruder];
-          retract_recover_length += addRetractLength;
+          retract_recover_length[active_extruder] += addRetractLength;
           target[E_AXIS] -= addRetractLength;
         }
         plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
@@ -2712,7 +2712,7 @@ void process_command(const char *strCmd, bool sendAck)
 
             //final unretract
             plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_feedrate/60, active_extruder);
-            retracted = false;
+            retracted[active_extruder] = false;
         }
         else
         {

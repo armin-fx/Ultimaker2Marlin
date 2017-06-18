@@ -42,12 +42,12 @@
 //===========================================================================
 //=============================public variables============================
 //===========================================================================
-uint16_t target_temperature[EXTRUDERS] = { 0 };
+int16_t target_temperature[EXTRUDERS] = { 0 };
 int current_temperature_raw[EXTRUDERS] = { 0 };
 float current_temperature[EXTRUDERS] = { 0.0 };
 #if TEMP_SENSOR_BED != 0
-uint16_t target_temperature_bed = 0;
-uint16_t target_temperature_bed_next = 0;
+int16_t target_temperature_bed = 0;
+int16_t target_temperature_bed_next = 0;
 int current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
 float first_layer_z_trigger   = 0.0;
